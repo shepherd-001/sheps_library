@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f9f4;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        .email-container {
+            width: 100%;
+            background-color: #f4f9f4;
+            padding: 20px;
+        }
+        .email-content {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .email-header {
+            text-align: center;
+            color: #333;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 6vw; /* Responsive font size */
+            color: #4CAF50; /* Light green color */
+        }
+        .greeting {
+            font-size: 4vw; /* Responsive font size */
+            color: #333;
+            margin-top: 10px;
+        }
+        .intro-text {
+            font-size: 4vw; /* Responsive font size */
+            color: #555;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .confirmation-link-container {
+            background-color: #ffffff;
+            padding: 10px;
+            text-align: center; /* Ensures the button is centered */
+            margin-top: 20px;
+            border-radius: 6px;
+            font-size: 5vw; /* Responsive font size */
+            font-weight: bold;
+            color: #4CAF50; /* Light green color */
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 3.5vw; /* Responsive font size */
+            color: #777;
+        }
+        .footer a {
+            color: #4CAF50; /* Light green color */
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .btn {
+            display: inline-block; /* Ensures button is treated as inline element for centering */
+            width: auto;
+            padding: 15px 30px; /* Adjusted padding for better button look */
+            background-color: #4CAF50; /* Light green color */
+            color: #ffffff;
+            font-size: 4.5vw; /* Responsive font size */
+            text-align: center;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Media queries for larger screens */
+        @media screen and (min-width: 600px) {
+            .email-header h1 {
+                font-size: 28px; /* Fixed size for larger screens */
+            }
+            .greeting {
+                font-size: 18px; /* Fixed size for larger screens */
+            }
+            .intro-text {
+                font-size: 16px; /* Fixed size for larger screens */
+            }
+            .confirmation-link-container {
+                font-size: 18px; /* Fixed size for larger screens */
+            }
+            .footer {
+                font-size: 14px; /* Fixed size for larger screens */
+            }
+            .btn {
+                font-size: 16px; /* Fixed size for larger screens */
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="email-content">
+        <div class="email-header">
+            <h1>Verify Your Email Address</h1>
+            <p class="greeting">Hello <strong th:text="${firstName}">[User]</strong>,</p>
+        </div>
+
+        <p class="intro-text">
+            Welcome to Sheps Library! We're thrilled to have you join our community of book lovers. With Sheps Library, you can easily manage your reading lists, track your progress, and discover new books tailored to your interests.
+        </p>
+
+        <p class="intro-text">
+            To complete your registration, please confirm your email address. This will ensure your account is securely activated and ready to use.
+        </p>
+
+        <p>Click the button below to confirm your email:</p>
+
+        <div class="confirmation-link-container">
+            <a th:href="${confirmationLink}" class="btn">Confirm Your Email</a>
+        </div>
+
+        <p>If you did not create an account or did not request this verification, feel free to disregard this email.</p>
+
+        <div class="footer">
+            <p>If you have any questions, don't hesitate to <a href="mailto:support@shepslibrary.com">contact us</a>.</p>
+            <p>Best regards, <br> The Sheps Library Team</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

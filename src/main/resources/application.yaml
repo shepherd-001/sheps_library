@@ -23,3 +23,34 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          from: ${MAIL_FROM_EMAIL}
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
+#        debug: true
+
+base_url: http://localhost:${PORT}
+mail_from_email: ${MAIL_FROM_EMAIL}
+mail_from_name: ${MAIL_FROM_NAME}
+
+zero_bounce_api_key: ${ZEROBOUNCE_API_KEY}
+zero_bounce_url: ${ZEROBOUNCE_URL}
+have_i_been_pawned_url: ${HAVE_I_BEEN_PAWNED_URL}
+
+jwt_secret_key: ${JWT_SECRET_KEY}
+jwt_access_expiration: ${JWT_EXPIRATION}
+jwt_refresh_expiration: ${JWT_REFRESH_EXPIRATION}
