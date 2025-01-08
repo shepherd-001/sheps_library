@@ -1,9 +1,6 @@
 package com.shepherd.shepslibrary.service.auth;
 
-import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
-import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
-import com.shepherd.shepslibrary.data.dto.request.PasswordResetRequest;
-import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
+import com.shepherd.shepslibrary.data.dto.request.*;
 import com.shepherd.shepslibrary.data.dto.response.*;
 import com.shepherd.shepslibrary.data.model.*;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
@@ -175,13 +172,28 @@ public class AuthServiceImpl implements AuthService{
                     notificationService.sendResetPasswordMail(user, token);
                     return requestPasswordResetMessage();
                 }).orElse(requestPasswordResetMessage());
-
     }
 
     private static RequestResetPasswordResponse requestPasswordResetMessage(){
         return RequestResetPasswordResponse.builder()
                 .message("We’ve sent a password reset link to your email address. " +
                 "Please follow the instructions in the email to reset your password.")
+                .build();
+    }
+
+    @Override
+    public ResetPasswordResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
+        log.info("::::: Initiating password reset :::::");
+        ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.getToken(), TokenType.RESET_PASSWORD);
+        User user = shepsToken.getUser();
+        user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
+        tokenService.deleteToken(shepsToken);
+        User savedUser = userRepository.save(user);
+        JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(savedUser);
+        return ResetPasswordResponse.builder()
+                .message("Password reset successful")
+                .accessToken(jwtTokenResponse.getAccessToken())
+                .refreshToken(jwtTokenResponse.getRefreshToken())
                 .build();
     }
 }
