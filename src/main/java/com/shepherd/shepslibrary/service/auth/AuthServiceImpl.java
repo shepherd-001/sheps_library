@@ -32,7 +32,7 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public RegisterUserResponse registerUser(RegisterUserRequest registerUserRequest) {
-        String email = registerUserRequest.getEmail().trim();
+        String email = registerUserRequest.getEmail().toLowerCase().trim();
         checkIfUserExists(email);
 //        validateEmail(email);
 //        validatePassword(registerUserRequest.getPassword());
@@ -79,7 +79,7 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public EmailConfirmationResponse verifyEmail(String token) {
-        if(token == null)
+        if(token.isBlank())
             throw new ShepsLibraryException("Token is required");
         ShepsToken shepsToken = tokenService.validateToken(token, TokenType.EMAIL_CONFIRMATION);
         User user = shepsToken.getUser();
