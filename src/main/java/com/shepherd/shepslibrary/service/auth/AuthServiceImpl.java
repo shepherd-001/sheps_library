@@ -1,8 +1,10 @@
 package com.shepherd.shepslibrary.service.auth;
 
+import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.data.dto.response.EmailConfirmationResponse;
 import com.shepherd.shepslibrary.data.dto.response.JwtTokenResponse;
+import com.shepherd.shepslibrary.data.dto.response.LoginResponse;
 import com.shepherd.shepslibrary.data.dto.response.RegisterUserResponse;
 import com.shepherd.shepslibrary.data.model.*;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
@@ -13,6 +15,9 @@ import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationServic
 import com.shepherd.shepslibrary.service.token.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +32,7 @@ public class AuthServiceImpl implements AuthService{
     private final PasswordValidationService passwordValidationService;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final AuthenticationManager authenticationManager;
     private final MailNotificationService notificationService;
     private static final int MAIL_EXPIRATION_TIME_IN_MIN = 30;
 
@@ -103,5 +109,26 @@ public class AuthServiceImpl implements AuthService{
                 .accessToken(jwtTokenResponse.getAccessToken())
                 .refreshToken(jwtTokenResponse.getRefreshToken())
                 .build();
+    }
+
+    @Override
+    public LoginResponse login(LoginRequest loginRequest){
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        String userEmail = authentication.getName();
+        User user = getUserByEmail(userEmail);
+        if(!user.isEnabled())
+            throw new ShepsLibraryException("Verify your email address before you proceed");
+        JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(user);
+        return LoginResponse.builder()
+                .message("User logged in successfully")
+                .accessToken(jwtTokenResponse.getAccessToken())
+                .refreshToken(jwtTokenResponse.getRefreshToken())
+                .build();
+    }
+
+    private User getUserByEmail(String userEmail) {
+        return userRepository.findByEmail(userEmail)
+                .orElseThrow(()-> new ResourceNotFound("User with the provided email not found"));
     }
 }

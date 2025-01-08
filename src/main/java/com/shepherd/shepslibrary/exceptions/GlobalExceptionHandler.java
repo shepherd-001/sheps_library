@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<ApiError> handleException(UnsupportedOperationException ex){
         log.error("::::: Unsupported operation exception: {} :::::", ex.getMessage());
-        return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @ExceptionHandler(AlreadyExistsException.class)
@@ -62,5 +62,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleException(UserAlreadyEnabledException ex) {
         log.error("::::: User already enable exception: {} :::::", ex.getMessage());
         return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ResourceNotFound.class)
+    public ResponseEntity<ApiError> handleException(ResourceNotFound ex) {
+        log.error("::::: Resource not found exception: {} :::::", ex.getMessage());
+        return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 }
