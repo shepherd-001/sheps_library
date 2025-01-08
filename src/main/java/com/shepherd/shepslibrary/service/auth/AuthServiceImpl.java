@@ -1,15 +1,12 @@
 package com.shepherd.shepslibrary.service.auth;
 
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
+import com.shepherd.shepslibrary.data.dto.response.EmailConfirmationResponse;
+import com.shepherd.shepslibrary.data.dto.response.JwtTokenResponse;
 import com.shepherd.shepslibrary.data.dto.response.RegisterUserResponse;
-import com.shepherd.shepslibrary.data.model.Gender;
-import com.shepherd.shepslibrary.data.model.Role;
-import com.shepherd.shepslibrary.data.model.TokenType;
-import com.shepherd.shepslibrary.data.model.User;
+import com.shepherd.shepslibrary.data.model.*;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
-import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
-import com.shepherd.shepslibrary.exceptions.EmailValidationException;
-import com.shepherd.shepslibrary.exceptions.PasswordValidationException;
+import com.shepherd.shepslibrary.exceptions.*;
 import com.shepherd.shepslibrary.service.email.EmailValidationService;
 import com.shepherd.shepslibrary.service.email.MailNotificationService;
 import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
@@ -53,17 +50,6 @@ public class AuthServiceImpl implements AuthService{
         return getRegisterUserResponse(savedUser);
     }
 
-    private static RegisterUserResponse getRegisterUserResponse(User user) {
-        return RegisterUserResponse.builder()
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .gender(user.getGender())
-                .isEnabled(user.isEnabled())
-                .isRevoked(user.isRevoked())
-                .build();
-    }
-
     private void checkIfUserExists(String email) {
         if(userRepository.existsByEmail(email))
             throw new AlreadyExistsException("User with the provided email already exists");
@@ -78,5 +64,44 @@ public class AuthServiceImpl implements AuthService{
         if(passwordValidationService.isPasswordBreached(password))
             throw new PasswordValidationException("This password has been compromised. Use a new, unique password"
                     , BAD_REQUEST.value());
+    }
+
+    private static RegisterUserResponse getRegisterUserResponse(User user) {
+        return RegisterUserResponse.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .gender(user.getGender())
+                .isEnabled(user.isEnabled())
+                .isRevoked(user.isRevoked())
+                .build();
+    }
+
+    @Override
+    public EmailConfirmationResponse verifyEmail(String token) {
+        if(token == null)
+            throw new ShepsLibraryException("Token is required");
+        ShepsToken shepsToken = tokenService.validateToken(token, TokenType.EMAIL_CONFIRMATION);
+        User user = shepsToken.getUser();
+        if(!user.isEnabled()){
+            user.setEnabled(true);
+            User verifiedUser = userRepository.save(user);
+            tokenService.deleteToken(shepsToken);
+            JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(verifiedUser);
+            return buildEmailConfirmationResponse(verifiedUser, jwtTokenResponse);
+        }
+        throw new UserAlreadyEnabledException("User is already verified");
+    }
+
+    private EmailConfirmationResponse buildEmailConfirmationResponse(User user,JwtTokenResponse jwtTokenResponse) {
+        return EmailConfirmationResponse.builder()
+                .message("User verified successfully")
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .isEnabled(user.isEnabled())
+                .accessToken(jwtTokenResponse.getAccessToken())
+                .refreshToken(jwtTokenResponse.getRefreshToken())
+                .build();
     }
 }

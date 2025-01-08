@@ -57,4 +57,10 @@ public class GlobalExceptionHandler {
         log.error("::::: Sheps token exception: {} :::::", ex.getMessage());
         return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(UserAlreadyEnabledException.class)
+    public ResponseEntity<ApiError> handleException(UserAlreadyEnabledException ex) {
+        log.error("::::: User already enable exception: {} :::::", ex.getMessage());
+        return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
 }

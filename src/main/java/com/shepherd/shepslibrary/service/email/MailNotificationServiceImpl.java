@@ -15,13 +15,13 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class MailNotificationServiceImpl implements MailNotificationService{
     private final MailSenderService mailSenderService;
-    @Value("${base_url}")
+    @Value("${client_url}")
     private String baseUrl;
     private final SpringTemplateEngine templateEngine;
 
     @Override
     public void sendVerificationMail(User user, String token) {
-        String verificationLink = "%s/api/v1/auth/verify?token=%s&email=%s".formatted(baseUrl, token, user.getEmail());
+        String verificationLink = "%s/verify?token=%s".formatted(baseUrl, token);
         Context context = new Context();
         context.setVariable("firstName", user.getFirstName());
         context.setVariable("confirmationLink", verificationLink);
@@ -29,12 +29,11 @@ public class MailNotificationServiceImpl implements MailNotificationService{
         log.info("::::: Verification mail ready to be sent to {} :::::", user.getEmail());
         CompletableFuture.runAsync(() -> mailSenderService
                 .sendEmail(user.getEmail(), "Confirm Your Email Address", htmlContent));
-
     }
 
     @Override
     public void sendResetPasswordMail(User user, String token) {
-        String verificationLink = "%s/api/v1/auth/reset-password?token=%s&email=%s".formatted(baseUrl, token, user.getEmail());
+        String verificationLink = "%s/reset-password?token=%s".formatted(baseUrl, token);
         Context context = new Context();
         context.setVariable("firstName", user.getFirstName());
         context.setVariable("resetPasswordLink", verificationLink);

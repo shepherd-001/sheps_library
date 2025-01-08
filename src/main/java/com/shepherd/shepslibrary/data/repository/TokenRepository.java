@@ -11,13 +11,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TokenRepository extends JpaRepository<ShepsToken, UUID> {
-    @Query("""
-           select t from ShepsToken t
-           where t.user.email = :email and t.token = :token
-           and t.tokenType = :tokenType\s
-          \s""")
-    ShepsToken findByUserAndTokenAndTokenType(@Param("email") String email,
-         @Param("token") String token, @Param("tokenType") TokenType tokenType);
+//    @Query("""
+//           select t from ShepsToken t
+//           where t.user.email = :email and t.token = :token
+//           and t.tokenType = :tokenType\s
+//          \s""")
+//    ShepsToken findByUserAndTokenAndTokenType(@Param("email") String email,
+//         @Param("token") String token, @Param("tokenType") TokenType tokenType);
     Optional<ShepsToken> findByTokenAndTokenType(String token, TokenType tokenType);
     List<ShepsToken> findAllByUserIdAndTokenType(UUID userId, TokenType tokenType);
 }
