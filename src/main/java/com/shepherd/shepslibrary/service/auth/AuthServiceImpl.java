@@ -1,11 +1,10 @@
 package com.shepherd.shepslibrary.service.auth;
 
+import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
+import com.shepherd.shepslibrary.data.dto.request.PasswordResetRequest;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
-import com.shepherd.shepslibrary.data.dto.response.EmailConfirmationResponse;
-import com.shepherd.shepslibrary.data.dto.response.JwtTokenResponse;
-import com.shepherd.shepslibrary.data.dto.response.LoginResponse;
-import com.shepherd.shepslibrary.data.dto.response.RegisterUserResponse;
+import com.shepherd.shepslibrary.data.dto.response.*;
 import com.shepherd.shepslibrary.data.model.*;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.exceptions.*;
@@ -16,11 +15,13 @@ import com.shepherd.shepslibrary.service.token.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import static com.shepherd.shepslibrary.utils.AppUtils.getCurrentUser;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
@@ -130,5 +131,57 @@ public class AuthServiceImpl implements AuthService{
     private User getUserByEmail(String userEmail) {
         return userRepository.findByEmail(userEmail)
                 .orElseThrow(()-> new ResourceNotFound("User with the provided email not found"));
+    }
+
+    @Override
+    public ChangePasswordResponse changePassword(ChangePasswordRequest changePasswordRequest) {
+        log.info("::::: Initiating change password request :::::");
+        User user = getCurrentUser();
+        checkIfCurrentPasswordIsCorrect(changePasswordRequest.getCurrentPassword(), user.getPassword());
+        checkIfCurrentAndNewPasswordAreNotTheSame(changePasswordRequest.getCurrentPassword(), changePasswordRequest.getNewPassword());
+        checkIfTwoPasswordAreTheSame(changePasswordRequest.getNewPassword(), changePasswordRequest.getConfirmPassword());
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        User savedUser = userRepository.save(user);
+        JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(savedUser);
+        return ChangePasswordResponse.builder()
+                .message("Password changed successfully")
+                .accessToken(jwtTokenResponse.getAccessToken())
+                .refreshToken(jwtTokenResponse.getRefreshToken())
+                .build();
+    }
+
+    private void checkIfCurrentPasswordIsCorrect(String currentPassword, String appUserPassword) {
+        if(!passwordEncoder.matches(currentPassword, appUserPassword))
+            throw new BadCredentialsException("Invalid password");
+    }
+
+    private void checkIfCurrentAndNewPasswordAreNotTheSame(String currentPassword, String newPassword){
+        if(currentPassword.equals(newPassword))
+            throw new BadCredentialsException("New password cannot be the same as old password");
+    }
+
+    private void checkIfTwoPasswordAreTheSame(String newPassword, String confirmPassword){
+        if(!newPassword.equals(confirmPassword))
+            throw new BadCredentialsException("Passwords do not match");
+    }
+
+    @Override
+    public RequestResetPasswordResponse requestPasswordReset(PasswordResetRequest passwordResetRequest){
+        log.info("::::: Initiating request password reset :::::");
+        return userRepository.findByEmail(passwordResetRequest.getEmail())
+                .filter(User::isEnabled)
+                .map(user -> {
+                    String token = tokenService.saveToken(user, TokenType.RESET_PASSWORD, MAIL_EXPIRATION_TIME_IN_MIN);
+                    notificationService.sendResetPasswordMail(user, token);
+                    return requestPasswordResetMessage();
+                }).orElse(requestPasswordResetMessage());
+
+    }
+
+    private static RequestResetPasswordResponse requestPasswordResetMessage(){
+        return RequestResetPasswordResponse.builder()
+                .message("We’ve sent a password reset link to your email address. " +
+                "Please follow the instructions in the email to reset your password.")
+                .build();
     }
 }
