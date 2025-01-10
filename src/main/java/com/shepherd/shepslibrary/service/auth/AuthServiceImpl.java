@@ -111,8 +111,8 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public LoginResponse login(LoginRequest loginRequest){
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginRequest.getEmail().toLowerCase().trim(), loginRequest.getPassword()));
         String userEmail = authentication.getName();
         User user = getUserByEmail(userEmail);
         if(!user.isEnabled())
