@@ -72,6 +72,7 @@ public class AuthServiceImpl implements AuthService{
 
     private static RegisterUserResponse getRegisterUserResponse(User user) {
         return RegisterUserResponse.builder()
+                .userId(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
@@ -127,7 +128,7 @@ public class AuthServiceImpl implements AuthService{
 
     private User getUserByEmail(String userEmail) {
         return userRepository.findByEmail(userEmail)
-                .orElseThrow(()-> new ResourceNotFound("User with the provided email not found"));
+                .orElseThrow(()-> new ResourceNotFoundException("User with the provided email not found"));
     }
 
     @Override
@@ -139,6 +140,7 @@ public class AuthServiceImpl implements AuthService{
         checkIfTwoPasswordAreTheSame(changePasswordRequest.getNewPassword(), changePasswordRequest.getConfirmPassword());
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         User savedUser = userRepository.save(user);
+        tokenService.deleteAllTokenByUserEmail(savedUser.getEmail());
         JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(savedUser);
         return ChangePasswordResponse.builder()
                 .message("Password changed successfully")
@@ -149,7 +151,7 @@ public class AuthServiceImpl implements AuthService{
 
     private void checkIfCurrentPasswordIsCorrect(String currentPassword, String appUserPassword) {
         if(!passwordEncoder.matches(currentPassword, appUserPassword))
-            throw new BadCredentialsException("Invalid password");
+            throw new BadCredentialsException("Current password is invalid");
     }
 
     private void checkIfCurrentAndNewPasswordAreNotTheSame(String currentPassword, String newPassword){
@@ -168,6 +170,7 @@ public class AuthServiceImpl implements AuthService{
         return userRepository.findByEmail(passwordResetRequest.getEmail())
                 .filter(User::isEnabled)
                 .map(user -> {
+                    tokenService.deleteAllTokenByUserEmail(user.getEmail());
                     String token = tokenService.saveToken(user, TokenType.RESET_PASSWORD, MAIL_EXPIRATION_TIME_IN_MIN);
                     notificationService.sendResetPasswordMail(user, token);
                     return requestPasswordResetMessage();

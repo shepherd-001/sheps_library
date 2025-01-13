@@ -7,6 +7,7 @@ import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.TokenRepository;
 import com.shepherd.shepslibrary.exceptions.ShepsTokenException;
 import com.shepherd.shepslibrary.security.JwtService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -78,5 +79,15 @@ public class TokenServiceImpl implements TokenService{
         tokenRepository.delete(shepsToken);
         log.info("::::: Deleted a token :::::");
     }
+
+    @Override
+    @Transactional
+    public void deleteAllTokenByUserEmail(String userEmail) {
+        log.info("::::: Initiating the removal of a token by user email :::::");
+        tokenRepository.deleteAllByUserEmail(userEmail);
+        log.info("::::: Deleted all tokens by user email :::::");
+    }
+
+
 }
 
