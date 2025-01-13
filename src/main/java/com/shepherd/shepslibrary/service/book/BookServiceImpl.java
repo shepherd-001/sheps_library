@@ -1,20 +1,26 @@
 package com.shepherd.shepslibrary.service.book;
 
 import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
+import com.shepherd.shepslibrary.data.dto.request.FilterBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
+import com.shepherd.shepslibrary.data.dto.request.UserResponse;
 import com.shepherd.shepslibrary.data.dto.response.AddBookResponse;
 import com.shepherd.shepslibrary.data.dto.response.BookResponse;
 import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
 import com.shepherd.shepslibrary.data.dto.response.UpdateBookResponse;
 import com.shepherd.shepslibrary.data.model.Book;
+import com.shepherd.shepslibrary.data.model.Role;
+import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.BookRepository;
 import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
+import com.shepherd.shepslibrary.specification.BookSpecification;
 import com.shepherd.shepslibrary.utils.AppUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -140,8 +146,14 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public PaginatedResponse<BookResponse> filterBook(String searchRequest) {
-        return null;
+    public PaginatedResponse<BookResponse> filterBook(FilterBookRequest request) {
+        Pageable pageable = findAllBooksPageRequest(request.getPageNumber());
+        Specification<Book> bookSpecification = Specification.where(
+                BookSpecification.hasTitle(request.getTitle()))
+                .and(BookSpecification.hasAuthor(request.getAuthor()))
+                .and(BookSpecification.hasGenre(request.getGenre()));
+        Page<Book> books = bookRepository.findAll(bookSpecification, pageable);
+        return buildPaginatedBookResponse(books);
     }
 
     @Override

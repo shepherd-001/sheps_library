@@ -2,6 +2,7 @@ package com.shepherd.shepslibrary.controllers;
 
 import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
+import com.shepherd.shepslibrary.data.dto.request.FilterBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
 import com.shepherd.shepslibrary.service.book.BookService;
 import jakarta.validation.Valid;
@@ -24,13 +25,13 @@ public class BookController {
                 .body(BaseResponse.buildResponse(bookService.addBook(addBookRequest)));
     }
 
-    @GetMapping("/get/{bookId}")
+    @GetMapping("/get-by-id/{bookId}")
     public ResponseEntity<Object> getBookById(@PathVariable UUID bookId){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(bookService.getBookById(bookId)));
     }
 
-    @GetMapping("/get/{isbn}")
+    @GetMapping("/get-by-isbn/{isbn}")
     public ResponseEntity<Object> getBookByIsbn(@PathVariable String isbn){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(bookService.getBookByIsbn(isbn)));
@@ -49,9 +50,9 @@ public class BookController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<Object> filterBook(@RequestParam String filter){
+    public ResponseEntity<Object> filterBook(@Valid @RequestBody FilterBookRequest filterBookRequest){
         return ResponseEntity.ok(BaseResponse
-                .buildResponse(bookService.filterBook(filter)));
+                .buildResponse(bookService.filterBook(filterBookRequest)));
     }
 
     @DeleteMapping("/delete/{bookId}")

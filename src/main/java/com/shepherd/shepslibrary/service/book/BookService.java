@@ -1,6 +1,7 @@
 package com.shepherd.shepslibrary.service.book;
 
 import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
+import com.shepherd.shepslibrary.data.dto.request.FilterBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
 import com.shepherd.shepslibrary.data.dto.response.AddBookResponse;
 import com.shepherd.shepslibrary.data.dto.response.BookResponse;
@@ -15,6 +16,6 @@ public interface BookService {
     BookResponse getBookByIsbn(String isbn);
     UpdateBookResponse updateBook(UpdateBookRequest request);
     PaginatedResponse<BookResponse> getAllBooks(int pageNumber);
-    PaginatedResponse<BookResponse> filterBook(String searchRequest);
+    PaginatedResponse<BookResponse> filterBook(FilterBookRequest request);
     void deleteBook(UUID id);
 }

@@ -9,7 +9,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SearchUserRequest {
-    private String searchText;
+public class FilterBookRequest {
+    private String title;
+    private String author;
+    private String genre;
     private int pageNumber;
 }
