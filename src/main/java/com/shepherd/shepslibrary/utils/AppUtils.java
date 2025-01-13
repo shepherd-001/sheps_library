@@ -15,6 +15,8 @@ import java.time.format.DateTimeFormatter;
 
 @Slf4j
 public final class AppUtils {
+    public static final int NUMBER_OF_ITEMS_PER_PAGE = 10;
+    public static final String SORT_BY_CREATED_AT = "createdAt";
 
     public static User getCurrentUser() {
         try {

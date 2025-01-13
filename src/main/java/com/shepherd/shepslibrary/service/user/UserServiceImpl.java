@@ -18,13 +18,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static com.shepherd.shepslibrary.utils.AppUtils.NUMBER_OF_ITEMS_PER_PAGE;
+import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private static final int NUMBER_OF_ITEMS_PER_PAGE = 10;
-    private static final String SORT_BY_CREATED_AT = "createdAt";
 
     @Override
     public UserResponse getUserById(UUID userId) {

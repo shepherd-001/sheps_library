@@ -12,11 +12,19 @@ import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.utils.AppUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static com.shepherd.shepslibrary.utils.AppUtils.NUMBER_OF_ITEMS_PER_PAGE;
+import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
 
 @Service
 @RequiredArgsConstructor
@@ -109,7 +117,26 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public PaginatedResponse<BookResponse> getAllBooks(int pageNumber) {
-        return null;
+        log.info("::::: Fetching all books :::::");
+        Pageable pageable = findAllBooksPageRequest(pageNumber);
+        Page<Book> books = bookRepository.findAll(pageable);
+        return buildPaginatedBookResponse(books);
+    }
+
+    private Pageable findAllBooksPageRequest(int pageNumber) {
+        return AppUtils.createPageRequest(pageNumber, NUMBER_OF_ITEMS_PER_PAGE, SORT_BY_CREATED_AT, Sort.Direction.ASC);
+    }
+
+    private PaginatedResponse<BookResponse> buildPaginatedBookResponse(Page<Book> books) {
+        List<BookResponse> content = books.isEmpty() ? Collections.emptyList() :
+                books.stream().map(this::mapToBookResponse).toList();
+        return PaginatedResponse.<BookResponse>builder()
+                .content(content)
+                .numberOfElements(books.getNumberOfElements())
+                .totalPages(books.getTotalPages())
+                .totalElements(books.getTotalElements())
+                .last(books.isLast())
+                .build();
     }
 
     @Override
