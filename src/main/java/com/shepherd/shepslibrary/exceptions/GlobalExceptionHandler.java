@@ -3,8 +3,13 @@ package com.shepherd.shepslibrary.exceptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 @Slf4j
@@ -20,6 +25,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleException(ShepsLibraryException ex){
         log.error("::::: Sheps library exception: {} :::::", ex.getMessage());
         return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+            log.error("::::: Method argument not valid exception: {} :::::", ex.getMessage());
+        }
+        return new ResponseEntity<>(ApiError.buildErrorResponse(errors), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UnsupportedOperationException.class)

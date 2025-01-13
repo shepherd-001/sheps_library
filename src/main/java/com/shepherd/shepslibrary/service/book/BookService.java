@@ -1,5 +1,20 @@
 package com.shepherd.shepslibrary.service.book;
 
-public interface BookService {
+import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
+import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
+import com.shepherd.shepslibrary.data.dto.response.AddBookResponse;
+import com.shepherd.shepslibrary.data.dto.response.BookResponse;
+import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
+import com.shepherd.shepslibrary.data.dto.response.UpdateBookResponse;
 
+import java.util.UUID;
+
+public interface BookService {
+    AddBookResponse addBook(AddBookRequest request);
+    BookResponse getBookById(UUID id);
+    BookResponse getBookByIsbn(String isbn);
+    UpdateBookResponse updateBook(UpdateBookRequest request);
+    void deleteBook(UUID id);
+    PaginatedResponse<BookResponse> getAllBooks(int pageNumber);
+    PaginatedResponse<BookResponse> searchBook(String searchRequest);
 }

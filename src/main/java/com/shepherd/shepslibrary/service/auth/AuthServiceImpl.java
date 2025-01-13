@@ -118,6 +118,7 @@ public class AuthServiceImpl implements AuthService{
         User user = getUserByEmail(userEmail);
         if(!user.isEnabled())
             throw new ShepsLibraryException("Verify your email address before you proceed");
+        tokenService.deleteAllTokenByUserEmail(userEmail);
         JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(user);
         return LoginResponse.builder()
                 .message("User logged in successfully")

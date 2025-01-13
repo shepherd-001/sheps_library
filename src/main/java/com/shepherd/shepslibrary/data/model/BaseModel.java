@@ -18,12 +18,10 @@ public abstract class BaseModel {
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-//    @CreatedBy
-//    @Column(name = "created_by")
-//    private String createdBy;
-//    @LastModifiedBy
-//    @Column(name = "updated_by")
-//    private String updatedBy;
+    @Column(name = "created_by", updatable = false)
+    private String createdBy;
+    @Column(name = "updated_by")
+    private String updatedBy;
 
     @PrePersist
     protected void onCreated(){
