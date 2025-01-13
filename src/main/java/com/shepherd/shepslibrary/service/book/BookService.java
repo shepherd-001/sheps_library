@@ -14,7 +14,7 @@ public interface BookService {
     BookResponse getBookById(UUID id);
     BookResponse getBookByIsbn(String isbn);
     UpdateBookResponse updateBook(UpdateBookRequest request);
-    void deleteBook(UUID id);
     PaginatedResponse<BookResponse> getAllBooks(int pageNumber);
-    PaginatedResponse<BookResponse> searchBook(String searchRequest);
+    PaginatedResponse<BookResponse> filterBook(String searchRequest);
+    void deleteBook(UUID id);
 }

@@ -108,18 +108,18 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public void deleteBook(UUID id) {
-        bookRepository.deleteById(id);
-        log.info("::::: Deleted a book by id :::::");
-    }
-
-    @Override
     public PaginatedResponse<BookResponse> getAllBooks(int pageNumber) {
         return null;
     }
 
     @Override
-    public PaginatedResponse<BookResponse> searchBook(String searchRequest) {
+    public PaginatedResponse<BookResponse> filterBook(String searchRequest) {
         return null;
+    }
+
+    @Override
+    public void deleteBook(UUID id) {
+        bookRepository.deleteById(id);
+        log.info("::::: Deleted a book by id :::::");
     }
 }
