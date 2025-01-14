@@ -84,4 +84,10 @@ public class GlobalExceptionHandler {
         log.error("::::: Resource not found exception: {} :::::", ex.getMessage());
         return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(TransactionException.class)
+    public ResponseEntity<ApiError> handleException(TransactionException ex) {
+        log.error("::::: Transaction exception: {} :::::", ex.getMessage());
+        return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
 }
