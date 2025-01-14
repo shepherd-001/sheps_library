@@ -4,11 +4,12 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Builder
 @Getter
 public class TransactionResponse {
-    private String message;
+    private UUID transactionId;
     private String firstName;
     private String lastName;
     private String title;
