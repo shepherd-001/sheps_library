@@ -15,6 +15,7 @@ public final class ValidationMessage {
             " one uppercase letter, one number, and one special character (e.g., @, #, $, %, ^, &, +, =, !, ...)";
     public static final String INVALID_EMAIL = "Invalid email address";
 
+
     public static final String BLANK_TITLE = "Title is required";
     public static final String BLANK_AUTHOR = "Author's name is required";
     public static final String BLANK_GENRE = "Genre is required";
@@ -23,6 +24,9 @@ public final class ValidationMessage {
     public static final String INVALID_AUTHOR = "The author's name is invalid. Names can only contain letters, spaces, apostrophes, or hyphens";
     public static final String INVALID_GENRE = "The genre is invalid. Genres can only contain letters, spaces, or hyphens";
 
+
+    public static final String BLANK_ID = "Id is required";
+    public static final String BLANK_PAGE_NUMBER = "Page number cannot be blank";
     private ValidationMessage() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }

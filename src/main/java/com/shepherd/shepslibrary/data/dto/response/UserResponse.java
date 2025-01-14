@@ -1,4 +1,4 @@
-package com.shepherd.shepslibrary.data.dto.request;
+package com.shepherd.shepslibrary.data.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.shepherd.shepslibrary.data.model.Gender;
