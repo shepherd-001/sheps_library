@@ -147,6 +147,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public PaginatedResponse<BookResponse> filterBook(FilterBookRequest request) {
+        log.info(":::::  Filtering book :::::");
         Pageable pageable = findAllBooksPageRequest(request.getPageNumber());
         Specification<Book> bookSpecification = Specification.where(
                 BookSpecification.hasTitle(request.getTitle()))
