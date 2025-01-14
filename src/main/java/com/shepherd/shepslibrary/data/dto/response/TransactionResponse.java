@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.data.dto.response;
 
+import com.shepherd.shepslibrary.data.model.TransactionType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,6 +11,7 @@ import java.util.UUID;
 @Getter
 public class TransactionResponse {
     private UUID transactionId;
+    private TransactionType transactionType;
     private String firstName;
     private String lastName;
     private String title;

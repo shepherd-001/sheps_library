@@ -17,6 +17,7 @@ public class Transaction extends BaseModel{
     private User user;
     @ManyToOne
     private Book book;
+    private TransactionType transactionType;
     private LocalDate borrowDate;
     private LocalDate returnDate;
 }

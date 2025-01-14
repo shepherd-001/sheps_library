@@ -5,6 +5,7 @@ import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
 import com.shepherd.shepslibrary.data.dto.response.TransactionResponse;
 import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.model.Transaction;
+import com.shepherd.shepslibrary.data.model.TransactionType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.BookRepository;
 import com.shepherd.shepslibrary.data.repository.TransactionRepository;
@@ -21,8 +22,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.NUMBER_OF_ITEMS_PER_PAGE;
@@ -49,6 +48,7 @@ public class TransactionServiceImpl implements TransactionService{
         Book savedBook = bookRepository.save(book);
 
         Transaction transaction = new Transaction();
+        transaction.setTransactionType(TransactionType.BORROW_BOOK);
         transaction.setUser(user);
         transaction.setBook(savedBook);
         transaction.setBorrowDate(LocalDate.now());
@@ -76,7 +76,7 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     private void validateReturnDate(LocalDate returnDate) {
-        if (LocalDate.now().plusMonths(MAX_BORROW_MONTHS).isAfter(returnDate)) {
+        if (LocalDate.now().plusMonths(MAX_BORROW_MONTHS).isBefore(returnDate)) {
             throw new TransactionException("Return date cannot be more than %s months".formatted(MAX_BORROW_MONTHS));
         }
     }
@@ -84,6 +84,7 @@ public class TransactionServiceImpl implements TransactionService{
     private TransactionResponse mapToTransactionResponse(Transaction transaction){
         return TransactionResponse.builder()
                 .transactionId(transaction.getId())
+                .transactionType(transaction.getTransactionType())
                 .firstName(transaction.getUser().getFirstName())
                 .lastName(transaction.getUser().getLastName())
                 .title(transaction.getBook().getTitle())
@@ -102,6 +103,7 @@ public class TransactionServiceImpl implements TransactionService{
         book.setAvailable(true);
         bookRepository.save(book);
 
+        transaction.setTransactionType(TransactionType.RETURN_BOOK);
         transaction.setReturnDate(LocalDate.now());
         transaction.setUpdatedBy(AppUtils.getCurrentUser().getEmail());
         Transaction savedTransaction = transactionRepository.save(transaction);
