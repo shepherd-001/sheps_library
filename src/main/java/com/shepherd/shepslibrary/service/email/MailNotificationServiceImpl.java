@@ -44,7 +44,14 @@ public class MailNotificationServiceImpl implements MailNotificationService{
     }
 
     @Override
-    public void sendLibrarianInvitation(String token) {
-        String invitationLink =
+    public void sendLibrarianInvitation(User user, String token) {
+        String invitationLink = "%s/invitation?token=%s".formatted(baseUrl, token);
+        Context context = new Context();
+        context.setVariable("invitationLink", invitationLink);
+        context.setVariable("firstName", user.getFirstName());
+        String htmlContent = templateEngine.process("librarian_invitation", context);
+        log.info("::::: Librarian invitation ready to be sent to {} :::::", user.getEmail());
+        CompletableFuture.runAsync(() -> mailSenderService
+                .sendEmail(user.getEmail(), "Librarian Invitation", htmlContent));
     }
 }

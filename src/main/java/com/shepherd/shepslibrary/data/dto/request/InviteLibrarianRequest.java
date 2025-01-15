@@ -3,9 +3,7 @@ package com.shepherd.shepslibrary.data.dto.request;
 import com.shepherd.shepslibrary.data.model.Gender;
 import com.shepherd.shepslibrary.utils.RegexPattern;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class RegisterUserRequest {
+public class InviteLibrarianRequest {
     @NotBlank(message = ValidationMessage.BLANK_FIRST_NAME)
     @Pattern(message = ValidationMessage.INVALID_FIRST_NAME, regexp = RegexPattern.USER_NAME)
     private String firstName;
@@ -27,10 +25,6 @@ public class RegisterUserRequest {
     @NotBlank(message = ValidationMessage.BLANK_EMAIL)
     @Email(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
     private String email;
-
-    @NotBlank(message = ValidationMessage.BLANK_PASSWORD)
-    @Pattern(regexp = RegexPattern.PASSWORD, message = ValidationMessage.INVALID_PASSWORD)
-    private String password;
 
     private Gender gender;
 }

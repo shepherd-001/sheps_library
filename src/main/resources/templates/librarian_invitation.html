@@ -35,6 +35,11 @@
             font-size: 6vw;
             color: #4CAF50;
         }
+        .greeting {
+            font-size: 4vw;
+            color: #333;
+            margin-top: 10px;
+        }
         .intro-text {
             font-size: 4vw;
             color: #555;
@@ -72,6 +77,7 @@
         }
         @media screen and (min-width: 600px) {
             .email-header h1 { font-size: 28px; }
+            .greeting { font-size: 18px; }
             .intro-text { font-size: 16px; }
             .btn { font-size: 16px; }
             .footer { font-size: 14px; }
@@ -83,6 +89,7 @@
     <div class="email-content">
         <div class="email-header">
             <h1>Welcome to Sheps Library!</h1>
+            <p class="greeting">Hello <strong th:text="${firstName}">[User]</strong>,</p>
         </div>
 
         <p class="intro-text">
