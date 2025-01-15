@@ -116,6 +116,22 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
+    public PaginatedResponse<TransactionResponse> getAllTransactionByUserId(UUID userId, int pageNumber) {
+        log.info("::::: Fetching all transactions by user id :::::");
+        Pageable pageable = AppUtils.createPageRequest(pageNumber, NUMBER_OF_ITEMS_PER_PAGE, SORT_BY_CREATED_AT, Sort.Direction.ASC);
+        Page<Transaction> transactions = transactionRepository.findAllByUserId(userId, pageable);
+        return PaginatedResponse.<TransactionResponse>builder()
+                .content(transactions.stream()
+                        .map(this::mapToTransactionResponse)
+                        .toList())
+                .numberOfElements(transactions.getNumberOfElements())
+                .totalPages(transactions.getTotalPages())
+                .totalElements(transactions.getTotalElements())
+                .last(transactions.isLast())
+                .build();
+    }
+
+    @Override
     public PaginatedResponse<TransactionResponse> getAllTransactions(int pageNumber) {
         log.info("::::: Fetching all transactions :::::");
         Pageable pageable = AppUtils.createPageRequest(pageNumber, NUMBER_OF_ITEMS_PER_PAGE, SORT_BY_CREATED_AT, Sort.Direction.ASC);

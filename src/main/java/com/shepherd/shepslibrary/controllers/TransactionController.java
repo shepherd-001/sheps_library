@@ -28,6 +28,12 @@ public class TransactionController {
                 .buildResponse(transactionService.returnBook(transactionId)));
     }
 
+    @GetMapping("/get/all/{userId}")
+    public ResponseEntity<Object> getAllTransactions(@PathVariable UUID userId, @RequestParam int pageNumber){
+        return ResponseEntity.ok(BaseResponse
+                .buildResponse(transactionService.getAllTransactionByUserId(userId, pageNumber)));
+    }
+
     @GetMapping("/get/all")
     public ResponseEntity<Object> getAllTransactions(@RequestParam int pageNumber){
         return ResponseEntity.ok(BaseResponse
