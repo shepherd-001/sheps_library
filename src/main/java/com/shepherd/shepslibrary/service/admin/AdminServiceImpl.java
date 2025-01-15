@@ -74,8 +74,8 @@ public class AdminServiceImpl implements AdminService {
     }
     private User createUser(InviteLibrarianRequest request){
         User user = new User();
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
+        user.setFirstName(request.getFirstName().trim());
+        user.setLastName(request.getLastName().trim());
         user.setEmail(request.getEmail().toLowerCase().trim());
         user.setGender(request.getGender());
         user.setRole(Role.LIBRARIAN);

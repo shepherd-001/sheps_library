@@ -8,6 +8,7 @@ public final class AllowedURIs {
                 "/api/v1/auth/login",
                 "/api/v1/auth/request-password-reset",
                 "/api/v1/auth/reset-password",
+                "/api/v1/librarian/create-password",
                 "/verify"
         };
     }

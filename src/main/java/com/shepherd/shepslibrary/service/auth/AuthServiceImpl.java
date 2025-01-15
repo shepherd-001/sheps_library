@@ -118,7 +118,7 @@ public class AuthServiceImpl implements AuthService{
         User user = getUserByEmail(userEmail);
         if(!user.isEnabled())
             throw new ShepsLibraryException("Verify your email address before you proceed");
-        tokenService.deleteAllTokenByUserEmail(userEmail);
+        tokenService.deleteAllTokenByUserEmail(userEmail, TokenType.JWT);
         JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(user);
         return LoginResponse.builder()
                 .message("User logged in successfully")
@@ -141,7 +141,7 @@ public class AuthServiceImpl implements AuthService{
         checkIfTwoPasswordAreTheSame(changePasswordRequest.getNewPassword(), changePasswordRequest.getConfirmPassword());
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         User savedUser = userRepository.save(user);
-        tokenService.deleteAllTokenByUserEmail(savedUser.getEmail());
+        tokenService.deleteAllTokenByUserEmail(savedUser.getEmail(), TokenType.JWT);
         JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(savedUser);
         return ChangePasswordResponse.builder()
                 .message("Password changed successfully")
@@ -171,7 +171,7 @@ public class AuthServiceImpl implements AuthService{
         return userRepository.findByEmail(passwordResetRequest.getEmail())
                 .filter(User::isEnabled)
                 .map(user -> {
-                    tokenService.deleteAllTokenByUserEmail(user.getEmail());
+                    tokenService.deleteAllTokenByUserEmail(user.getEmail(), TokenType.RESET_PASSWORD);
                     String token = tokenService.saveToken(user, TokenType.RESET_PASSWORD, MAIL_EXPIRATION_TIME_IN_MIN);
                     notificationService.sendResetPasswordMail(user, token);
                     return requestPasswordResetMessage();

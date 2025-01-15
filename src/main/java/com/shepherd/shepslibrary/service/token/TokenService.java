@@ -13,5 +13,5 @@ public interface TokenService {
     JwtTokenResponse buildAndSaveJwtToken(User user);
     ShepsToken validateToken(String token, TokenType tokenType);
     void deleteToken(ShepsToken shepsToken);
-    void deleteAllTokenByUserEmail(String userEmail);
+    void deleteAllTokenByUserEmail(String userEmail, TokenType tokenType);
 }

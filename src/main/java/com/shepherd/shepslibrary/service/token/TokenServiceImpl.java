@@ -65,13 +65,22 @@ public class TokenServiceImpl implements TokenService{
     public ShepsToken validateToken(String token, TokenType tokenType) {
         ShepsToken shepsToken = tokenRepository.findByTokenAndTokenType(token, tokenType)
                 .orElseThrow(()-> new ShepsTokenException("Token is invalid"));
-
+        validateUserEmail(token, shepsToken.getUser().getEmail());
         if (shepsToken.getExpirationTime().isBefore(LocalDateTime.now())) {
             log.info("::::: Token is expired :::::");
             throw new ShepsTokenException("Token is expired");
         }
+
         log.info("::::: Token validation successful :::::");
         return shepsToken;
+    }
+
+    private void validateUserEmail(String token, String email) {
+        String jwtEmail = jwtService.extractUsername(token);
+        if(!jwtEmail.equals(email)){
+            log.error("::::: JWT email '{}' does not match expected email '{}' :::::", jwtEmail, email);
+            throw new ShepsTokenException("Error validating token");
+        }
     }
 
     @Override
@@ -82,9 +91,9 @@ public class TokenServiceImpl implements TokenService{
 
     @Override
     @Transactional
-    public void deleteAllTokenByUserEmail(String userEmail) {
+    public void deleteAllTokenByUserEmail(String userEmail, TokenType tokenType) {
         log.info("::::: Initiating the removal of a token by user email :::::");
-        tokenRepository.deleteAllByUserEmail(userEmail);
+        tokenRepository.deleteAllByUserEmailAndTokenType(userEmail, tokenType);
         log.info("::::: Deleted all tokens by user email :::::");
     }
 
