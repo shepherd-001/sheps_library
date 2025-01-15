@@ -43,7 +43,11 @@ spring:
           writetimeout: 10000
 #        debug: true
 
-client_url: http://localhost:${PORT}
+admin_email: ${ADMIN_EMAIL}
+admin_password: ${ADMIN_PASSWORD}
+
+
+client_url: http://localhost:3000
 mail_from_email: ${MAIL_FROM_EMAIL}
 mail_from_name: ${MAIL_FROM_NAME}
 

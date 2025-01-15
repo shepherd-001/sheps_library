@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService{
         user.setLastName(registerUserRequest.getLastName().trim());
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(registerUserRequest.getPassword()));
-        user.setGender(Gender.valueOf(registerUserRequest.getGender().toUpperCase().trim()));
+        user.setGender(registerUserRequest.getGender());
         user.setRole(Role.MEMBER);
         User savedUser = userRepository.save(user);
         String token = tokenService.saveToken(savedUser, TokenType.EMAIL_CONFIRMATION, MAIL_EXPIRATION_TIME_IN_MIN);

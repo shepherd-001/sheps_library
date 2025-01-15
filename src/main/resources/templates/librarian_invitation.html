@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invitation to Sheps Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f9f4;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        .email-container {
+            width: 100%;
+            background-color: #f4f9f4;
+            padding: 20px;
+        }
+        .email-content {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .email-header {
+            text-align: center;
+            color: #333;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 6vw;
+            color: #4CAF50;
+        }
+        .intro-text {
+            font-size: 4vw;
+            color: #555;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .confirmation-link-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            font-size: 4.5vw;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 3.5vw;
+            color: #777;
+        }
+        .footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        @media screen and (min-width: 600px) {
+            .email-header h1 { font-size: 28px; }
+            .intro-text { font-size: 16px; }
+            .btn { font-size: 16px; }
+            .footer { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="email-content">
+        <div class="email-header">
+            <h1>Welcome to Sheps Library!</h1>
+        </div>
+
+        <p class="intro-text">
+            You have been invited to join Sheps Library as a Librarian. We are excited to have you contribute to our community and manage our resources effectively.
+        </p>
+
+        <p class="intro-text">
+            To get started, please complete your profile by clicking the button below. This link will allow you to set your name and password to access your account.
+        </p>
+
+        <div class="confirmation-link-container">
+            <a th:href="${invitationLink}" class="btn">Accept Invitation</a>
+        </div>
+
+        <p class="intro-text">
+            If you did not expect this invitation, you can safely ignore this email.
+        </p>
+
+        <div class="footer">
+            <p>If you have any questions, please <a href="mailto:support@shepslibrary.com">contact us</a>.</p>
+            <p>Warm regards, <br> The Sheps Library Team</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.data.dto.request;
 
+import com.shepherd.shepslibrary.data.model.Gender;
 import com.shepherd.shepslibrary.utils.RegexPattern;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.constraints.Email;
@@ -32,5 +33,5 @@ public class RegisterUserRequest {
     private String password;
 
     @NotBlank(message = ValidationMessage.BLANK_GENDER)
-    private String gender;
+    private Gender gender;
 }

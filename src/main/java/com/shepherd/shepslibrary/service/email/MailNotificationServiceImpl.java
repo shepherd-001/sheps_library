@@ -33,13 +33,18 @@ public class MailNotificationServiceImpl implements MailNotificationService{
 
     @Override
     public void sendResetPasswordMail(User user, String token) {
-        String verificationLink = "%s/reset-password?token=%s".formatted(baseUrl, token);
+        String resetPasswordLink = "%s/reset-password?token=%s".formatted(baseUrl, token);
         Context context = new Context();
         context.setVariable("firstName", user.getFirstName());
-        context.setVariable("resetPasswordLink", verificationLink);
+        context.setVariable("resetPasswordLink", resetPasswordLink);
         String htmlContent = templateEngine.process("reset-password", context);
         log.info("::::: Reset password mail ready to be sent to {} :::::", user.getEmail());
         CompletableFuture.runAsync(() -> mailSenderService
                 .sendEmail(user.getEmail(), "Reset Your Password", htmlContent));
+    }
+
+    @Override
+    public void sendLibrarianInvitation(String token) {
+        String invitationLink =
     }
 }
