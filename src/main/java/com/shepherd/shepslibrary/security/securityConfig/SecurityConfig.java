@@ -30,6 +30,7 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity(
         securedEnabled = true,
+        prePostEnabled = true,
         jsr250Enabled = true
 )
 @RequiredArgsConstructor

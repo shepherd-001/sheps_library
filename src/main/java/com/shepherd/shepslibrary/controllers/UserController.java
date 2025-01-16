@@ -5,6 +5,7 @@ import com.shepherd.shepslibrary.data.model.Role;
 import com.shepherd.shepslibrary.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -22,12 +23,14 @@ public class UserController {
     }
 
     @GetMapping("/get/all-by-role")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Object> getAllUsersByRole(@RequestParam Role role, @RequestParam int pageNumber) {
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(userService.getAllUsersByRole(role, pageNumber)));
     }
 
     @GetMapping("/get/all-by-status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Object> getAllUsersByStatus(@RequestParam boolean status, @RequestParam int pageNumber) {
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(userService.getAllUsersByStatus(status, pageNumber)));

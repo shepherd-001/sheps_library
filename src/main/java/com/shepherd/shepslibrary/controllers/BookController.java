@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -20,6 +21,7 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Object> addBook(@Valid @RequestBody AddBookRequest addBookRequest){
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.buildResponse(bookService.addBook(addBookRequest)));
@@ -32,12 +34,14 @@ public class BookController {
     }
 
     @GetMapping("/get-by-isbn/{isbn}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<Object> getBookByIsbn(@PathVariable String isbn){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(bookService.getBookByIsbn(isbn)));
     }
 
     @PutMapping("/edit")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Object> updateBook(@Valid @RequestBody UpdateBookRequest updateBookRequest){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(bookService.updateBook(updateBookRequest)));
@@ -56,6 +60,7 @@ public class BookController {
     }
 
     @DeleteMapping("/delete/{bookId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Object> deleteBook(@PathVariable UUID bookId){
         bookService.deleteBook(bookId);
         return ResponseEntity.ok(BaseResponse.buildResponse("Book deleted successfully"));

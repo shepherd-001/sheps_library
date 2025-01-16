@@ -6,6 +6,7 @@ import com.shepherd.shepslibrary.service.transaction.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -16,12 +17,14 @@ import java.util.UUID;
 public class TransactionController {
     private final TransactionService transactionService;
 
+    @PreAuthorize("hasRole('MEMBER')")
     @PostMapping("/borrow-book")
     public ResponseEntity<Object> borrowBook(@Valid @RequestBody BorrowBookRequest borrowBookRequest){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(transactionService.borrowBook(borrowBookRequest)));
     }
 
+    @PreAuthorize("hasRole('MEMBER')")
     @PutMapping("/return-book")
     public ResponseEntity<Object> returnBook(@RequestParam UUID transactionId){
         return ResponseEntity.ok(BaseResponse
@@ -35,6 +38,7 @@ public class TransactionController {
     }
 
     @GetMapping("/get/all")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<Object> getAllTransactions(@RequestParam int pageNumber){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(transactionService.getAllTransactions(pageNumber)));
