@@ -38,7 +38,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<ApiError> handleException(AuthorizationDeniedException ex){
         log.error("::::: Authorization denied exception: {} :::::", ex.getMessage());
-        return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.FORBIDDEN);
+        String errorMessage = "You are not permitted to access this resource";
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiError.buildErrorResponse(errorMessage));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
