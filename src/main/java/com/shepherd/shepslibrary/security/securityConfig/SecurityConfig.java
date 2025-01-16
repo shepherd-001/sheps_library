@@ -28,11 +28,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(
-        securedEnabled = true,
-        prePostEnabled = true,
-        jsr250Enabled = true
-)
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final CustomAuthorizationFilter authorizationFilter;

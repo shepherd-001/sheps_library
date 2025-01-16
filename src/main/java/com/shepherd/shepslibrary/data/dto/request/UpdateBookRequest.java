@@ -16,7 +16,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class UpdateBookRequest {
-    @NotBlank(message = ValidationMessage.BLANK_ID)
     private UUID bookId;
 
     @NotBlank(message = ValidationMessage.BLANK_TITLE)
