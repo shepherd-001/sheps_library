@@ -128,7 +128,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.example.ShepsLibraryApplication</mainClass>
+                            <mainClass>com.shepherd.shepslibrary.ShepsLibraryApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
