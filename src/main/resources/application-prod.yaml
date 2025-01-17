@@ -3,8 +3,6 @@ logging:
     org.springframework.web: DEBUG
 
 spring:
-  profiles:
-    active: prod
   application:
     name: ShepsLibrary
   datasource:
