@@ -1,8 +1,5 @@
 package com.shepherd.shepslibrary.data.dto.request;
 
-import com.shepherd.shepslibrary.utils.ValidationMessage;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

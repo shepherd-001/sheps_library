@@ -1,7 +1,7 @@
 package com.shepherd.shepslibrary.service.user;
 
-import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
+import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 import com.shepherd.shepslibrary.data.model.Role;
 
 import java.util.UUID;

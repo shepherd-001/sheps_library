@@ -19,7 +19,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
@@ -37,15 +36,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             @Nonnull HttpServletRequest request,
             @Nonnull HttpServletResponse response,
             @Nonnull FilterChain filterChain) throws ServletException, IOException {
-        String requestURI = request.getRequestURI();
 
-        log.info("::::: Request URI: {} :::::", requestURI);
-        for (String endpoint : AllowedURIs.allowedEndpoints()) {
-            if (matchesUri(requestURI, endpoint)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-        }
+        log.info("::::: Request URI: {} :::::", request.getRequestURI());
 
         try{
             String jwtToken = extractJwtToken(request);
@@ -87,13 +79,4 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
-
-    private boolean matchesUri(String requestURI, String allowedUri) {
-        if (allowedUri.endsWith("/**")) {
-            String baseUri = allowedUri.replace("/**", "");
-            return requestURI.startsWith(baseUri);
-        }
-        return requestURI.equals(allowedUri);
-    }
-
 }

@@ -10,7 +10,7 @@ spring:
     name: ShepsLibrary
 
   profiles:
-    active: dev
+    active: local
 
   datasource:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
