@@ -28,11 +28,11 @@ import io.swagger.v3.oas.annotations.servers.Server;
         ),
         servers = {
                 @Server(
-                        description = "Local ENV",
+                        description = "Local environment",
                         url = "http://localhost:9092"
                 ),
                 @Server(
-                        description = "PROD ENV",
+                        description = "Development environment",
                         url = "https://shepslibrary-production.up.railway.app"
                 )
         },
