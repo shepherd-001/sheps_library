@@ -1,10 +1,10 @@
-version: '3.8'
-
-services:
-  db:
-    image: mysql:alpine
-    ports:
-      - "3306:3306"
-    environment:
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: shepslibrary
+#version: '3.8'
+#
+#services:
+#  db:
+#    image: mysql:alpine
+#    ports:
+#      - "3306:3306"
+#    environment:
+#      POSTGRES_PASSWORD: password
+#      POSTGRES_DB: shepslibrary
