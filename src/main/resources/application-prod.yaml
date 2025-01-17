@@ -1,0 +1,57 @@
+logging:
+  level:
+    org.springframework.web: DEBUG
+
+spring:
+  profiles:
+    active: prod
+  application:
+    name: ShepsLibrary
+  datasource:
+    url: jdbc:mysql://${PROD_DB_HOST}:${PROD_DB_PORT}/${PROD_DB_NAME}
+    username: ${PROD_DB_USERNAME}
+    password: ${PROD_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database: mysql
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          from: ${MAIL_FROM_EMAIL}
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
+#        debug: true
+
+admin_email: ${ADMIN_EMAIL}
+admin_password: ${ADMIN_PASSWORD}
+
+
+client_url: http://localhost:3000
+mail_from_email: ${MAIL_FROM_EMAIL}
+mail_from_name: ${MAIL_FROM_NAME}
+
+zero_bounce_api_key: ${ZEROBOUNCE_API_KEY}
+zero_bounce_url: ${ZEROBOUNCE_URL}
+have_i_been_pawned_url: ${HAVE_I_BEEN_PAWNED_URL}
+
+jwt_secret_key: ${JWT_SECRET_KEY}
+jwt_access_expiration: ${JWT_EXPIRATION}
+jwt_refresh_expiration: ${JWT_REFRESH_EXPIRATION}
+
