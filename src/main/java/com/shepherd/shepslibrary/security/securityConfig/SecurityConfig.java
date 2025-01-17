@@ -36,6 +36,7 @@ public class SecurityConfig {
     private final LogoutHandler logoutHandler;
 
     private static final List<String> ALLOWED_ORIGINS = List.of("http://localhost:3000");
+//    private static final List<String> ALLOWED_ORIGINS = List.of("*");
     private static final List<String> ALLOWED_METHODS = List.of("GET", "POST", "DELETE", "PUT", "PATCH");
     private static final List<String> ALLOWED_HEADERS = List.of("Authorization", "Requestor-Type",
             "Origin", "X-Requested-With", "Accept",  "Content-Type", "Cache-Control");
