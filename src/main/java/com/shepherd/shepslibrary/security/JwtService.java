@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -18,10 +17,6 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class JwtService {
     private final Key signingKey;
-    @Value("${jwt_access_expiration}")
-    private long accessTokenExpiration;
-    @Value("${jwt_refresh_expiration}")
-    private long refreshTokenExpiration;
 
     public String extractUsername(String jwtToken){
         return extractClaim(jwtToken, Claims::getSubject);
@@ -40,11 +35,11 @@ public class JwtService {
                 .getBody();
     }
 
-    public String generateAccessToken(String email){
+    public String generateAccessToken(String email, long accessTokenExpiration){
         return buildJwtToken(new HashMap<>(), email, accessTokenExpiration);
     }
 
-    public String generateRefreshToken(String email){
+    public String generateRefreshToken(String email, long refreshTokenExpiration){
         return buildJwtToken(new HashMap<>(), email, refreshTokenExpiration);
     }
 
