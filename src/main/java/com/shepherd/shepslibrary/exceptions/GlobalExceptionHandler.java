@@ -106,4 +106,10 @@ public class GlobalExceptionHandler {
         log.error("::::: Transaction exception: {} :::::", ex.getMessage());
         return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ReservationException.class)
+    public ResponseEntity<ApiError> handleException(ReservationException ex) {
+        log.error("::::: Reservation exception: {} :::::", ex.getMessage());
+        return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
 }

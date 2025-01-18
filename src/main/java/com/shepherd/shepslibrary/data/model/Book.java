@@ -16,5 +16,5 @@ public class Book extends BaseModel{
     private String genre;
     @Column(unique = true)
     private String isbn;
-    private boolean isAvailable = true;
+    private boolean isAvailable;
 }

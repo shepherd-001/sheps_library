@@ -74,10 +74,11 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookResponse getBookById(UUID id) {
         log.info("::::: Fetching book by id :::::");
-        return mapToBookResponse(findBookById(id));
+        return mapToBookResponse(fetchBookById(id));
     }
 
-    private Book findBookById(UUID bookId) {
+    @Override
+    public Book fetchBookById(UUID bookId) {
         return bookRepository.findById(bookId).orElseThrow
                 (()-> new ResourceNotFoundException("Book with the provided ID not found"));
     }
@@ -101,10 +102,11 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public UpdateBookResponse updateBook(UpdateBookRequest request) {
-        Book book = findBookById(request.getBookId());
+        Book book = fetchBookById(request.getBookId());
         book.setTitle(request.getTitle().trim());
         book.setAuthor(request.getAuthor().trim());
         book.setGenre(request.getGenre().trim());
+        book.setAvailable(true);
         book.setUpdatedBy(AppUtils.getCurrentUser().getEmail());
         Book savedBook = bookRepository.save(book);
         log.info("::::: Updated a book :::::");
@@ -158,5 +160,10 @@ public class BookServiceImpl implements BookService {
     public void deleteBook(UUID id) {
         bookRepository.deleteById(id);
         log.info("::::: Deleted a book by id :::::");
+    }
+
+    @Override
+    public Book saveBook(Book book) {
+        return bookRepository.save(book);
     }
 }
