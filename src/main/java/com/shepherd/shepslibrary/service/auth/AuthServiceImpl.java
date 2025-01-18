@@ -174,7 +174,6 @@ public class AuthServiceImpl implements AuthService{
         return userRepository.findByEmail(passwordResetRequest.getEmail())
                 .filter(User::isEnabled)
                 .map(user -> {
-                    tokenService.deleteAllTokenByUserAndType(user.getEmail(), TokenType.RESET_PASSWORD);
                     String token = tokenService.generateToken(user, TokenType.RESET_PASSWORD);
                     notificationService.sendResetPasswordMail(user, token);
                     return requestPasswordResetMessage();

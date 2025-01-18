@@ -13,10 +13,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseResponse<T> {
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private T data;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String message;
     private boolean isSuccessful;
     @JsonFormat(pattern = "HH:mm:ss, dd-MM-yyyy")
