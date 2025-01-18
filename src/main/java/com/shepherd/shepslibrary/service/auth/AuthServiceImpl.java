@@ -74,6 +74,7 @@ public class AuthServiceImpl implements AuthService{
 
     private static RegisterUserResponse getRegisterUserResponse(User user) {
         return RegisterUserResponse.builder()
+                .message("User registered successfully")
                 .userId(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
