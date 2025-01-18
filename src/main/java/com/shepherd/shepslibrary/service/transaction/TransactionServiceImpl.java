@@ -7,11 +7,10 @@ import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.model.Transaction;
 import com.shepherd.shepslibrary.data.model.TransactionType;
 import com.shepherd.shepslibrary.data.model.User;
-import com.shepherd.shepslibrary.data.repository.BookRepository;
 import com.shepherd.shepslibrary.data.repository.TransactionRepository;
-import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.exceptions.TransactionException;
+import com.shepherd.shepslibrary.service.book.BookService;
 import com.shepherd.shepslibrary.utils.AppUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,7 @@ import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
 @Slf4j
 public class TransactionServiceImpl implements TransactionService{
     private final TransactionRepository transactionRepository;
-    private final BookRepository bookRepository;
+    private final BookService bookService;
     private static final int MAX_BORROW_MONTHS = 2;
 
     @Override
@@ -41,11 +40,11 @@ public class TransactionServiceImpl implements TransactionService{
         log.info("::::: Initiating borrow book request :::::");
         User user = AppUtils.getCurrentUser();
         checkIfUserIsRevoked(user);
-        Book book = getBookById(request.getBookId());
+        Book book = bookService.fetchBookById(request.getBookId());
         checkIfBookIsAvailable(book);
         validateReturnDate(request.getReturnDate());
         book.setAvailable(false);
-        Book savedBook = bookRepository.save(book);
+        Book savedBook = bookService.saveBook(book);
 
         Transaction transaction = new Transaction();
         transaction.setTransactionType(TransactionType.BORROW_BOOK);
@@ -61,18 +60,13 @@ public class TransactionServiceImpl implements TransactionService{
 
     private void checkIfUserIsRevoked(User user){
         if(user.isRevoked())
-            throw new ShepsLibraryException("Your access to borrow books has been revoked. " +
+            throw new ShepsLibraryException("Your access to perform this action has been revoked. " +
                     "Please settle your overdue payment or contact our support team for assistance");
     }
 
     private void checkIfBookIsAvailable(Book book){
         if(!book.isAvailable())
             throw new TransactionException("Book is not available");
-    }
-
-    private Book getBookById(UUID bookId) {
-        return bookRepository.findById(bookId).orElseThrow
-                (()-> new ResourceNotFoundException("Book with the provided ID not found"));
     }
 
     private void validateReturnDate(LocalDate returnDate) {
@@ -101,7 +95,7 @@ public class TransactionServiceImpl implements TransactionService{
         Transaction transaction = getTransactionById(transactionId);
         Book book = transaction.getBook();
         book.setAvailable(true);
-        bookRepository.save(book);
+        bookService.saveBook(book);
 
         transaction.setTransactionType(TransactionType.RETURN_BOOK);
         transaction.setReturnDate(LocalDate.now());
