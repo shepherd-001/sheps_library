@@ -10,6 +10,7 @@ import java.util.UUID;
 public class ReserveBookResponse {
     private String message;
     private UUID reservationId;
+    private UUID userId;
     private UUID bookId;
     private boolean isReserved;
 }

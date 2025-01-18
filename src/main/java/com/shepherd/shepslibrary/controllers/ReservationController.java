@@ -2,6 +2,7 @@ package com.shepherd.shepslibrary.controllers;
 
 import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
 import com.shepherd.shepslibrary.service.transaction.ReservationService;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,7 +18,7 @@ public class ReservationController {
 
     @PreAuthorize("hasRole('MEMBER')")
     @PostMapping("/create")
-    public ResponseEntity<Object> reserveBook(@RequestParam UUID bookId){
+    public ResponseEntity<Object> reserveBook(@NotNull @RequestParam UUID bookId){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(reservationService.reserveBook(bookId)));
     }

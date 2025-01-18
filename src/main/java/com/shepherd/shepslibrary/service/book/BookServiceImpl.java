@@ -43,6 +43,7 @@ public class BookServiceImpl implements BookService {
         book.setAuthor(request.getAuthor().trim());
         book.setGenre(request.getGenre().trim());
         book.setIsbn(generateRandomIsbn());
+        book.setAvailable(true);
         book.setCreatedBy(createdBy);
         Book savedBook = bookRepository.save(book);
         log.info("::::: New book added :::::");
@@ -106,7 +107,6 @@ public class BookServiceImpl implements BookService {
         book.setTitle(request.getTitle().trim());
         book.setAuthor(request.getAuthor().trim());
         book.setGenre(request.getGenre().trim());
-        book.setAvailable(true);
         book.setUpdatedBy(AppUtils.getCurrentUser().getEmail());
         Book savedBook = bookRepository.save(book);
         log.info("::::: Updated a book :::::");

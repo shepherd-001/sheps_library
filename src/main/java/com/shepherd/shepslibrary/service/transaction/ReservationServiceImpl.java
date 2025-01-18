@@ -12,6 +12,7 @@ import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.service.book.BookService;
 import com.shepherd.shepslibrary.utils.AppUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -66,6 +67,7 @@ public class ReservationServiceImpl implements ReservationService{
         return ReserveBookResponse.builder()
                 .message("Book reserved successfully")
                 .reservationId(reservation.getId())
+                .userId(reservation.getUserId())
                 .bookId(reservation.getBookId())
                 .isReserved(true)
                 .build();
@@ -121,6 +123,7 @@ public class ReservationServiceImpl implements ReservationService{
     }
 
     @Override
+    @Transactional
     public void deleteReservation(UUID reservationId, UUID userId) {
         log.info("::::: Initiating the deletion of a user reservation :::::");
         reservationRepository.deleteByIdAndUserId(reservationId, userId);
@@ -128,6 +131,7 @@ public class ReservationServiceImpl implements ReservationService{
     }
 
     @Override
+    @Transactional
     public void deleteAllReservation(UUID userId) {
         log.info("::::: Initiating the deletion of all user reservations :::::");
         reservationRepository.deleteAllByUserId(userId);
