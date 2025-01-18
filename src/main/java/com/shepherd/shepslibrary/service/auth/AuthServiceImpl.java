@@ -35,7 +35,6 @@ public class AuthServiceImpl implements AuthService{
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
     private final MailNotificationService notificationService;
-    private static final int MAIL_EXPIRATION_TIME_IN_MIN = 30;
 
     @Override
     public RegisterUserResponse registerUser(RegisterUserRequest registerUserRequest) {
@@ -51,7 +50,7 @@ public class AuthServiceImpl implements AuthService{
         user.setGender(registerUserRequest.getGender());
         user.setRole(Role.MEMBER);
         User savedUser = userRepository.save(user);
-        String token = tokenService.saveToken(savedUser, TokenType.EMAIL_CONFIRMATION, MAIL_EXPIRATION_TIME_IN_MIN);
+        String token = tokenService.generateToken(savedUser, TokenType.EMAIL_CONFIRMATION);
         notificationService.sendVerificationMail(savedUser, token);
         log.info("::::: User with the first name {} registered successfully :::::", savedUser.getFirstName());
         return getRegisterUserResponse(savedUser);
@@ -95,7 +94,7 @@ public class AuthServiceImpl implements AuthService{
             user.setEnabled(true);
             User verifiedUser = userRepository.save(user);
             tokenService.deleteToken(shepsToken);
-            JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(verifiedUser);
+            JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(verifiedUser);
             return buildEmailConfirmationResponse(verifiedUser, jwtTokenResponse);
         }
         throw new UserAlreadyEnabledException("User is already verified");
@@ -121,8 +120,8 @@ public class AuthServiceImpl implements AuthService{
         User user = getUserByEmail(userEmail);
         if(!user.isEnabled())
             throw new ShepsLibraryException("Verify your email address before you proceed");
-        tokenService.deleteAllTokenByUserEmail(userEmail, TokenType.JWT);
-        JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(user);
+        tokenService.deleteAllTokenByUserAndType(userEmail, TokenType.JWT);
+        JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(user);
         return LoginResponse.builder()
                 .message("User logged in successfully")
                 .accessToken(jwtTokenResponse.getAccessToken())
@@ -144,8 +143,8 @@ public class AuthServiceImpl implements AuthService{
         checkIfTwoPasswordAreTheSame(changePasswordRequest.getNewPassword(), changePasswordRequest.getConfirmPassword());
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         User savedUser = userRepository.save(user);
-        tokenService.deleteAllTokenByUserEmail(savedUser.getEmail(), TokenType.JWT);
-        JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(savedUser);
+        tokenService.deleteAllTokenByUserAndType(savedUser.getEmail(), TokenType.JWT);
+        JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(savedUser);
         return ChangePasswordResponse.builder()
                 .message("Password changed successfully")
                 .accessToken(jwtTokenResponse.getAccessToken())
@@ -174,8 +173,8 @@ public class AuthServiceImpl implements AuthService{
         return userRepository.findByEmail(passwordResetRequest.getEmail())
                 .filter(User::isEnabled)
                 .map(user -> {
-                    tokenService.deleteAllTokenByUserEmail(user.getEmail(), TokenType.RESET_PASSWORD);
-                    String token = tokenService.saveToken(user, TokenType.RESET_PASSWORD, MAIL_EXPIRATION_TIME_IN_MIN);
+                    tokenService.deleteAllTokenByUserAndType(user.getEmail(), TokenType.RESET_PASSWORD);
+                    String token = tokenService.generateToken(user, TokenType.RESET_PASSWORD);
                     notificationService.sendResetPasswordMail(user, token);
                     return requestPasswordResetMessage();
                 }).orElse(requestPasswordResetMessage());
@@ -196,7 +195,7 @@ public class AuthServiceImpl implements AuthService{
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
         tokenService.deleteToken(shepsToken);
         User savedUser = userRepository.save(user);
-        JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(savedUser);
+        JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(savedUser);
         return ResetPasswordResponse.builder()
                 .message("Password reset successful")
                 .accessToken(jwtTokenResponse.getAccessToken())

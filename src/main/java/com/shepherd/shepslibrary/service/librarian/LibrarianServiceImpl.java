@@ -31,7 +31,7 @@ public class LibrarianServiceImpl implements LibrarianService{
             user.setPassword(passwordEncoder.encode(request.getPassword()));
             User verifiedUser = userRepository.save(user);
             tokenService.deleteToken(shepsToken);
-            JwtTokenResponse jwtTokenResponse = tokenService.buildAndSaveJwtToken(verifiedUser);
+            JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(verifiedUser);
             return CreatePasswordResponse.builder()
                     .message("Librarian password created successfully")
                     .accessToken(jwtTokenResponse.getAccessToken())

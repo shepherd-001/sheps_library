@@ -31,7 +31,6 @@ public class AdminServiceImpl implements AdminService {
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final MailNotificationService mailNotificationService;
-    private static final int MAIL_EXPIRATION_TIME_IN_MIN = 10080;
 
     @PostConstruct
     public void createAdmin() {
@@ -58,7 +57,7 @@ public class AdminServiceImpl implements AdminService {
 
         User user = createUser(request);
 
-        String token = tokenService.saveToken(user, TokenType.LIBRARIAN_INVITATION, MAIL_EXPIRATION_TIME_IN_MIN);
+        String token = tokenService.generateToken(user, TokenType.LIBRARIAN_INVITATION);
         mailNotificationService.sendLibrarianInvitation(user, token);
         log.info("::::: Librarian invited successfully :::::");
         return InviteLibrarianResponse.builder()

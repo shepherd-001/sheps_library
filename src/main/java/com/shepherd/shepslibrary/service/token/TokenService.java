@@ -7,9 +7,9 @@ import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 
 public interface TokenService {
-    String saveToken(User user, TokenType tokenType, int expirationTimeInMinutes);
-    JwtTokenResponse buildAndSaveJwtToken(User user);
+    String generateToken(User user, TokenType tokenType);
+    JwtTokenResponse generateJwtTokens(User user);
     ShepsToken validateToken(String token, TokenType tokenType);
     void deleteToken(ShepsToken shepsToken);
-    void deleteAllTokenByUserEmail(String userEmail, TokenType tokenType);
+    void deleteAllTokenByUserAndType(String userEmail, TokenType tokenType);
 }

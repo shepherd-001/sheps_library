@@ -58,6 +58,10 @@ zero_bounce_api_key: ${ZEROBOUNCE_API_KEY}
 zero_bounce_url: ${ZEROBOUNCE_URL}
 have_i_been_pawned_url: ${HAVE_I_BEEN_PAWNED_URL}
 
+reset_password_expiration: ${RESET_PASSWORD_EXPIRATION}
+email_confirmation_expiration: ${EMAIL_CONFIRMATION_EXPIRATION}
+librarian_invite_expiration: ${LIBRARIAN_INVITATION_EXPIRATION}
+
 jwt_secret_key: ${JWT_SECRET_KEY}
 jwt_access_expiration: ${JWT_EXPIRATION}
 jwt_refresh_expiration: ${JWT_REFRESH_EXPIRATION}
