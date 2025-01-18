@@ -55,7 +55,7 @@ public class TokenServiceImpl implements TokenService{
                 .token(token)
                 .isExpired(false)
                 .isRevoked(false)
-                .expirationTime(LocalDateTime.now().plusMinutes(expirationTimeInSeconds))
+                .expirationTime(LocalDateTime.now().plusSeconds(expirationTimeInSeconds))
                 .build();
 
         deleteAllTokenByUserAndType(user.getEmail(), tokenType);

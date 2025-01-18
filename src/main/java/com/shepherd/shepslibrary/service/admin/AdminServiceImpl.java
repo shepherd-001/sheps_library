@@ -33,7 +33,7 @@ public class AdminServiceImpl implements AdminService {
     private final MailNotificationService mailNotificationService;
 
     @PostConstruct
-    public void createAdmin() {
+    private void createAdmin() {
         if(!userRepository.existsByRole(Role.ADMIN)){
             User user = new User();
             user.setFirstName("Admin");

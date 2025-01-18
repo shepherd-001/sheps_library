@@ -43,10 +43,11 @@ public class LogoutService implements LogoutHandler {
     private void invalidateUserTokens(ShepsToken shepsToken) {
         log.info("::::: Initiating user jwt tokens invalidation :::::");
         User user = shepsToken.getUser();
+
         var tokens = tokenRepository.findAllByUserIdAndTokenType(user.getId(), TokenType.JWT);
         if (!tokens.isEmpty()) {
             tokenRepository.deleteAll(tokens);
-            log.info("::::: Invalidated {} JWT tokens :::::", tokens.size());
+            log.info("::::: Invalidated {} JWT token(s) :::::", tokens.size());
         } else {
             log.warn("::::: No JWT tokens found for invalidation :::::");
         }
