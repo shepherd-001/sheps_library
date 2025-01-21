@@ -19,4 +19,6 @@ public class InviteLibrarianResponse {
     private Gender gender;
     private boolean isEnabled;
     private boolean isRevoked;
+    private String accessToken;
+    private String refreshToken;
 }

@@ -26,7 +26,7 @@ public class AdminController {
     @PostMapping("/resend-librarian-invite")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Object> resendLibrarian(@RequestParam String inviteeEmail){
-        return ResponseEntity.ok().body(BaseResponse
-                        .buildResponse(adminService.resendInvite(inviteeEmail)));
+        return ResponseEntity.ok(BaseResponse
+                .buildResponse(adminService.resendInvite(inviteeEmail)));
     }
 }

@@ -1,4 +1,4 @@
-package com.shepherd.shepslibrary.service.email;
+package com.shepherd.shepslibrary.service.notification;
 
 import com.shepherd.shepslibrary.exceptions.MailSenderException;
 import jakarta.mail.MessagingException;

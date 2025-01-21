@@ -1,19 +1,16 @@
 package com.shepherd.shepslibrary.service.admin;
 
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
-import com.shepherd.shepslibrary.data.dto.request.PasswordResetRequest;
 import com.shepherd.shepslibrary.data.dto.response.InviteLibrarianResponse;
-import com.shepherd.shepslibrary.data.dto.response.RequestResetPasswordResponse;
 import com.shepherd.shepslibrary.data.model.Gender;
 import com.shepherd.shepslibrary.data.model.Role;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
-import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
-import com.shepherd.shepslibrary.service.email.MailNotificationService;
+import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
@@ -93,7 +90,7 @@ public class AdminServiceImpl implements AdminService {
         return userRepository.findByEmail(inviteeEmail)
                 .map(this::handleResendInvite)
                 .orElseGet(()-> {
-                    log.info("::::: User not found");
+                    log.info("::::: User not found :::::");
                     return getResendLibrarianInviteResponse();
                 });
     }
@@ -101,7 +98,7 @@ public class AdminServiceImpl implements AdminService {
     private InviteLibrarianResponse handleResendInvite(User user) {
         if(user.isEnabled()){
             log.error("::::: User with email {} is already enabled :::::", user.getEmail());
-            throw new UserAlreadyEnabledException("User is already enabled. Resend invitation not applicable");
+            throw new UserAlreadyEnabledException("User is already verified. Resend invitation not applicable");
         }
         if(user.getRole() != Role.LIBRARIAN){
             log.warn("::::: User does not have the role LIBRARIAN");
@@ -116,7 +113,7 @@ public class AdminServiceImpl implements AdminService {
 
     private InviteLibrarianResponse getResendLibrarianInviteResponse(){
         return InviteLibrarianResponse.builder()
-                .message("LLibrarian invite has been resent successfully")
+                .message("Librarian invite has been resent successfully")
                 .build();
     }
 }

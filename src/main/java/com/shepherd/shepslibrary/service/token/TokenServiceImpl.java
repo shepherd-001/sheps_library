@@ -90,7 +90,7 @@ public class TokenServiceImpl implements TokenService{
         validateUserEmail(token, shepsToken.getUser().getEmail());
         if (shepsToken.getExpirationTime() == null ||
                 shepsToken.getExpirationTime().isBefore(LocalDateTime.now())) {
-            log.info("::::: Token is expired :::::");
+            log.info("::::: Token is expired or expiration time is null :::::");
             throw new ShepsTokenException("Token is expired");
         }
         log.info("::::: Token validation successful :::::");
