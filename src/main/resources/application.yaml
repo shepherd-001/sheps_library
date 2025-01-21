@@ -44,6 +44,11 @@ spring:
           writetimeout: 10000
 #        debug: true
 
+executor:
+  corePoolSize: ${CORE_POOL_SIZE}
+  maxPoolSize: ${MAX_POOL_SIZE}
+  keepAliveTime: ${KEEP_ALIVE_TIME}
+
 admin_email: ${ADMIN_EMAIL}
 admin_password: ${ADMIN_PASSWORD}
 
