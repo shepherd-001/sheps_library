@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.service.notification;
 
+import com.shepherd.shepslibrary.data.model.Reservation;
 import com.shepherd.shepslibrary.data.model.Transaction;
 import com.shepherd.shepslibrary.data.model.User;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +59,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 "invitationLink", invitationLink,
                 "firstName", user.getFirstName()
         );
-        sendEmail("librarian_invitation", "Librarian Invitation", user, variables);
+        sendEmail("librarian-invitation", "Librarian Invitation", user, variables);
     }
 
     @Override
@@ -79,6 +80,11 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 "borrowedDate", borrowedDate,
                 "dueDate", dueDate
         );
-        sendEmail("overdue_book", "Overdue Book Notification", transaction.getUser(), variables);
+        sendEmail("overdue-book", "Overdue Book Notification", transaction.getUser(), variables);
+    }
+
+    @Override
+    public void sendAvailableReservationMail(Reservation reservation) {
+
     }
 }

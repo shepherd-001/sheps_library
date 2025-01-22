@@ -11,13 +11,16 @@ import com.shepherd.shepslibrary.exceptions.ReservationException;
 import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.service.book.BookService;
+import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.utils.AppUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -32,6 +35,7 @@ import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
 public class ReservationServiceImpl implements ReservationService{
     private final BookService bookService;
     private final ReservationRepository reservationRepository;
+    private final MailNotificationService mailNotificationService;
 
     @Override
     public ReserveBookResponse reserveBook(UUID bookId) {
@@ -42,9 +46,9 @@ public class ReservationServiceImpl implements ReservationService{
 
         checkIfBookIsAvailable(book);
         Reservation reservation = new Reservation();
-        reservation.setBookId(bookId);
+        reservation.setBook(book);
+        reservation.setUser(user);
         reservation.setReservationDate(LocalDate.now());
-        reservation.setUserId(user.getId());
         reservation.setCreatedBy(user.getEmail());
 
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -67,8 +71,8 @@ public class ReservationServiceImpl implements ReservationService{
         return ReserveBookResponse.builder()
                 .message("Book reserved successfully")
                 .reservationId(reservation.getId())
-                .userId(reservation.getUserId())
-                .bookId(reservation.getBookId())
+                .userId(reservation.getUser().getId())
+                .bookId(reservation.getBook().getId())
                 .isReserved(true)
                 .build();
     }
@@ -83,9 +87,9 @@ public class ReservationServiceImpl implements ReservationService{
 
     private ReservationResponse mapToReservationResponse(Reservation reservation){
         return ReservationResponse.builder()
-                .userId(reservation.getUserId())
+                .userId(reservation.getUser().getId())
                 .reservationId(reservation.getId())
-                .bookId(reservation.getBookId())
+                .bookId(reservation.getBook().getId())
                 .reservationDate(reservation.getReservationDate())
                 .build();
     }
@@ -137,4 +141,25 @@ public class ReservationServiceImpl implements ReservationService{
         reservationRepository.deleteAllByUserId(userId);
         log.info("::::: Deleted all user reservations :::::");
     }
+
+    @Scheduled(cron = "0 0 12 * * ?")
+    public void sendBookOverdueNotifications(){
+        Pageable pageable = PageRequest.of(0, 100);
+        try{
+            while (true){
+            Page<Reservation> availableReservationsPage = reservationRepository.findAllAvailableReservations(pageable);
+            if(availableReservationsPage.isEmpty()){
+                log.info("::::: No reservation found :::::");
+                break;
+            }
+            availableReservationsPage
+                    .getContent().forEach(mailNotificationService::sendAvailableReservationMail);
+                log.info("::::: Processing transaction page number {} :::::", availableReservationsPage.getNumber());
+                pageable = pageable.next();
+            }
+        }catch (Exception exception){
+            throw new ShepsLibraryException(exception.getMessage());
+        }
+    }
+
 }

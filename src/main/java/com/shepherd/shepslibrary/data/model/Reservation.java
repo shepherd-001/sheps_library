@@ -2,10 +2,10 @@ package com.shepherd.shepslibrary.data.model;
 
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 @AllArgsConstructor
@@ -14,7 +14,9 @@ import java.util.UUID;
 @Getter
 @Setter
 public class Reservation extends BaseModel{
-    private UUID userId;
-    private UUID bookId;
+    @OneToOne
+    private Book book;
+    @OneToOne
+    private User user;
     private LocalDate reservationDate;
 }
