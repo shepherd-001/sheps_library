@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.service.notification;
 
+import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.model.Reservation;
 import com.shepherd.shepslibrary.data.model.Transaction;
 import com.shepherd.shepslibrary.data.model.User;
@@ -24,12 +25,12 @@ public class MailNotificationServiceImpl implements MailNotificationService {
     private final SpringTemplateEngine templateEngine;
     private final ExecutorService executorService;
 
-    private void sendEmail(String templateName, String subject, User user, Map<String, Object> variables) {
+    private void sendEmail(String templateName, String subject, String email, Map<String, Object> variables) {
         Context context = new Context();
         context.setVariables(variables);
         String htmlContent = templateEngine.process(templateName, context);
-        log.info("::::: Mail ready to be sent to {} :::::", user.getEmail());
-        executorService.submit(() -> mailSenderService.sendEmail(user.getEmail(), subject, htmlContent));
+        log.info("::::: Mail ready to be sent to {} :::::", email);
+        executorService.submit(() -> mailSenderService.sendEmail(email, subject, htmlContent));
     }
 
     @Override
@@ -39,7 +40,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 "firstName", user.getFirstName(),
                 "confirmationLink", verificationLink
         );
-        sendEmail("email-confirmation", "Confirm Your Email Address", user, variables);
+        sendEmail("email-confirmation", "Confirm Your Email Address", user.getEmail(), variables);
     }
 
     @Override
@@ -49,7 +50,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 "firstName", user.getFirstName(),
                 "resetPasswordLink", resetPasswordLink
         );
-        sendEmail("reset-password", "Reset Your Password", user, variables);
+        sendEmail("reset-password", "Reset Your Password", user.getEmail(), variables);
     }
 
     @Override
@@ -59,14 +60,17 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 "invitationLink", invitationLink,
                 "firstName", user.getFirstName()
         );
-        sendEmail("librarian-invitation", "Librarian Invitation", user, variables);
+        sendEmail("librarian-invitation", "Librarian Invitation", user.getEmail(), variables);
     }
 
     @Override
     public void sendOverdueBookMail(Transaction transaction) {
-        String firstName = transaction.getUser().getFirstName();
-        String bookTitle = transaction.getBook().getTitle();
-        String bookAuthor = transaction.getBook().getAuthor();
+        User user = transaction.getUser();
+        String firstName = user.getFirstName();
+        String email = user.getEmail();
+        Book book = transaction.getBook();
+        String bookTitle = book.getTitle();
+        String bookAuthor = book.getAuthor();
         LocalDate borrowedDate = transaction.getBorrowDate();
         LocalDate dueDate = transaction.getReturnDate();
 
@@ -80,11 +84,23 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 "borrowedDate", borrowedDate,
                 "dueDate", dueDate
         );
-        sendEmail("overdue-book", "Overdue Book Notification", transaction.getUser(), variables);
+        sendEmail("overdue-book", "Overdue Book Notification", email, variables);
     }
 
     @Override
     public void sendAvailableReservationMail(Reservation reservation) {
+        User user = reservation.getUser();
+        String firstName = user.getFirstName();
+        String email = user.getEmail();
+        Book book = reservation.getBook();
+        String title = book.getTitle();
+        String author = book.getAuthor();
 
+        Map<String, Object> variables = Map.of(
+                "firstName", firstName,
+                "bookTitle", title,
+                "bookAuthor", author
+        );
+        sendEmail("available-reservation", "Available Book Notification", email, variables);
     }
 }

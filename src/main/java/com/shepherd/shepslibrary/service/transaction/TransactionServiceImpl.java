@@ -145,7 +145,8 @@ public class TransactionServiceImpl implements TransactionService{
         return getTransactionPaginatedResponse(transactions);
     }
 
-    @Scheduled(cron = "0 0 9 * * ?")
+    @Override
+//    @Scheduled(cron = "0 0 9 * * ?")
     public void sendBookOverdueNotifications(){
         Pageable pageable = PageRequest.of(0, 100);
         try{

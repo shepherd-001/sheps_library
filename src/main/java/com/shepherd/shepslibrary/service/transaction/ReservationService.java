@@ -13,4 +13,5 @@ public interface ReservationService {
     PaginatedResponse<ReservationResponse> getAllReservations(int pageNumber);
     void deleteReservation(UUID reservationId, UUID userId);
     void deleteAllReservation(UUID userId);
+    void sendAvailableBooksNotification();
 }

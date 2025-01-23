@@ -1,6 +1,8 @@
 package com.shepherd.shepslibrary.data.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
 
@@ -17,6 +19,7 @@ public class Transaction extends BaseModel{
     private User user;
     @ManyToOne
     private Book book;
+    @Enumerated(EnumType.STRING)
     private TransactionType transactionType;
     private LocalDate borrowDate;
     private LocalDate returnDate;

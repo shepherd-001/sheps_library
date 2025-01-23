@@ -142,14 +142,15 @@ public class ReservationServiceImpl implements ReservationService{
         log.info("::::: Deleted all user reservations :::::");
     }
 
-    @Scheduled(cron = "0 0 12 * * ?")
-    public void sendBookOverdueNotifications(){
+    @Override
+//    @Scheduled(cron = "0 0 12 * * ?")
+    public void sendAvailableBooksNotification(){
         Pageable pageable = PageRequest.of(0, 100);
         try{
             while (true){
             Page<Reservation> availableReservationsPage = reservationRepository.findAllAvailableReservations(pageable);
             if(availableReservationsPage.isEmpty()){
-                log.info("::::: No reservation found :::::");
+                log.info("::::: No reservations found :::::");
                 break;
             }
             availableReservationsPage
@@ -161,5 +162,4 @@ public class ReservationServiceImpl implements ReservationService{
             throw new ShepsLibraryException(exception.getMessage());
         }
     }
-
 }
