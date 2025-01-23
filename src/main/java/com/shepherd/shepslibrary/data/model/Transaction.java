@@ -1,9 +1,6 @@
 package com.shepherd.shepslibrary.data.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -14,6 +11,9 @@ import java.time.LocalDate;
 @Builder
 @Getter
 @Setter
+@Table(indexes = {
+        @Index(name = "idx_createdAt", columnList = "createdAt")
+})
 public class Transaction extends BaseModel{
     @ManyToOne
     private User user;

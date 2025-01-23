@@ -12,6 +12,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
+@Table(indexes = {
+        @Index(name = "idx_token", columnList = "token"),
+        @Index(name = "idx_createdAt", columnList = "createdAt")
+})
 public class ShepsToken extends BaseModel{
     @Column(unique = true, columnDefinition = "Text")
     private String token;
