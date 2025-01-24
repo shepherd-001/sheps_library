@@ -11,6 +11,7 @@ import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.service.token.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ public class LibrarianServiceImpl implements LibrarianService{
             user.setEnabled(true);
             user.setPassword(passwordEncoder.encode(request.getPassword()));
             User verifiedUser = userRepository.save(user);
+            updateUserCache(verifiedUser);
             tokenService.deleteToken(shepsToken);
             JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(verifiedUser);
             return CreatePasswordResponse.builder()
@@ -39,5 +41,10 @@ public class LibrarianServiceImpl implements LibrarianService{
                     .build();
         }
         throw new UserAlreadyEnabledException("User already created password");
+    }
+
+    @CachePut(value = "userCache", key = "#user.email")
+    public void updateUserCache(User user) {
+        log.info("::::: Updating cache for user with email: {} :::::", user.getEmail());
     }
 }

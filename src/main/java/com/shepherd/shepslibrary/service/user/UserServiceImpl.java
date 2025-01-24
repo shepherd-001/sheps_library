@@ -3,12 +3,16 @@ package com.shepherd.shepslibrary.service.user;
 import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
 import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 import com.shepherd.shepslibrary.data.model.Role;
+import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.utils.AppUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -28,6 +32,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
+    @Cacheable(value = "userCache", key = "#userId")
     public UserResponse getUserById(UUID userId) {
         log.info("::::: Fetching a user by id :::::");
         return userRepository.findById(userId)
@@ -36,6 +41,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "userCache", key = "'role:' + #role + ':page:' + #pageNumber")
     public PaginatedResponse<UserResponse> getAllUsersByRole(Role role, int pageNumber) {
         log.info("::::: Fetching all users by role :::::");
         Pageable pageable = findAllUsersPageRequest(pageNumber);
@@ -61,6 +67,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "userCache", key = "'status:' + #status + ':page:' + #pageNumber")
     public PaginatedResponse<UserResponse> getAllUsersByStatus(boolean status, int pageNumber) {
         log.info("::::: Fetching all users by status :::::");
         Pageable pageable = findAllUsersPageRequest(pageNumber);

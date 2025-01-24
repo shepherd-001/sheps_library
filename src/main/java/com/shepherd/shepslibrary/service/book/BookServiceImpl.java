@@ -14,6 +14,9 @@ import com.shepherd.shepslibrary.specification.BookSpecification;
 import com.shepherd.shepslibrary.utils.AppUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -73,17 +76,20 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Cacheable(value = "bookCache", key = "#id")
     public BookResponse getBookById(UUID id) {
         log.info("::::: Fetching book by id :::::");
         return mapToBookResponse(fetchBookById(id));
     }
 
     @Override
-    public Book fetchBookById(UUID bookId) {
-        return bookRepository.findById(bookId).orElseThrow
+    public Book fetchBookById(UUID id) {
+        return bookRepository.findById(id).orElseThrow
                 (()-> new ResourceNotFoundException("Book with the provided ID not found"));
     }
+
     @Override
+    @Cacheable(value = "bookCache", key = "#isbn")
     public BookResponse getBookByIsbn(String isbn) {
         log.info("::::: Fetching book by isbn :::::");
         return bookRepository.findByIsbn(isbn)
@@ -102,6 +108,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @CachePut(value = "bookCache", key = "#request.bookId")
     public UpdateBookResponse updateBook(UpdateBookRequest request) {
         Book book = fetchBookById(request.getBookId());
         book.setTitle(request.getTitle().trim());
@@ -145,6 +152,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Cacheable(value = "bookCache", key = "#request.title + ':' + #request.author + ':' + #request.genre + ':' + #request.pageNumber")
     public PaginatedResponse<BookResponse> filterBook(FilterBookRequest request) {
         log.info(":::::  Filtering book :::::");
         Pageable pageable = findAllBooksPageRequest(request.getPageNumber());
@@ -157,6 +165,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @CacheEvict(value = "bookCache", allEntries = true)
     public void deleteBook(UUID id) {
         bookRepository.deleteById(id);
         log.info("::::: Deleted a book by id :::::");

@@ -16,6 +16,8 @@ import com.shepherd.shepslibrary.utils.AppUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -77,6 +79,7 @@ public class ReservationServiceImpl implements ReservationService{
     }
 
     @Override
+    @Cacheable(value = "reservationCache", key = "#reservationId")
     public ReservationResponse getReservationById(UUID reservationId) {
         log.info("::::: Fetching reservation by id :::::");
         return reservationRepository.findById(reservationId)
@@ -94,6 +97,7 @@ public class ReservationServiceImpl implements ReservationService{
     }
 
     @Override
+    @Cacheable(value = "reservationCache", key = "'user:' + #userId + ':page:' + #pageNumber")
     public PaginatedResponse<ReservationResponse> getAllReservationByUserId(UUID userId, int pageNumber) {
         log.info("::::: Fetching all reservations for a user :::::");
         Pageable pageable = buildPageable(pageNumber);
@@ -118,6 +122,7 @@ public class ReservationServiceImpl implements ReservationService{
     }
 
     @Override
+    @Cacheable(value = "reservationCache", key = "'allReservations:page:' + #pageNumber")
     public PaginatedResponse<ReservationResponse> getAllReservations(int pageNumber) {
         log.info("::::: Fetching all reservations :::::");
         Pageable pageable = buildPageable(pageNumber);
@@ -127,6 +132,7 @@ public class ReservationServiceImpl implements ReservationService{
 
     @Override
     @Transactional
+    @CacheEvict(value = "reservationCache", key = "#reservationId")
     public void deleteReservation(UUID reservationId, UUID userId) {
         log.info("::::: Initiating the deletion of a user reservation :::::");
         reservationRepository.deleteByIdAndUserId(reservationId, userId);
@@ -135,6 +141,7 @@ public class ReservationServiceImpl implements ReservationService{
 
     @Override
     @Transactional
+    @CacheEvict(value = "reservationCache", key = "'user:' + #userId")
     public void deleteAllReservation(UUID userId) {
         log.info("::::: Initiating the deletion of all user reservations :::::");
         reservationRepository.deleteAllByUserId(userId);
