@@ -20,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -142,7 +141,7 @@ public class ReservationServiceImpl implements ReservationService{
         log.info("::::: Deleted all user reservations :::::");
     }
 
-    @Override
+//    @Override
 //    @Scheduled(cron = "0 0 12 * * ?")
     public void sendAvailableBooksNotification(){
         Pageable pageable = PageRequest.of(0, 100);
