@@ -14,6 +14,8 @@ import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationServic
 import com.shepherd.shepslibrary.service.token.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -144,6 +146,7 @@ public class AuthServiceImpl implements AuthService{
         checkIfTwoPasswordAreTheSame(changePasswordRequest.getNewPassword(), changePasswordRequest.getConfirmPassword());
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         User savedUser = userRepository.save(user);
+        updateUserCache(savedUser);
         tokenService.deleteAllTokenByUserAndType(savedUser.getEmail(), TokenType.JWT);
         JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(savedUser);
         return ChangePasswordResponse.builder()
@@ -168,10 +171,15 @@ public class AuthServiceImpl implements AuthService{
             throw new BadCredentialsException("Passwords do not match");
     }
 
+    @CachePut(value = "userCache", key = "#user.email")
+    public void updateUserCache(User user) {
+        log.info("::::: Updating cache for user with email: {} :::::", user.getEmail());
+    }
+
     @Override
-    public RequestResetPasswordResponse requestPasswordReset(PasswordResetRequest passwordResetRequest){
+    public RequestResetPasswordResponse requestPasswordReset(PasswordResetRequest request){
         log.info("::::: Initiating request password reset :::::");
-        return userRepository.findByEmail(passwordResetRequest.getEmail())
+        return userRepository.findByEmail(request.getEmail())
                 .filter(User::isEnabled)
                 .map(user -> {
                     String token = tokenService.generateToken(user, TokenType.RESET_PASSWORD);
@@ -195,6 +203,7 @@ public class AuthServiceImpl implements AuthService{
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
         tokenService.deleteToken(shepsToken);
         User savedUser = userRepository.save(user);
+        updateUserCache(savedUser);
         JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(savedUser);
         return ResetPasswordResponse.builder()
                 .message("Password reset successful")

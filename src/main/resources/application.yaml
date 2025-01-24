@@ -55,6 +55,10 @@ executor:
   maxPoolSize: ${MAX_POOL_SIZE}
   keepAliveTime: ${KEEP_ALIVE_TIME}
 
+cache:
+  expiry: ${CACHE_EXPIRY}
+  maximumSize: ${CACHE_MAXIMUM_SIZE}
+
 admin_email: ${ADMIN_EMAIL}
 admin_password: ${ADMIN_PASSWORD}
 
