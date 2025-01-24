@@ -3,6 +3,7 @@ package com.shepherd.shepslibrary.exceptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
@@ -32,6 +33,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ApiError> handleException(UsernameNotFoundException ex){
         log.error("::::: User name not found exception: {} :::::", ex.getMessage());
+        return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiError> handleException(BadCredentialsException ex){
+        log.error("::::: Bad credentials exception: {} :::::", ex.getMessage());
         return new ResponseEntity<>(ApiError.buildErrorResponse(ex.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
