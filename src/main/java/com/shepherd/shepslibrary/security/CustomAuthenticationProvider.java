@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +23,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         String requestEmail = authentication.getPrincipal().toString();
         String requestPassword = authentication.getCredentials().toString();
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(requestEmail);
+        UserDetails userDetails;
+        try {
+            userDetails = userDetailsService.loadUserByUsername(requestEmail);
+        } catch (UsernameNotFoundException e) {
+            throw new BadCredentialsException("Invalid email or password", e);
+        }
 
         if(passwordEncoder.matches(requestPassword, userDetails.getPassword()))
             return new UsernamePasswordAuthenticationToken(
