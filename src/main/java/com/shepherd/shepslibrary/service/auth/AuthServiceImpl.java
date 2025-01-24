@@ -1,6 +1,9 @@
 package com.shepherd.shepslibrary.service.auth;
 
-import com.shepherd.shepslibrary.data.dto.request.*;
+import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
+import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
+import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
+import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
 import com.shepherd.shepslibrary.data.dto.response.*;
 import com.shepherd.shepslibrary.data.model.Role;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
@@ -41,6 +44,8 @@ public class AuthServiceImpl implements AuthService{
     public RegisterUserResponse registerUser(RegisterUserRequest registerUserRequest) {
         String email = registerUserRequest.getEmail().toLowerCase().trim();
         checkIfUserExists(email);
+//        if(registerUserRequest.getGender() == null)
+//            throw new ShepsLibraryException(ValidationMessage.NULL_GENDER);
 //        validateEmail(email);
 //        validatePassword(registerUserRequest.getPassword());
         User user = new User();
@@ -88,8 +93,6 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public EmailConfirmationResponse verifyEmail(String token) {
-        if(token.isBlank())
-            throw new ShepsLibraryException("Token is required");
         ShepsToken shepsToken = tokenService.validateToken(token, TokenType.EMAIL_CONFIRMATION);
         User user = shepsToken.getUser();
         if(!user.isEnabled()){
@@ -144,6 +147,8 @@ public class AuthServiceImpl implements AuthService{
         checkIfCurrentPasswordIsCorrect(changePasswordRequest.getCurrentPassword(), user.getPassword());
         checkIfCurrentAndNewPasswordAreNotTheSame(changePasswordRequest.getCurrentPassword(), changePasswordRequest.getNewPassword());
         checkIfTwoPasswordAreTheSame(changePasswordRequest.getNewPassword(), changePasswordRequest.getConfirmPassword());
+        validatePassword(changePasswordRequest.getNewPassword());
+        validatePassword(changePasswordRequest.getConfirmPassword());
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         User savedUser = userRepository.save(user);
         updateUserCache(savedUser);
@@ -177,9 +182,9 @@ public class AuthServiceImpl implements AuthService{
     }
 
     @Override
-    public RequestResetPasswordResponse requestPasswordReset(PasswordResetRequest request){
+    public RequestResetPasswordResponse requestPasswordReset(String email){
         log.info("::::: Initiating request password reset :::::");
-        return userRepository.findByEmailEqualsIgnoreCase(request.getEmail().trim())
+        return userRepository.findByEmailEqualsIgnoreCase(email.trim())
                 .filter(User::isEnabled)
                 .map(user -> {
                     String token = tokenService.generateToken(user, TokenType.RESET_PASSWORD);
@@ -199,6 +204,7 @@ public class AuthServiceImpl implements AuthService{
     public ResetPasswordResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
         log.info("::::: Initiating password reset :::::");
         ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.getToken(), TokenType.RESET_PASSWORD);
+        validatePassword(resetPasswordRequest.getNewPassword());
         User user = shepsToken.getUser();
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
         tokenService.deleteToken(shepsToken);

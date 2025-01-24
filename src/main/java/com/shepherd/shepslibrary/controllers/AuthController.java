@@ -1,17 +1,26 @@
 package com.shepherd.shepslibrary.controllers;
 
 import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
-import com.shepherd.shepslibrary.data.dto.request.*;
+import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
+import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
+import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
+import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
 import com.shepherd.shepslibrary.service.auth.AuthService;
+import com.shepherd.shepslibrary.utils.RegexPattern;
+import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
+@Validated
 public class AuthController {
     private final AuthService authService;
 
@@ -23,7 +32,9 @@ public class AuthController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<Object> verifyEmail(@RequestParam String token){
+    public ResponseEntity<Object> verifyEmail(@RequestParam
+                                                  @NotBlank(message = ValidationMessage.BLANK_TOKEN)
+                                                  String token){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(authService.verifyEmail(token)));
     }
@@ -41,9 +52,12 @@ public class AuthController {
     }
 
     @PostMapping("/request-password-reset")
-    public ResponseEntity<Object> requestPasswordReset(@Valid @RequestBody PasswordResetRequest passwordResetRequest) {
+    public ResponseEntity<Object> requestPasswordReset(@RequestParam
+                                                           @NotBlank(message = ValidationMessage.BLANK_EMAIL)
+                                                           @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
+                                                           String email) {
         return ResponseEntity.ok(BaseResponse
-                .buildResponse(authService.requestPasswordReset(passwordResetRequest)));
+                .buildResponse(authService.requestPasswordReset(email)));
     }
 
     @PostMapping("/reset-password")

@@ -25,7 +25,7 @@ public class RegisterUserRequest {
     private String lastName;
 
     @NotBlank(message = ValidationMessage.BLANK_EMAIL)
-    @Email(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
+    @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
     private String email;
 
     @NotBlank(message = ValidationMessage.BLANK_PASSWORD)

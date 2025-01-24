@@ -57,6 +57,9 @@ public class AdminServiceImpl implements AdminService {
         if(userRepository.existsByEmailEqualsIgnoreCase(request.getEmail().trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
 
+//        if(request.getGender() == null)
+//            throw new ShepsLibraryException(ValidationMessage.NULL_GENDER);
+
         User user = createUser(request);
 
         String token = tokenService.generateToken(user, TokenType.LIBRARIAN_INVITATION);
