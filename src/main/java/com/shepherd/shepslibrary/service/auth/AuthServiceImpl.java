@@ -96,6 +96,7 @@ public class AuthServiceImpl implements AuthService{
         if(!user.isEnabled()){
             user.setEnabled(true);
             User verifiedUser = userRepository.save(user);
+            updateUserCache(verifiedUser);
             tokenService.deleteToken(shepsToken);
             JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(verifiedUser);
             return buildEmailConfirmationResponse(verifiedUser, jwtTokenResponse);

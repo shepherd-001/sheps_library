@@ -16,6 +16,8 @@ import com.shepherd.shepslibrary.utils.AppUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -48,6 +50,7 @@ public class TransactionServiceImpl implements TransactionService{
         validateReturnDate(request.getReturnDate());
         book.setAvailable(false);
         Book savedBook = bookService.saveBook(book);
+        updateBookCache(savedBook);
 
         Transaction transaction = new Transaction();
         transaction.setTransactionType(TransactionType.BORROW_BOOK);
@@ -78,6 +81,16 @@ public class TransactionServiceImpl implements TransactionService{
         }
     }
 
+    @CachePut(value = "bookCache", key = "#book.id")
+    public void updateBookCache(Book book) {
+        log.info("::::: Updating cache for book :::::");
+    }
+
+    @CachePut(value = "transactionCache", key = "#transaction.id")
+    public void updateTransactionCache(Transaction transaction) {
+        log.info("::::: Updating cache for transaction :::::");
+    }
+
     private TransactionResponse mapToTransactionResponse(Transaction transaction){
         return TransactionResponse.builder()
                 .transactionId(transaction.getId())
@@ -98,12 +111,14 @@ public class TransactionServiceImpl implements TransactionService{
         Transaction transaction = getTransactionById(transactionId);
         Book book = transaction.getBook();
         book.setAvailable(true);
-        bookService.saveBook(book);
+        book = bookService.saveBook(book);
+        updateBookCache(book);
 
         transaction.setTransactionType(TransactionType.RETURN_BOOK);
         transaction.setReturnDate(LocalDate.now());
         transaction.setUpdatedBy(AppUtils.getCurrentUser().getEmail());
         Transaction savedTransaction = transactionRepository.save(transaction);
+        updateTransactionCache(savedTransaction);
         return mapToTransactionResponse(savedTransaction);
     }
 
@@ -113,6 +128,7 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
+    @Cacheable(value = "transactionCache", key = "'user:' + #userId + ':page:' + #pageNumber")
     public PaginatedResponse<TransactionResponse> getAllTransactionByUserId(UUID userId, int pageNumber) {
         log.info("::::: Fetching all transactions by user id :::::");
         Pageable pageable = buildPageable(pageNumber);
