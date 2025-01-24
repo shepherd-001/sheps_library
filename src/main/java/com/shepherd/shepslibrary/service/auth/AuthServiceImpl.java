@@ -58,7 +58,7 @@ public class AuthServiceImpl implements AuthService{
     }
 
     private void checkIfUserExists(String email) {
-        if(userRepository.existsByEmail(email))
+        if(userRepository.existsByEmailEqualsIgnoreCase(email.trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
     }
 
@@ -118,7 +118,7 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public LoginResponse login(LoginRequest loginRequest){
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginRequest.getEmail().toLowerCase().trim(), loginRequest.getPassword()));
+                loginRequest.getEmail().trim(), loginRequest.getPassword()));
         String userEmail = authentication.getName();
         User user = getUserByEmail(userEmail);
         if(!user.isEnabled())
@@ -133,7 +133,7 @@ public class AuthServiceImpl implements AuthService{
     }
 
     private User getUserByEmail(String userEmail) {
-        return userRepository.findByEmail(userEmail)
+        return userRepository.findByEmailEqualsIgnoreCase(userEmail)
                 .orElseThrow(()-> new ResourceNotFoundException("User with the provided email not found"));
     }
 
@@ -179,7 +179,7 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public RequestResetPasswordResponse requestPasswordReset(PasswordResetRequest request){
         log.info("::::: Initiating request password reset :::::");
-        return userRepository.findByEmail(request.getEmail())
+        return userRepository.findByEmailEqualsIgnoreCase(request.getEmail().trim())
                 .filter(User::isEnabled)
                 .map(user -> {
                     String token = tokenService.generateToken(user, TokenType.RESET_PASSWORD);
