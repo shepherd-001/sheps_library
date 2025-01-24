@@ -1,9 +1,6 @@
 package com.shepherd.shepslibrary.data.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -12,6 +9,10 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
+@Table(indexes = {
+        @Index(name = "idx_email", columnList = "email"),
+        @Index(name = "idx_createdAt", columnList = "createdAt")
+})
 public class User extends BaseModel{
     private String firstName;
     private String lastName;

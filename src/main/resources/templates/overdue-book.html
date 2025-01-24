@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overdue Book Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f9f4;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        .email-container {
+            width: 100%;
+            background-color: #f4f9f4;
+            padding: 20px;
+        }
+        .email-content {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .email-header {
+            text-align: center;
+            color: #333;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #e74c3c;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #333;
+            margin-top: 10px;
+        }
+        .intro-text {
+            font-size: 16px;
+            color: #555;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .book-details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .book-details p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #333;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
+        }
+        .footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="email-content">
+        <div class="email-header">
+            <h1>Overdue Book Notification</h1>
+            <p class="greeting">Hello <strong th:text="${firstName}">[User]</strong>,</p>
+        </div>
+
+        <p class="intro-text">
+            We hope this message finds you well. This is a friendly reminder that the book you borrowed from our library has been overdue for {{overdueDays}} day(s). Please find the details of the overdue book below.        </p>
+
+        <div class="book-details">
+            <p><strong>Book Title:</strong> {{bookTitle}}</p>
+            <p><strong>Author:</strong> {{bookAuthor}}</p>
+            <p><strong>Date Borrowed:</strong> {{borrowedDate}}</p>
+            <p><strong>Due Date:</strong> {{dueDate}}</p>
+        </div>
+
+        <p class="intro-text">
+            We kindly request that you return the book at your earliest convenience to avoid further penalties. If you have already returned the book or require assistance, please let us know by replying to this email.
+        </p>
+
+        <div class="footer">
+            <p>If you have any questions, feel free to <a href="mailto:support@library.com">contact us</a>.</p>
+            <p>Thank you for being a valued member of our library.</p>
+            <p>Best regards, <br> The Library Team</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

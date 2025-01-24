@@ -12,10 +12,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
+@Table(indexes = {
+        @Index(name = "idx_token", columnList = "token"),
+        @Index(name = "idx_createdAt", columnList = "createdAt")
+})
 public class ShepsToken extends BaseModel{
-    @Column(unique = true, columnDefinition = "Text")
+    @Column(unique = true, length = 500)
     private String token;
-    @Column(unique = true, columnDefinition = "Text")
+    @Column(length = 500)
     private String refreshToken;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

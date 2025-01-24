@@ -8,7 +8,9 @@ import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
-import com.shepherd.shepslibrary.service.email.MailNotificationService;
+import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
+import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
+import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
@@ -71,6 +73,7 @@ public class AdminServiceImpl implements AdminService {
                 .isRevoked(user.isRevoked())
                 .build();
     }
+
     private User createUser(InviteLibrarianRequest request){
         User user = new User();
         user.setFirstName(request.getFirstName().trim());
@@ -79,5 +82,38 @@ public class AdminServiceImpl implements AdminService {
         user.setGender(request.getGender());
         user.setRole(Role.LIBRARIAN);
         return userRepository.save(user);
+    }
+
+    @Override
+    public InviteLibrarianResponse resendInvite(String inviteeEmail) {
+        log.info("::::: Initiating resend invitation for email: {} :::::", inviteeEmail);
+        return userRepository.findByEmail(inviteeEmail)
+                .map(this::handleResendInvite)
+                .orElseGet(()-> {
+                    log.info("::::: User not found :::::");
+                    return getResendLibrarianInviteResponse();
+                });
+    }
+
+    private InviteLibrarianResponse handleResendInvite(User user) {
+        if(user.isEnabled()){
+            log.error("::::: User with email {} is already enabled :::::", user.getEmail());
+            throw new UserAlreadyEnabledException("User is already verified. Resend invitation not applicable");
+        }
+        if(user.getRole() != Role.LIBRARIAN){
+            log.warn("::::: User does not have the role LIBRARIAN");
+            throw new ShepsLibraryException("User is not a librarian. Resend invitation not applicable.");
+        }
+
+        String token = tokenService.generateToken(user, TokenType.LIBRARIAN_INVITATION);
+        mailNotificationService.sendLibrarianInvitation(user, token);
+        log.info("::::: Invitation successfully resent to {} :::::", user.getEmail());
+        return getResendLibrarianInviteResponse();
+    }
+
+    private InviteLibrarianResponse getResendLibrarianInviteResponse(){
+        return InviteLibrarianResponse.builder()
+                .message("Librarian invite has been resent successfully")
+                .build();
     }
 }

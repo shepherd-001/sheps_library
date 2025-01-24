@@ -9,13 +9,12 @@ import java.time.LocalDateTime;
 
 @Builder
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiError {
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final String message;
     @JsonFormat(pattern = "HH:mm:ss, dd-MM-yyyy")
     private final LocalDateTime timestamp;
     private final boolean status;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final Object error;
 
     public static ApiError buildErrorResponse(String message){

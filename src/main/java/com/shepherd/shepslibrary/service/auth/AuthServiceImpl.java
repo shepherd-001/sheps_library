@@ -8,8 +8,8 @@ import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.exceptions.*;
-import com.shepherd.shepslibrary.service.email.EmailValidationService;
-import com.shepherd.shepslibrary.service.email.MailNotificationService;
+import com.shepherd.shepslibrary.service.notification.EmailValidationService;
+import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -174,7 +174,6 @@ public class AuthServiceImpl implements AuthService{
         return userRepository.findByEmail(passwordResetRequest.getEmail())
                 .filter(User::isEnabled)
                 .map(user -> {
-                    tokenService.deleteAllTokenByUserAndType(user.getEmail(), TokenType.RESET_PASSWORD);
                     String token = tokenService.generateToken(user, TokenType.RESET_PASSWORD);
                     notificationService.sendResetPasswordMail(user, token);
                     return requestPasswordResetMessage();

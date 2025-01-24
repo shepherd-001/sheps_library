@@ -11,11 +11,13 @@ import com.shepherd.shepslibrary.data.repository.TransactionRepository;
 import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.exceptions.TransactionException;
 import com.shepherd.shepslibrary.service.book.BookService;
+import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.utils.AppUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class TransactionServiceImpl implements TransactionService{
     private final TransactionRepository transactionRepository;
     private final BookService bookService;
     private static final int MAX_BORROW_MONTHS = 2;
+    private final MailNotificationService mailNotificationService;
 
     @Override
     @Transactional
@@ -139,5 +142,26 @@ public class TransactionServiceImpl implements TransactionService{
         Pageable pageable = buildPageable(pageNumber);
         Page<Transaction> transactions = transactionRepository.findAll(pageable);
         return getTransactionPaginatedResponse(transactions);
+    }
+
+//    @Override
+//    @Scheduled(cron = "0 0 9 * * ?")
+    public void sendBookOverdueNotifications(){
+        Pageable pageable = PageRequest.of(0, 100);
+        try{
+            while (true){
+                Page<Transaction> overdueTransactionsPage = transactionRepository.findOverdueTransactions(LocalDate.now(), pageable);
+                if (overdueTransactionsPage.isEmpty()) {
+                    log.info("::::: No transaction found :::::");
+                    break;
+                }
+                overdueTransactionsPage
+                        .getContent().forEach(mailNotificationService::sendOverdueBookMail);
+                log.info("::::: Processing transaction page number {} :::::", overdueTransactionsPage.getNumber());
+                pageable = pageable.next();
+            }
+        }catch (Exception exception){
+            throw new ShepsLibraryException(exception.getMessage());
+        }
     }
 }

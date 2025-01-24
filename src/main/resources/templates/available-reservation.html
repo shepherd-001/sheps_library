@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Availability Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f9f4;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        .email-container {
+            width: 100%;
+            padding: 20px;
+        }
+        .email-content {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .email-header {
+            text-align: center;
+            color: #333;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #4CAF50;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #333;
+            margin-top: 10px;
+        }
+        .intro-text {
+            font-size: 16px;
+            color: #555;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .book-details {
+            font-size: 16px;
+            color: #333;
+            margin: 20px 0;
+            line-height: 1.5;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
+        }
+        .footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="email-content">
+        <div class="email-header">
+            <h1>Book Availability Notification</h1>
+        </div>
+
+        <p class="greeting">Dear <strong th:text="${firstName}">[First Name]</strong>,</p>
+
+        <p class="intro-text">
+            We are pleased to inform you that the book you were waiting for is now available at Sheps Library. Here are the details:
+        </p>
+
+        <div class="book-details">
+            <p><strong>Title:</strong> <span th:text="${bookTitle}">[Book Title]</span></p>
+            <p><strong>Author:</strong> <span th:text="${bookAuthor}">[Book Author]</span></p>
+        </div>
+
+        <p class="intro-text">
+            Feel free to visit the library or reserve the book online to ensure it is ready for pickup. We hope you enjoy reading it!
+        </p>
+
+        <div class="footer">
+            <p>If you have any questions, please don't hesitate to <a href="mailto:support@shepslibrary.com">contact us</a>.</p>
+            <p>Happy Reading!<br>The Sheps Library Team</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

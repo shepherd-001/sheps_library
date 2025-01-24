@@ -6,4 +6,5 @@ import com.shepherd.shepslibrary.data.dto.response.InviteLibrarianResponse;
 
 public interface AdminService {
     InviteLibrarianResponse inviteLibrarian(InviteLibrarianRequest request);
+    InviteLibrarianResponse resendInvite(String inviteeEmail);
 }

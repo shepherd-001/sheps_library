@@ -2,10 +2,10 @@ package com.shepherd.shepslibrary.security;
 
 import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
-import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -24,6 +24,7 @@ public class LogoutService implements LogoutHandler {
     private static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
 
     @Override
+    @Transactional
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         log.info("::::: Initiating logout process :::::");
         String authHeader = request.getHeader(AUTHORIZATION);
@@ -42,15 +43,9 @@ public class LogoutService implements LogoutHandler {
 
     private void invalidateUserTokens(ShepsToken shepsToken) {
         log.info("::::: Initiating user jwt tokens invalidation :::::");
-        User user = shepsToken.getUser();
-
-        var tokens = tokenRepository.findAllByUserIdAndTokenType(user.getId(), TokenType.JWT);
-        if (!tokens.isEmpty()) {
-            tokenRepository.deleteAll(tokens);
-            log.info("::::: Invalidated {} JWT token(s) :::::", tokens.size());
-        } else {
-            log.warn("::::: No JWT tokens found for invalidation :::::");
-        }
+        String userEmail = shepsToken.getUser().getEmail();
+        tokenRepository.deleteAllByUserEmailAndTokenType(userEmail, TokenType.JWT);
+        log.info("::::: Tokens invalidated successfully :::::");
         SecurityContextHolder.clearContext();
     }
 }
