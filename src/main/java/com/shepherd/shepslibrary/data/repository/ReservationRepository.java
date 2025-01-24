@@ -17,4 +17,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
            where reservation.book.isAvailable = true
            """)
     Page<Reservation> findAllAvailableReservations(Pageable pageable);
+    boolean existsByUserIdAndBookId(UUID userId, UUID bookId);
 }

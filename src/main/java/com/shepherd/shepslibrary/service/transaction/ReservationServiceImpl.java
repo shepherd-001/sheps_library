@@ -46,6 +46,10 @@ public class ReservationServiceImpl implements ReservationService{
         Book book = bookService.fetchBookById(bookId);
 
         checkIfBookIsAvailable(book);
+
+        if (reservationRepository.existsByUserIdAndBookId(user.getId(), bookId))
+            throw new ReservationException("You have already reserved this book");
+
         Reservation reservation = new Reservation();
         reservation.setBook(book);
         reservation.setUser(user);
