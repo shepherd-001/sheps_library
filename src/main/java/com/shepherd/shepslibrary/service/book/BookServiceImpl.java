@@ -166,8 +166,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @CacheEvict(value = "bookCache", allEntries = true)
-    public void deleteBook(UUID id) {
-        bookRepository.deleteById(id);
+    public void deleteBook(UUID bookId) {
+        if(!bookRepository.existsById(bookId))
+            throw new ResourceNotFoundException("Book with the provided ID not found");
+        bookRepository.deleteById(bookId);
         log.info("::::: Deleted a book by id :::::");
     }
 

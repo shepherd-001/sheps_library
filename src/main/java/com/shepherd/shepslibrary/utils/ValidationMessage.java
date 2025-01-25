@@ -36,6 +36,7 @@ public final class ValidationMessage {
 
 
     public static final String NULL_PAGE_NUMBER = "Page number is required";
+    public static final String INVALID_PAGE_NUMBER = "Page number must be a positive integer";
 
     private ValidationMessage() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");

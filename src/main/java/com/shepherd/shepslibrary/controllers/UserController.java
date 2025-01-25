@@ -3,8 +3,10 @@ package com.shepherd.shepslibrary.controllers;
 import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
 import com.shepherd.shepslibrary.data.model.Role;
 import com.shepherd.shepslibrary.service.user.UserService;
+import com.shepherd.shepslibrary.utils.RegexPattern;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,23 +21,18 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
-@Validated
 public class UserController {
     private final UserService userService;
 
     @GetMapping("/get/id")
-    public ResponseEntity<Object> getUserById(@RequestParam
-                                                  @NotNull(message = ValidationMessage.NULL_USER_ID)
-                                                  UUID userId) {
+    public ResponseEntity<Object> getUserById(@RequestParam UUID userId) {
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(userService.getUserById(userId)));
     }
 
     @GetMapping("/get/all-by-role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> getAllUsersByRole(@RequestParam
-                                                        @NotNull(message = ValidationMessage.NULL_USER_ROLE)
-                                                        Role role,
+    public ResponseEntity<Object> getAllUsersByRole(@RequestParam Role role,
                                                     @RequestParam(defaultValue = "0") int pageNumber) {
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(userService.getAllUsersByRole(role, pageNumber)));
@@ -43,10 +40,9 @@ public class UserController {
 
     @GetMapping("/get/all-by-status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> getAllUsersByStatus(@RequestParam
-                                                          @NotNull(message = ValidationMessage.NULL_USER_STATUS)
-                                                          Boolean status,
-                                                      @RequestParam(defaultValue = "0") int pageNumber) {
+    public ResponseEntity<Object> getAllUsersByStatus(@RequestParam boolean status,
+                                                      @RequestParam(defaultValue = "0")
+                                                      int pageNumber) {
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(userService.getAllUsersByStatus(status, pageNumber)));
     }

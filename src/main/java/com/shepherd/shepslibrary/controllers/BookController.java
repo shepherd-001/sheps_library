@@ -35,9 +35,7 @@ public class BookController {
     }
 
     @GetMapping("/get-by-id/{bookId}")
-    public ResponseEntity<Object> getBookById(@PathVariable
-                                                  @NotNull(message = ValidationMessage.NULL_BOOK_ID)
-                                                  UUID bookId){
+    public ResponseEntity<Object> getBookById(@PathVariable UUID bookId){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(bookService.getBookById(bookId)));
     }
@@ -60,7 +58,8 @@ public class BookController {
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<Object> getAllBooks(@RequestParam(defaultValue = "0") int pageNumber){
+    public ResponseEntity<Object> getAllBooks(@RequestParam(defaultValue = "0")
+                                                  int pageNumber){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(bookService.getAllBooks(pageNumber)));
     }
@@ -73,9 +72,7 @@ public class BookController {
 
     @DeleteMapping("/delete/{bookId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> deleteBook(@PathVariable
-                                                 @NotNull(message = ValidationMessage.NULL_BOOK_ID)
-                                                 UUID bookId){
+    public ResponseEntity<Object> deleteBook(@PathVariable UUID bookId){
         bookService.deleteBook(bookId);
         return ResponseEntity.ok(BaseResponse.buildResponse("Book deleted successfully"));
     }

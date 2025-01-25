@@ -3,9 +3,11 @@ package com.shepherd.shepslibrary.controllers;
 import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
 import com.shepherd.shepslibrary.service.transaction.TransactionService;
+import com.shepherd.shepslibrary.utils.RegexPattern;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,7 +19,6 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/transaction")
-@Validated
 public class TransactionController {
     private final TransactionService transactionService;
 
@@ -30,18 +31,13 @@ public class TransactionController {
 
     @PreAuthorize("hasRole('MEMBER')")
     @PutMapping("/return-book")
-    public ResponseEntity<Object> returnBook(@RequestParam
-                                                 @NotNull(message = ValidationMessage.NULL_TRANSACTION_ID)
-                                                 UUID transactionId){
+    public ResponseEntity<Object> returnBook(@RequestParam UUID transactionId){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(transactionService.returnBook(transactionId)));
     }
 
     @GetMapping("/get/all/{userId}")
-    public ResponseEntity<Object> getAllTransactions(@PathVariable
-                                                         @NotNull(message = ValidationMessage.NULL_USER_ID)
-                                                         UUID userId,
-                                                     @RequestParam(defaultValue = "0") int pageNumber){
+    public ResponseEntity<Object> getAllTransactions(@PathVariable UUID userId, @RequestParam(defaultValue = "0") int pageNumber){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(transactionService.getAllTransactionByUserId(userId, pageNumber)));
     }

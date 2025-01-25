@@ -18,4 +18,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
            """)
     Page<Reservation> findAllAvailableReservations(Pageable pageable);
     boolean existsByUserIdAndBookId(UUID userId, UUID bookId);
+    boolean existsByIdAndUserId(UUID reservationId, UUID userId);
 }
