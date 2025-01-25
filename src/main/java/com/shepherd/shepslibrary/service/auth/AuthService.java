@@ -1,6 +1,9 @@
 package com.shepherd.shepslibrary.service.auth;
 
-import com.shepherd.shepslibrary.data.dto.request.*;
+import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
+import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
+import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
+import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
 import com.shepherd.shepslibrary.data.dto.response.*;
 
 public interface AuthService {
@@ -8,6 +11,6 @@ public interface AuthService {
     EmailConfirmationResponse verifyEmail(String token);
     LoginResponse login(LoginRequest loginRequest);
     ChangePasswordResponse changePassword(ChangePasswordRequest changePasswordRequest);
-    RequestResetPasswordResponse requestPasswordReset(PasswordResetRequest passwordResetRequest);
+    RequestResetPasswordResponse requestPasswordReset(String email);
     ResetPasswordResponse resetPassword(ResetPasswordRequest resetPasswordRequest);
 }

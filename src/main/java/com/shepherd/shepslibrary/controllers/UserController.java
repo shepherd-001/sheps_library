@@ -3,9 +3,14 @@ package com.shepherd.shepslibrary.controllers;
 import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
 import com.shepherd.shepslibrary.data.model.Role;
 import com.shepherd.shepslibrary.service.user.UserService;
+import com.shepherd.shepslibrary.utils.RegexPattern;
+import com.shepherd.shepslibrary.utils.ValidationMessage;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,14 +32,17 @@ public class UserController {
 
     @GetMapping("/get/all-by-role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> getAllUsersByRole(@RequestParam Role role, @RequestParam int pageNumber) {
+    public ResponseEntity<Object> getAllUsersByRole(@RequestParam Role role,
+                                                    @RequestParam(defaultValue = "0") int pageNumber) {
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(userService.getAllUsersByRole(role, pageNumber)));
     }
 
     @GetMapping("/get/all-by-status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> getAllUsersByStatus(@RequestParam boolean status, @RequestParam int pageNumber) {
+    public ResponseEntity<Object> getAllUsersByStatus(@RequestParam boolean status,
+                                                      @RequestParam(defaultValue = "0")
+                                                      int pageNumber) {
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(userService.getAllUsersByStatus(status, pageNumber)));
     }

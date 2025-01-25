@@ -1,5 +1,7 @@
 package com.shepherd.shepslibrary.exceptions;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,9 +12,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestControllerAdvice
 @Slf4j
@@ -51,13 +50,27 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
-            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
-            log.error("::::: Method argument not valid exception: {} :::::", ex.getMessage());
-        }
-        return new ResponseEntity<>(ApiError.buildErrorResponse(errors), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ApiError> handleException(MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(FieldError::getDefaultMessage)
+                .orElse("Field validation error");
+
+        log.error("::::: Method argument not valid exception: {} :::::", ex.getMessage());
+        return new ResponseEntity<>(ApiError.buildErrorResponse(errorMessage), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiError> handleException(ConstraintViolationException ex) {
+        String errorMessage = ex.getConstraintViolations()
+                .stream()
+                .findFirst()
+                .map(ConstraintViolation::getMessage)
+                .orElse("Field validation error");
+
+        log.error("::::: Constraint violation exception: {} :::::", ex.getMessage());
+        return new ResponseEntity<>(ApiError.buildErrorResponse(errorMessage), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UnsupportedOperationException.class)

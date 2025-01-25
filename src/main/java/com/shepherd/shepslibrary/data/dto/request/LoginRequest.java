@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 public class LoginRequest {
     @NotBlank(message = ValidationMessage.BLANK_EMAIL)
-    @Email(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
+    @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
     private String email;
     @NotBlank(message = ValidationMessage.BLANK_PASSWORD)
     @Pattern(regexp = RegexPattern.PASSWORD, message = ValidationMessage.INVALID_PASSWORD)

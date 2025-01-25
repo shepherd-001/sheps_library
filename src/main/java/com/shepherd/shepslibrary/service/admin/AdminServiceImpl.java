@@ -54,8 +54,11 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public InviteLibrarianResponse inviteLibrarian(InviteLibrarianRequest request) {
-        if(userRepository.existsByEmail(request.getEmail()))
+        if(userRepository.existsByEmailEqualsIgnoreCase(request.getEmail().trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
+
+//        if(request.getGender() == null)
+//            throw new ShepsLibraryException(ValidationMessage.NULL_GENDER);
 
         User user = createUser(request);
 
@@ -87,7 +90,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public InviteLibrarianResponse resendInvite(String inviteeEmail) {
         log.info("::::: Initiating resend invitation for email: {} :::::", inviteeEmail);
-        return userRepository.findByEmail(inviteeEmail)
+        return userRepository.findByEmailEqualsIgnoreCase(inviteeEmail.trim())
                 .map(this::handleResendInvite)
                 .orElseGet(()-> {
                     log.info("::::: User not found :::::");

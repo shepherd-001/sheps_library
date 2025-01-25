@@ -3,10 +3,15 @@ package com.shepherd.shepslibrary.controllers;
 import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
 import com.shepherd.shepslibrary.service.transaction.TransactionService;
+import com.shepherd.shepslibrary.utils.RegexPattern;
+import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -32,14 +37,14 @@ public class TransactionController {
     }
 
     @GetMapping("/get/all/{userId}")
-    public ResponseEntity<Object> getAllTransactions(@PathVariable UUID userId, @RequestParam int pageNumber){
+    public ResponseEntity<Object> getAllTransactions(@PathVariable UUID userId, @RequestParam(defaultValue = "0") int pageNumber){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(transactionService.getAllTransactionByUserId(userId, pageNumber)));
     }
 
     @GetMapping("/get/all")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public ResponseEntity<Object> getAllTransactions(@RequestParam int pageNumber){
+    public ResponseEntity<Object> getAllTransactions(@RequestParam(defaultValue = "0") int pageNumber){
         return ResponseEntity.ok(BaseResponse
                 .buildResponse(transactionService.getAllTransactions(pageNumber)));
     }

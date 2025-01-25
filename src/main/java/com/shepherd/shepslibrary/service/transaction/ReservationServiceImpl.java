@@ -138,6 +138,8 @@ public class ReservationServiceImpl implements ReservationService{
     @Transactional
     @CacheEvict(value = "reservationCache", key = "#reservationId")
     public void deleteReservation(UUID reservationId, UUID userId) {
+        if(!reservationRepository.existsByIdAndUserId(reservationId, userId))
+            throw new ResourceNotFoundException("Reservation not found");
         log.info("::::: Initiating the deletion of a user reservation :::::");
         reservationRepository.deleteByIdAndUserId(reservationId, userId);
         log.info("::::: Reservation deleted successfully :::::");
