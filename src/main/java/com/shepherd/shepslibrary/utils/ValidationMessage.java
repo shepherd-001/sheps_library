@@ -13,6 +13,10 @@ public final class ValidationMessage {
             " one uppercase letter, one number, and one special character (e.g., @, #, $, %, ^, &, +, =, !, ...)";
     public static final String INVALID_EMAIL = "Invalid email address";
 
+    public static final String FIRST_NAME_TOO_LONG = "First name is too long";
+    public static final String LAST_NAME_TOO_LONG = "Last name is too long";
+
+
 
     public static final String BLANK_TITLE = "Title is required";
     public static final String BLANK_AUTHOR = "Author's name is required";
