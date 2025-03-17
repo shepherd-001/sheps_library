@@ -148,7 +148,6 @@ public class AuthServiceImpl implements AuthService{
         checkIfCurrentAndNewPasswordAreNotTheSame(changePasswordRequest.getCurrentPassword(), changePasswordRequest.getNewPassword());
         checkIfTwoPasswordAreTheSame(changePasswordRequest.getNewPassword(), changePasswordRequest.getConfirmPassword());
         validatePassword(changePasswordRequest.getNewPassword());
-        validatePassword(changePasswordRequest.getConfirmPassword());
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         User savedUser = userRepository.save(user);
         updateUserCache(savedUser);

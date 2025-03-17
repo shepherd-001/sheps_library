@@ -31,7 +31,7 @@ public class AdminController {
 
     @PostMapping("/resend-librarian-invite")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> resendLibrarian(@RequestParam
+    public ResponseEntity<Object> resendLibrarianInvitation(@RequestParam
                                                       @NotBlank(message = ValidationMessage.BLANK_EMAIL)
                                                       @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
                                                       String inviteeEmail){
