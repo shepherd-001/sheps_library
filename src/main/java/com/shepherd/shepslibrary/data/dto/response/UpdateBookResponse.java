@@ -6,7 +6,6 @@ import lombok.Getter;
 @Builder
 @Getter
 public class UpdateBookResponse {
-    private String message;
     private String title;
     private String author;
     private String genre;

@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
 import com.shepherd.shepslibrary.service.admin.AdminService;
 import com.shepherd.shepslibrary.utils.RegexPattern;
@@ -25,8 +24,7 @@ public class AdminController {
     @PostMapping("/invite-librarian")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Object> inviteLibrarian(@Valid @RequestBody InviteLibrarianRequest request){
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                BaseResponse.buildResponse(adminService.inviteLibrarian(request)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminService.inviteLibrarian(request));
     }
 
     @PostMapping("/resend-librarian-invite")
@@ -35,7 +33,6 @@ public class AdminController {
                                                       @NotBlank(message = ValidationMessage.BLANK_EMAIL)
                                                       @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
                                                       String inviteeEmail){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(adminService.resendInvite(inviteeEmail)));
+        return ResponseEntity.ok(adminService.resendInvite(inviteeEmail));
     }
 }

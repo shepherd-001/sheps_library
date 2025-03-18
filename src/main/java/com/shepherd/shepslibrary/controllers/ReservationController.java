@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
 import com.shepherd.shepslibrary.service.transaction.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,43 +17,37 @@ public class ReservationController {
     @PreAuthorize("hasRole('MEMBER')")
     @PostMapping("/create")
     public ResponseEntity<Object> reserveBook(@RequestParam UUID bookId){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(reservationService.reserveBook(bookId)));
+        return ResponseEntity.ok(reservationService.reserveBook(bookId));
     }
 
     @PreAuthorize("hasRole('MEMBER')")
     @GetMapping("/get")
     public ResponseEntity<Object> getReservationById(@RequestParam UUID reservationId){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(reservationService.getReservationById(reservationId)));
+        return ResponseEntity.ok(reservationService.getReservationById(reservationId));
     }
 
     @PreAuthorize("hasRole('MEMBER')")
     @GetMapping("/get-all-by-user")
     public ResponseEntity<Object> getAllReservationsByUserId(@RequestParam UUID userId,
                                                              @RequestParam(defaultValue = "0") int pageNumber){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(reservationService.getAllReservationByUserId(userId, pageNumber)));
+        return ResponseEntity.ok(reservationService.getAllReservationByUserId(userId, pageNumber));
     }
 
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     @GetMapping("/get-all")
     public ResponseEntity<Object> getAllReservations(@RequestParam(defaultValue = "0") int pageNumber){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(reservationService.getAllReservations(pageNumber)));
+        return ResponseEntity.ok(reservationService.getAllReservations(pageNumber));
     }
 
     @DeleteMapping("/delete/{reservationId}/{userId}")
     @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<Object> deleteReservation(@PathVariable UUID reservationId, @PathVariable UUID userId){
-        reservationService.deleteReservation(reservationId, userId);
-        return ResponseEntity.ok(BaseResponse.buildResponse("Reservation deleted successfully"));
+        return ResponseEntity.ok(reservationService.deleteReservation(reservationId, userId));
     }
 
     @DeleteMapping("/delete/all/{userId}")
     @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<Object> deleteAllReservations(@PathVariable UUID userId){
-        reservationService.deleteAllReservation(userId);
-        return ResponseEntity.ok(BaseResponse.buildResponse("Successfully deleted all reservations"));
+        return ResponseEntity.ok(reservationService.deleteAllReservation(userId));
     }
 }

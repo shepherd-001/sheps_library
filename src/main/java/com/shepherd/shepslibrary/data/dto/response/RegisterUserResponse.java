@@ -9,7 +9,6 @@ import java.util.UUID;
 @Builder
 @Getter
 public class RegisterUserResponse {
-    private String message;
     private UUID userId;
     private String firstName;
     private String lastName;

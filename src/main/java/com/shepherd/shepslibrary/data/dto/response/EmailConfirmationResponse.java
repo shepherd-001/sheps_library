@@ -6,7 +6,6 @@ import lombok.Getter;
 @Builder
 @Getter
 public class EmailConfirmationResponse {
-    private String message;
     private final String firstName;
     private final String lastName;
     private final String email;

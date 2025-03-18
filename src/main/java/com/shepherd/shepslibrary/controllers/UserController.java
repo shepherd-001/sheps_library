@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
 import com.shepherd.shepslibrary.data.model.Role;
 import com.shepherd.shepslibrary.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +20,14 @@ public class UserController {
 
     @GetMapping("/get/id")
     public ResponseEntity<Object> getUserById(@RequestParam UUID userId) {
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(userService.getUserById(userId)));
+        return ResponseEntity.ok(userService.getUserById(userId));
     }
 
     @GetMapping("/get/all-by-role")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Object> getAllUsersByRole(@RequestParam Role role,
                                                     @RequestParam(defaultValue = "0") int pageNumber) {
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(userService.getAllUsersByRole(role, pageNumber)));
+        return ResponseEntity.ok(userService.getAllUsersByRole(role, pageNumber));
     }
 
     @GetMapping("/get/all-by-status")
@@ -38,7 +35,6 @@ public class UserController {
     public ResponseEntity<Object> getAllUsersByStatus(@RequestParam boolean status,
                                                       @RequestParam(defaultValue = "0")
                                                       int pageNumber) {
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(userService.getAllUsersByStatus(status, pageNumber)));
+        return ResponseEntity.ok(userService.getAllUsersByStatus(status, pageNumber));
     }
 }

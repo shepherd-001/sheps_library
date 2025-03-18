@@ -1,7 +1,8 @@
 package com.shepherd.shepslibrary.service.librarian;
 
+import com.shepherd.shepslibrary.controllers.response.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.CreatePasswordRequest;
-import com.shepherd.shepslibrary.data.dto.response.CreatePasswordResponse;
+import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
 import com.shepherd.shepslibrary.data.dto.response.JwtTokenResponse;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
@@ -24,7 +25,7 @@ public class LibrarianServiceImpl implements LibrarianService{
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public CreatePasswordResponse createPassword(CreatePasswordRequest request) {
+    public BaseResponse<AuthResponse> createPassword(CreatePasswordRequest request) {
         ShepsToken shepsToken = tokenService.validateToken(request.getToken(), TokenType.LIBRARIAN_INVITATION);
         User user = shepsToken.getUser();
         if(!user.isEnabled() && user.getPassword() == null){
@@ -34,11 +35,7 @@ public class LibrarianServiceImpl implements LibrarianService{
             updateUserCache(verifiedUser);
             tokenService.deleteToken(shepsToken);
             JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(verifiedUser);
-            return CreatePasswordResponse.builder()
-                    .message("Librarian password created successfully")
-                    .accessToken(jwtTokenResponse.getAccessToken())
-                    .refreshToken(jwtTokenResponse.getRefreshToken())
-                    .build();
+            return getCreatePasswordResponse(jwtTokenResponse);
         }
         throw new UserAlreadyEnabledException("User already created password");
     }
@@ -46,5 +43,12 @@ public class LibrarianServiceImpl implements LibrarianService{
     @CachePut(value = "userCache", key = "#user.email")
     public void updateUserCache(User user) {
         log.info("::::: Updating cache for user with email: {} :::::", user.getEmail());
+    }
+
+    private static BaseResponse<AuthResponse> getCreatePasswordResponse(JwtTokenResponse jwtTokenResponse){
+        return BaseResponse.buildResponse("Librarian password created successfully", AuthResponse.builder()
+                        .accessToken(jwtTokenResponse.getAccessToken())
+                        .refreshToken(jwtTokenResponse.getRefreshToken())
+                .build());
     }
 }

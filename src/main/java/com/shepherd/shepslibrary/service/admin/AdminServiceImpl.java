@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.service.admin;
 
+import com.shepherd.shepslibrary.controllers.response.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
 import com.shepherd.shepslibrary.data.dto.response.InviteLibrarianResponse;
 import com.shepherd.shepslibrary.data.model.Gender;
@@ -53,28 +54,17 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
-    public InviteLibrarianResponse inviteLibrarian(InviteLibrarianRequest request) {
+    public BaseResponse<InviteLibrarianResponse> inviteLibrarian(InviteLibrarianRequest request) {
         if(userRepository.existsByEmailEqualsIgnoreCase(request.getEmail().trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
-
-//        if(request.getGender() == null)
-//            throw new ShepsLibraryException(ValidationMessage.NULL_GENDER);
 
         User user = createUser(request);
 
         String token = tokenService.generateToken(user, TokenType.LIBRARIAN_INVITATION);
         mailNotificationService.sendLibrarianInvitation(user, token);
         log.info("::::: Librarian invited successfully :::::");
-        return InviteLibrarianResponse.builder()
-                .message("Librarian invited successfully")
-                .librarianId(user.getId())
-                .librarianEmail(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .gender(user.getGender())
-                .isEnabled(user.isEnabled())
-                .isRevoked(user.isRevoked())
-                .build();
+        InviteLibrarianResponse inviteResponse = getInviteResponse(user);
+        return BaseResponse.buildResponse("Librarian invited successfully", inviteResponse);
     }
 
     private User createUser(InviteLibrarianRequest request){
@@ -87,8 +77,20 @@ public class AdminServiceImpl implements AdminService {
         return userRepository.save(user);
     }
 
+    private static InviteLibrarianResponse getInviteResponse(User user){
+        return InviteLibrarianResponse.builder()
+                .librarianId(user.getId())
+                .librarianEmail(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .gender(user.getGender())
+                .isEnabled(user.isEnabled())
+                .isRevoked(user.isRevoked())
+                .build();
+    }
+
     @Override
-    public InviteLibrarianResponse resendInvite(String inviteeEmail) {
+    public BaseResponse<String> resendInvite(String inviteeEmail) {
         log.info("::::: Initiating resend invitation for email: {} :::::", inviteeEmail);
         return userRepository.findByEmailEqualsIgnoreCase(inviteeEmail.trim())
                 .map(this::handleResendInvite)
@@ -98,7 +100,7 @@ public class AdminServiceImpl implements AdminService {
                 });
     }
 
-    private InviteLibrarianResponse handleResendInvite(User user) {
+    private BaseResponse<String> handleResendInvite(User user) {
         if(user.isEnabled()){
             log.error("::::: User with email {} is already enabled :::::", user.getEmail());
             throw new UserAlreadyEnabledException("User is already verified. Resend invitation not applicable");
@@ -114,9 +116,7 @@ public class AdminServiceImpl implements AdminService {
         return getResendLibrarianInviteResponse();
     }
 
-    private InviteLibrarianResponse getResendLibrarianInviteResponse(){
-        return InviteLibrarianResponse.builder()
-                .message("Librarian invite has been resent successfully")
-                .build();
+    private BaseResponse<String> getResendLibrarianInviteResponse(){
+        return BaseResponse.buildResponse("Librarian invite has been resent successfully");
     }
 }

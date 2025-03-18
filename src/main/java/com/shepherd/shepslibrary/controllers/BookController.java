@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.FilterBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
@@ -30,13 +29,12 @@ public class BookController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Object> addBook(@Valid @RequestBody AddBookRequest addBookRequest){
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(BaseResponse.buildResponse(bookService.addBook(addBookRequest)));
+                .body(bookService.addBook(addBookRequest));
     }
 
     @GetMapping("/get-by-id/{bookId}")
     public ResponseEntity<Object> getBookById(@PathVariable UUID bookId){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(bookService.getBookById(bookId)));
+        return ResponseEntity.ok(bookService.getBookById(bookId));
     }
 
     @GetMapping("/get-by-isbn/{isbn}")
@@ -45,34 +43,29 @@ public class BookController {
                                                     @NotBlank(message = ValidationMessage.BLANK_ISBN)
                                                     @Pattern(message= ValidationMessage.INVALID_ISBN, regexp = RegexPattern.ISBN)
                                                     String isbn){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(bookService.getBookByIsbn(isbn)));
+        return ResponseEntity.ok(bookService.getBookByIsbn(isbn));
     }
 
     @PutMapping("/edit")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Object> updateBook(@Valid @RequestBody UpdateBookRequest updateBookRequest){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(bookService.updateBook(updateBookRequest)));
+        return ResponseEntity.ok(bookService.updateBook(updateBookRequest));
     }
 
     @GetMapping("/get/all")
     public ResponseEntity<Object> getAllBooks(@RequestParam(defaultValue = "0")
                                                   int pageNumber){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(bookService.getAllBooks(pageNumber)));
+        return ResponseEntity.ok(bookService.getAllBooks(pageNumber));
     }
 
     @GetMapping("/filter")
     public ResponseEntity<Object> filterBook(@Valid @RequestBody FilterBookRequest filterBookRequest){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(bookService.filterBook(filterBookRequest)));
+        return ResponseEntity.ok(bookService.filterBook(filterBookRequest));
     }
 
     @DeleteMapping("/delete/{bookId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Object> deleteBook(@PathVariable UUID bookId){
-        bookService.deleteBook(bookId);
-        return ResponseEntity.ok(BaseResponse.buildResponse("Book deleted successfully"));
+        return ResponseEntity.ok(bookService.deleteBook(bookId));
     }
 }

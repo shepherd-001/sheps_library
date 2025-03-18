@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.service.user;
 
+import com.shepherd.shepslibrary.controllers.response.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
 import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 import com.shepherd.shepslibrary.data.model.Role;
@@ -30,20 +31,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Cacheable(value = "userCache", key = "#userId")
-    public UserResponse getUserById(UUID userId) {
+    public BaseResponse<UserResponse> getUserById(UUID userId) {
         log.info("::::: Fetching a user by id :::::");
         return userRepository.findById(userId)
-                .map(this::mapToUserResponse)
+                .map(user -> BaseResponse.buildResponse(mapToUserResponse(user)))
                 .orElseThrow(()-> new ResourceNotFoundException("User with the provided Id not found"));
     }
 
     @Override
     @Cacheable(value = "userCache", key = "'role:' + #role + ':page:' + #pageNumber")
-    public PaginatedResponse<UserResponse> getAllUsersByRole(Role role, int pageNumber) {
+    public BaseResponse<PaginatedResponse<UserResponse>> getAllUsersByRole(Role role, int pageNumber) {
         log.info("::::: Fetching all users by role :::::");
         Pageable pageable = findAllUsersPageRequest(pageNumber);
         Page<User> users = userRepository.findAllByRole(role, pageable);
-        return buildPaginatedUserResponse(users);
+        return BaseResponse.buildResponse(buildPaginatedUserResponse(users));
     }
 
     private Pageable findAllUsersPageRequest(int pageNumber){
@@ -65,11 +66,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Cacheable(value = "userCache", key = "'status:' + #status + ':page:' + #pageNumber")
-    public PaginatedResponse<UserResponse> getAllUsersByStatus(boolean status, int pageNumber) {
+    public BaseResponse<PaginatedResponse<UserResponse>> getAllUsersByStatus(boolean status, int pageNumber) {
         log.info("::::: Fetching all users by status :::::");
         Pageable pageable = findAllUsersPageRequest(pageNumber);
         Page<User> users = userRepository.findAllByIsEnabled(status, pageable);
-        return buildPaginatedUserResponse(users);
+        return BaseResponse.buildResponse(buildPaginatedUserResponse(users));
     }
 
     UserResponse mapToUserResponse(User user){

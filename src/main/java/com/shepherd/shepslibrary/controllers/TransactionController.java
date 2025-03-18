@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
 import com.shepherd.shepslibrary.service.transaction.TransactionService;
 import jakarta.validation.Valid;
@@ -20,27 +19,23 @@ public class TransactionController {
     @PreAuthorize("hasRole('MEMBER')")
     @PostMapping("/borrow-book")
     public ResponseEntity<Object> borrowBook(@Valid @RequestBody BorrowBookRequest borrowBookRequest){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(transactionService.borrowBook(borrowBookRequest)));
+        return ResponseEntity.ok(transactionService.borrowBook(borrowBookRequest));
     }
 
     @PreAuthorize("hasRole('MEMBER')")
     @PutMapping("/return-book")
     public ResponseEntity<Object> returnBook(@RequestParam UUID transactionId){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(transactionService.returnBook(transactionId)));
+        return ResponseEntity.ok(transactionService.returnBook(transactionId));
     }
 
     @GetMapping("/get/all/{userId}")
     public ResponseEntity<Object> getAllTransactions(@PathVariable UUID userId, @RequestParam(defaultValue = "0") int pageNumber){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(transactionService.getAllTransactionByUserId(userId, pageNumber)));
+        return ResponseEntity.ok(transactionService.getAllTransactionByUserId(userId, pageNumber));
     }
 
     @GetMapping("/get/all")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<Object> getAllTransactions(@RequestParam(defaultValue = "0") int pageNumber){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(transactionService.getAllTransactions(pageNumber)));
+        return ResponseEntity.ok(transactionService.getAllTransactions(pageNumber));
     }
 }
