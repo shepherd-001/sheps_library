@@ -26,7 +26,7 @@ public class LibrarianServiceImpl implements LibrarianService{
 
     @Override
     public BaseResponse<AuthResponse> createPassword(CreatePasswordRequest request) {
-        ShepsToken shepsToken = tokenService.validateToken(request.getToken(), TokenType.LIBRARIAN_INVITATION);
+        ShepsToken shepsToken = tokenService.validateToken(request.getToken(), TokenType.LIBRARIAN_INVITATION, request.getEmail());
         User user = shepsToken.getUser();
         if(!user.isEnabled() && user.getPassword() == null){
             user.setEnabled(true);

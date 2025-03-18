@@ -84,24 +84,34 @@ public class TokenServiceImpl implements TokenService{
     }
 
     @Override
-    public ShepsToken validateToken(String token, TokenType tokenType) {
-        ShepsToken shepsToken = tokenRepository.findByTokenAndTokenType(token, tokenType)
-                .orElseThrow(()-> new ShepsTokenException("Token is invalid"));
-        validateUserEmail(token, shepsToken.getUser().getEmail());
-        if (shepsToken.getExpirationTime() == null ||
-                shepsToken.getExpirationTime().isBefore(LocalDateTime.now())) {
-            log.info("::::: Token is expired or expiration time is null :::::");
-            throw new ShepsTokenException("Token is expired");
-        }
-        log.info("::::: Token validation successful :::::");
+    public ShepsToken validateToken(String token, TokenType tokenType, String expectedEmail) {
+        ShepsToken shepsToken = fetchToken(token, tokenType);
+        validateTokenExpiration(shepsToken);
+        validateUserEmail(shepsToken.getUser().getEmail(), expectedEmail);
+        log.info("Token validation successful");
         return shepsToken;
     }
 
-    private void validateUserEmail(String token, String email) {
-        String jwtEmail = jwtService.extractUsername(token);
-        if(!jwtEmail.equals(email)){
-            log.error("::::: JWT email '{}' does not match expected email '{}' :::::", jwtEmail, email);
-            throw new ShepsTokenException("Error validating token");
+    private ShepsToken fetchToken(String token, TokenType tokenType) {
+        return tokenRepository.findByTokenAndTokenType(token, tokenType)
+                .orElseThrow(() -> new ShepsTokenException("Token is invalid"));
+    }
+
+    private void validateTokenExpiration(ShepsToken shepsToken) {
+        if (shepsToken.getExpirationTime() == null) {
+            log.error("Token expiration time is null");
+            throw new ShepsTokenException("Invalid token");
+        }
+        if (shepsToken.getExpirationTime().isBefore(LocalDateTime.now())) {
+            log.info("Token is expired");
+            throw new ShepsTokenException("Token is expired");
+        }
+    }
+
+    private void validateUserEmail(String userEmail, String expectedEmail) {
+        if (!userEmail.trim().equals(expectedEmail.trim())){
+            log.error("User email doesn't match the expected email");
+            throw new ShepsTokenException("Error validation token");
         }
     }
 

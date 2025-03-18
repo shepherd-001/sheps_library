@@ -34,8 +34,12 @@ public class AuthController {
     @PostMapping("/verify")
     public ResponseEntity<Object> verifyEmail(@RequestParam
                                                   @NotBlank(message = ValidationMessage.BLANK_TOKEN)
-                                                  String token){
-        return ResponseEntity.ok(authService.verifyEmail(token));
+                                                  String token,
+                                              @RequestParam
+                                              @NotBlank(message = ValidationMessage.BLANK_EMAIL)
+                                              @Email(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
+                                              String email){
+        return ResponseEntity.ok(authService.verifyEmail(token, email));
     }
 
     @PostMapping("/login")

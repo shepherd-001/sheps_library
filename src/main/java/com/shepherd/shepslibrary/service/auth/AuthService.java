@@ -9,7 +9,7 @@ import com.shepherd.shepslibrary.data.dto.response.*;
 
 public interface AuthService {
     BaseResponse<RegisterUserResponse> registerUser(RegisterUserRequest registerUserRequest);
-    BaseResponse<EmailConfirmationResponse> verifyEmail(String token);
+    BaseResponse<EmailConfirmationResponse> verifyEmail(String token, String email);
     BaseResponse<AuthResponse> login(LoginRequest loginRequest);
     BaseResponse<ChangePasswordResponse> changePassword(ChangePasswordRequest changePasswordRequest);
     BaseResponse<String> requestPasswordReset(String email);

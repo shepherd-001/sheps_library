@@ -62,8 +62,7 @@ public class AuthServiceImpl implements AuthService{
         String token = tokenService.generateToken(savedUser, TokenType.EMAIL_CONFIRMATION);
         notificationService.sendVerificationMail(savedUser, token);
         log.info("::::: User with the first name {} registered successfully :::::", savedUser.getFirstName());
-
-        return getRegisterUserResponse(savedUser);
+        return BaseResponse.buildResponse("User registered successfully", getRegisterUserResponse(savedUser));
     }
 
     private void checkIfUserExists(String email) {
@@ -82,8 +81,8 @@ public class AuthServiceImpl implements AuthService{
                     , BAD_REQUEST.value());
     }
 
-    private static BaseResponse<RegisterUserResponse> getRegisterUserResponse(User user) {
-        RegisterUserResponse registerUserResponse = RegisterUserResponse.builder()
+    private static RegisterUserResponse getRegisterUserResponse(User user) {
+        return RegisterUserResponse.builder()
                 .userId(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -92,13 +91,12 @@ public class AuthServiceImpl implements AuthService{
                 .isEnabled(user.isEnabled())
                 .isRevoked(user.isRevoked())
                 .build();
-        return BaseResponse.buildResponse("User registered successfully", registerUserResponse);
     }
 
     @Override
     @Transactional
-    public BaseResponse<EmailConfirmationResponse> verifyEmail(String token) {
-        ShepsToken shepsToken = tokenService.validateToken(token, TokenType.EMAIL_CONFIRMATION);
+    public BaseResponse<EmailConfirmationResponse> verifyEmail(String token, String email) {
+        ShepsToken shepsToken = tokenService.validateToken(token, TokenType.EMAIL_CONFIRMATION, email);
         User user = shepsToken.getUser();
         if(!user.isEnabled()){
             user.setEnabled(true);
@@ -183,7 +181,6 @@ public class AuthServiceImpl implements AuthService{
     }
 
     @Override
-    @Transactional
     public BaseResponse<String> requestPasswordReset(String email){
         log.info("::::: Initiating request password reset :::::");
         return userRepository.findByEmailEqualsIgnoreCase(email.trim())
@@ -204,7 +201,8 @@ public class AuthServiceImpl implements AuthService{
     @Transactional
     public BaseResponse<ResetPasswordResponse> resetPassword(ResetPasswordRequest resetPasswordRequest) {
         log.info("::::: Initiating password reset :::::");
-        ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.getToken(), TokenType.RESET_PASSWORD);
+        ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.getToken(),
+                TokenType.RESET_PASSWORD, resetPasswordRequest.getEmail());
         validatePassword(resetPasswordRequest.getNewPassword());
         User user = shepsToken.getUser();
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
