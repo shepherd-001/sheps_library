@@ -46,11 +46,8 @@ public class AuthServiceImpl implements AuthService{
     @Transactional
     public BaseResponse<RegisterUserResponse> registerUser(RegisterUserRequest registerUserRequest) {
         String email = registerUserRequest.getEmail().toLowerCase().trim();
-        checkIfUserExists(email);
-//        if(registerUserRequest.getGender() == null)
-//            throw new ShepsLibraryException(ValidationMessage.NULL_GENDER);
-//        validateEmail(email);
-//        validatePassword(registerUserRequest.getPassword());
+        validateEmailAddress(email);
+        validatePassword(registerUserRequest.getPassword());
         User user = new User();
         user.setFirstName(registerUserRequest.getFirstName().trim());
         user.setLastName(registerUserRequest.getLastName().trim());
@@ -65,12 +62,10 @@ public class AuthServiceImpl implements AuthService{
         return BaseResponse.buildResponse("User registered successfully", getRegisterUserResponse(savedUser));
     }
 
-    private void checkIfUserExists(String email) {
+    private void validateEmailAddress(String email) {
         if(userRepository.existsByEmailEqualsIgnoreCase(email.trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
-    }
 
-    private void validateEmail(String email) {
         if(!emailValidationService.isValidEmail(email))
             throw new EmailValidationException("Your email address is not acceptable");
     }

@@ -82,7 +82,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    @Cacheable(value = "bookCache", key = "#id")
+    @Cacheable(value = "bookCache", key = "#id", unless = "#result == null")
     public BaseResponse<BookResponse> getBookById(UUID id) {
         log.info("::::: Fetching book by id :::::");
         BookResponse bookResponse = mapToBookResponse(fetchBookById(id));
@@ -96,7 +96,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    @Cacheable(value = "bookCache", key = "#isbn")
+    @Cacheable(value = "bookCache", key = "#isbn", unless = "#result == null")
     public BaseResponse<BookResponse> getBookByIsbn(String isbn) {
         log.info("::::: Fetching book by isbn :::::");
         return bookRepository.findByIsbn(isbn)
