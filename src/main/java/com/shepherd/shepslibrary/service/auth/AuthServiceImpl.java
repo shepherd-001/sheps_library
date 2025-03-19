@@ -47,7 +47,7 @@ public class AuthServiceImpl implements AuthService{
     public BaseResponse<RegisterUserResponse> registerUser(RegisterUserRequest registerUserRequest) {
         String email = registerUserRequest.getEmail().toLowerCase().trim();
         validateEmailAddress(email);
-        validatePassword(registerUserRequest.getPassword());
+//        validatePassword(registerUserRequest.getPassword());
         User user = new User();
         user.setFirstName(registerUserRequest.getFirstName().trim());
         user.setLastName(registerUserRequest.getLastName().trim());
@@ -66,8 +66,8 @@ public class AuthServiceImpl implements AuthService{
         if(userRepository.existsByEmailEqualsIgnoreCase(email.trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
 
-        if(!emailValidationService.isValidEmail(email))
-            throw new EmailValidationException("Your email address is not acceptable");
+//        if(!emailValidationService.isValidEmail(email))
+//            throw new EmailValidationException("Your email address is not acceptable");
     }
 
     private void validatePassword(String password){

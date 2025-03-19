@@ -7,15 +7,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -29,7 +24,6 @@ public class EmailValidationServiceImpl implements EmailValidationService{
     private String apiKey;
     @Value("${zero_bounce_url}")
     private String validationUrl;
-//    private final RestTemplate restTemplate;
     private final WebClient webClient;
 
 
@@ -46,85 +40,6 @@ public class EmailValidationServiceImpl implements EmailValidationService{
             "dropmail.me", "safepostmail.com", "mailnesia.com",
             "randommail.org", "guerrillamail.net", "fakeemailgenerator.com"
     );
-
-
-//    @Override
-//    public boolean isValidEmail(String email) {
-//        try{
-//            email = email.toLowerCase().trim();
-//            log.info("::::: Initiating email validation :::::");
-//            checkEmailNotBlank(email);
-//            isDisposableEmail(email);
-//            String url = buildValidationUrl(email);
-//            log.info("::::: Validating email address {} :::::", email);
-//            EmailValidationResponse emailValidationResponse = restTemplate.getForObject(url, EmailValidationResponse.class);
-//            return isEmailValidAndAllowed(Objects.requireNonNull(emailValidationResponse));
-//        }catch (HttpClientErrorException | HttpServerErrorException ex){
-//            log.info("::::: Error during email validation {} :::::", ex.getMessage());
-//            throw new EmailValidationException(ex.getMessage());
-//        }
-//    }
-
-//    private static boolean isEmailValidAndAllowed(EmailValidationResponse validationResponse) {
-//        String status = Optional.ofNullable(validationResponse.getStatus()).map(String::toLowerCase).orElse("");
-//        String subStatus = Optional.ofNullable(validationResponse.getSubStatus()).map(String::toLowerCase).orElse("");
-//
-//       return switch (status) {
-//            case "valid" -> {
-//                log.info("::::: Valid email address -> sub status: {} :::::", subStatus);
-//                yield true;
-//            }
-//            case "do_not_mail" -> handleDoNoMailSubStatus(subStatus);
-//            default -> {
-//                log.info("::::: Invalid email address -> sub status: {} :::::", subStatus);
-//                throw new EmailValidationException("Error validating email address." +
-//                        " Try again with a valid email address");
-//            }
-//        };
-//    }
-//
-//    private static boolean handleDoNoMailSubStatus(String subStatus) {
-//        return switch (subStatus) {
-//            case "role_based", "role_based_catch_all" -> {
-//                log.info("::::: Valid email address -> status: 'do_not_mail' sub status: {} :::::", subStatus);
-//                yield true;
-//            }
-//            case "disposable" -> {
-//                log.error("::::: The email address entered is disposable :::::");
-//                throw new EmailValidationException("Disposable email address is not allowed");
-//            }
-//            default -> {
-//                log.error("::::: Unacceptable email address with sub status: {} :::::", subStatus);
-//                throw new EmailValidationException("Unacceptable email address. Try again with a valid email address");
-//            }
-//        };
-//    }
-//
-//    private static void checkEmailNotBlank(String email) {
-//        if(email.isBlank())
-//            throw new EmailValidationException("Please enter a valid email address");
-//    }
-//
-//    private static void isDisposableEmail(String email){
-//        String domain = extractDomainFromEmail(email.trim());
-//        if(DISPOSABLE_EMAIL_DOMAINS.contains(domain)){
-//            log.error("::::: Disposable email address :::::");
-//            throw new EmailValidationException("Disposable email address is not allowed");
-//        }
-//    }
-//
-//    private static String extractDomainFromEmail(String email) {
-//        return email.substring(email.indexOf('@') + 1);
-//    }
-//
-//    private String buildValidationUrl(String email) {
-//        return UriComponentsBuilder.fromUriString(validationUrl)
-//                .queryParam("api_key", apiKey)
-//                .queryParam("email", email)
-//                .toUriString();
-//    }
-
-
 
     @Override
     public boolean isValidEmail(String email) {
