@@ -8,7 +8,6 @@ import java.util.UUID;
 @Builder
 @Getter
 public class AddBookResponse {
-    private String message;
     private UUID bookId;
     private String title;
     private String author;

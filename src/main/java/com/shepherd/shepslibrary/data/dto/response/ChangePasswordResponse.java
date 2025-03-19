@@ -6,7 +6,6 @@ import lombok.Getter;
 @Builder
 @Getter
 public class ChangePasswordResponse {
-    private String message;
     private String accessToken;
     private String refreshToken;
 }

@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.responses.BaseResponse;
+import com.shepherd.shepslibrary.controllers.response.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
@@ -28,27 +28,28 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<Object> signup(@Valid @RequestBody RegisterUserRequest registerRequest) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(BaseResponse.buildResponse(authService.registerUser(registerRequest)));
+                .body(authService.registerUser(registerRequest));
     }
 
     @PostMapping("/verify")
     public ResponseEntity<Object> verifyEmail(@RequestParam
                                                   @NotBlank(message = ValidationMessage.BLANK_TOKEN)
-                                                  String token){
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(authService.verifyEmail(token)));
+                                                  String token,
+                                              @RequestParam
+                                              @NotBlank(message = ValidationMessage.BLANK_EMAIL)
+                                              @Email(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
+                                              String email){
+        return ResponseEntity.ok(authService.verifyEmail(token, email));
     }
 
     @PostMapping("/login")
     public ResponseEntity<Object> login(@Valid @RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(authService.login(loginRequest)));
+        return ResponseEntity.ok(authService.login(loginRequest));
     }
 
     @PutMapping("/change-password")
     public ResponseEntity<Object> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(authService.changePassword(changePasswordRequest)));
+        return ResponseEntity.ok(authService.changePassword(changePasswordRequest));
     }
 
     @PostMapping("/request-password-reset")
@@ -56,14 +57,12 @@ public class AuthController {
                                                            @NotBlank(message = ValidationMessage.BLANK_EMAIL)
                                                            @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
                                                            String email) {
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(authService.requestPasswordReset(email)));
+        return ResponseEntity.ok(authService.requestPasswordReset(email));
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<Object> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
-        return ResponseEntity.ok(BaseResponse
-                .buildResponse(authService.resetPassword(resetPasswordRequest)));
+        return ResponseEntity.ok(authService.resetPassword(resetPasswordRequest));
     }
 
     @PostMapping("/logout")

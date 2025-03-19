@@ -1,17 +1,17 @@
 package com.shepherd.shepslibrary.service.transaction;
 
+import com.shepherd.shepslibrary.controllers.response.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
 import com.shepherd.shepslibrary.data.dto.response.ReservationResponse;
-import com.shepherd.shepslibrary.data.dto.response.ReserveBookResponse;
 
 import java.util.UUID;
 
 public interface ReservationService {
-    ReserveBookResponse reserveBook(UUID bookId);
-    ReservationResponse getReservationById(UUID reservationId);
-    PaginatedResponse<ReservationResponse> getAllReservationByUserId(UUID userId, int pageNumber);
-    PaginatedResponse<ReservationResponse> getAllReservations(int pageNumber);
-    void deleteReservation(UUID reservationId, UUID userId);
-    void deleteAllReservation(UUID userId);
+    BaseResponse<ReservationResponse> reserveBook(UUID bookId);
+    BaseResponse<ReservationResponse> getReservationById(UUID reservationId);
+    BaseResponse<PaginatedResponse<ReservationResponse>> getAllReservationByUserId(UUID userId, int pageNumber);
+    BaseResponse<PaginatedResponse<ReservationResponse>> getAllReservations(int pageNumber);
+    BaseResponse<String> deleteReservation(UUID reservationId, UUID userId);
+    BaseResponse<String> deleteAllReservation(UUID userId);
 //    void sendAvailableBooksNotification();
 }
