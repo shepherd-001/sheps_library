@@ -34,6 +34,7 @@ public class AppConfig {
         );
     }
 
+
     @Bean
     public CacheManager cacheManager(
             @Value("${cache.expiry}") Duration expiry,
