@@ -25,11 +25,6 @@ public class AuthController {
     private final AuthService authService;
 
 
-    @PostMapping("/signup")
-    public ResponseEntity<Object> signup(@Valid @RequestBody RegisterUserRequest registerRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(authService.registerUser(registerRequest));
-    }
 
     @PostMapping("/verify")
     public ResponseEntity<Object> verifyEmail(@RequestParam

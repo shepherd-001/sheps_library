@@ -7,10 +7,11 @@ import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
 import com.shepherd.shepslibrary.data.dto.response.AddBookResponse;
 import com.shepherd.shepslibrary.data.dto.response.BookResponse;
 import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
-import com.shepherd.shepslibrary.data.dto.response.UpdateBookResponse;
 import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.repository.BookRepository;
+import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
 import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
+import com.shepherd.shepslibrary.mapper.BookMapper;
 import com.shepherd.shepslibrary.specification.BookSpecification;
 import com.shepherd.shepslibrary.utils.AppUtils;
 import jakarta.transaction.Transactional;
@@ -39,21 +40,19 @@ import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
 @Slf4j
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
+    private final BookMapper bookMapper;
 
     @Override
     public BaseResponse<AddBookResponse> addBook(AddBookRequest request) {
-        Book book = new Book();
-        String createdBy = AppUtils.getCurrentUser().getEmail();
-        book.setTitle(request.getTitle().trim());
-        book.setAuthor(request.getAuthor().trim());
-        book.setGenre(request.getGenre().trim());
+        if(bookRepository.existsByTitle(request.getTitle()))
+            throw new AlreadyExistsException("Book with title '%s' already exists".formatted(request.getTitle()));
+        Book book = bookMapper.mapToBook(request);
         book.setIsbn(generateRandomIsbn());
-        book.setAvailable(true);
-        book.setCreatedBy(createdBy);
+        book.setCreatedBy(AppUtils.getCurrentUser().getEmail());
         Book savedBook = bookRepository.save(book);
         log.info("::::: New book added :::::");
-        AddBookResponse addBookResponse = getAddBookResponse(savedBook);
-        return BaseResponse.buildResponse("Book added successfully", addBookResponse);
+        return BaseResponse.buildResponse("Book added successfully",
+                bookMapper.mapToAddBookResponse(savedBook));
     }
 
     private String generateRandomIsbn() {
@@ -70,23 +69,12 @@ public class BookServiceImpl implements BookService {
         return isbn;
     }
 
-    private static AddBookResponse getAddBookResponse(Book book){
-        return AddBookResponse.builder()
-                .bookId(book.getId())
-                .title(book.getTitle())
-                .author(book.getAuthor())
-                .genre(book.getGenre())
-                .isbn(book.getIsbn())
-                .isAvailable(book.isAvailable())
-                .build();
-    }
-
     @Override
     @Cacheable(value = "bookCache", key = "#id", unless = "#result == null")
     public BaseResponse<BookResponse> getBookById(UUID id) {
         log.info("::::: Fetching book by id :::::");
-        BookResponse bookResponse = mapToBookResponse(fetchBookById(id));
-        return BaseResponse.buildResponse(bookResponse);
+        Book book = fetchBookById(id);
+        return BaseResponse.buildResponse(bookMapper.mapToBookResponse(book));
     }
 
     @Override
@@ -100,42 +88,19 @@ public class BookServiceImpl implements BookService {
     public BaseResponse<BookResponse> getBookByIsbn(String isbn) {
         log.info("::::: Fetching book by isbn :::::");
         return bookRepository.findByIsbn(isbn)
-                .map(book -> BaseResponse.buildResponse(mapToBookResponse(book)))
+                .map(book -> BaseResponse.buildResponse(bookMapper.mapToBookResponse(book)))
                 .orElseThrow(()-> new ResourceNotFoundException("Book with the provided ISBN not found"));
     }
 
-    private BookResponse mapToBookResponse(Book book){
-        return BookResponse.builder()
-                        .title(book.getTitle())
-                        .author(book.getAuthor())
-                        .genre(book.getGenre())
-                        .isbn(book.getIsbn())
-                        .isAvailable(book.isAvailable())
-                .build();
-    }
-
     @Override
-    @CachePut(value = "bookCache", key = "#request.bookId")
-    public BaseResponse<UpdateBookResponse> updateBook(UpdateBookRequest request) {
-        Book book = fetchBookById(request.getBookId());
-        book.setTitle(request.getTitle().trim());
-        book.setAuthor(request.getAuthor().trim());
-        book.setGenre(request.getGenre().trim());
-        book.setUpdatedBy(AppUtils.getCurrentUser().getEmail());
+    @CachePut(value = "bookCache", key = "#updateBookRequest.bookId")
+    public BaseResponse<BookResponse> updateBook(UpdateBookRequest updateBookRequest) {
+        Book book = fetchBookById(updateBookRequest.getBookId());
+        bookMapper.updateBookFromRequest(updateBookRequest, book);
+        book.setUpdatedBy(AppUtils.getCurrentUser().getUpdatedBy());
         Book savedBook = bookRepository.save(book);
         log.info("::::: Updated a book :::::");
-        UpdateBookResponse updateBookResponse = getUpdateBookResponse(savedBook);
-        return BaseResponse.buildResponse(updateBookResponse);
-    }
-
-    private static UpdateBookResponse getUpdateBookResponse(Book savedBook) {
-        return UpdateBookResponse.builder()
-                .title(savedBook.getTitle())
-                .author(savedBook.getAuthor())
-                .genre(savedBook.getGenre())
-                .isbn(savedBook.getIsbn())
-                .isAvailable(savedBook.isAvailable())
-                .build();
+        return BaseResponse.buildResponse("Book updated successfully", bookMapper.mapToBookResponse(savedBook));
     }
 
     @Override
@@ -152,7 +117,7 @@ public class BookServiceImpl implements BookService {
 
     private PaginatedResponse<BookResponse> buildPaginatedBookResponse(Page<Book> books) {
         List<BookResponse> content = books.isEmpty() ? Collections.emptyList() :
-                books.stream().map(this::mapToBookResponse).toList();
+                books.stream().map(bookMapper::mapToBookResponse).toList();
         return PaginatedResponse.<BookResponse>builder()
                 .content(content)
                 .numberOfElements(books.getNumberOfElements())

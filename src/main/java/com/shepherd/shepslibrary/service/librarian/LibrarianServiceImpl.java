@@ -8,7 +8,6 @@ import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
-import com.shepherd.shepslibrary.exceptions.PasswordValidationException;
 import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
@@ -18,7 +17,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 @RequiredArgsConstructor
@@ -32,35 +30,23 @@ public class LibrarianServiceImpl implements LibrarianService{
     @Override
     public BaseResponse<AuthResponse> createPassword(CreatePasswordRequest request) {
         ShepsToken shepsToken = tokenService.validateToken(request.getToken(), TokenType.LIBRARIAN_INVITATION, request.getEmail());
-//        validatePassword(request.getPassword());
+//        passwordValidationService.validatePasswordNotBreached(request.getPassword());
         User user = shepsToken.getUser();
-        if(!user.isEnabled() && user.getPassword() == null){
-            user.setEnabled(true);
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-            User verifiedUser = userRepository.save(user);
-            updateUserCache(verifiedUser);
-            tokenService.deleteToken(shepsToken);
-            JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(verifiedUser);
-            return getCreatePasswordResponse(jwtTokenResponse);
-        }
-        throw new UserAlreadyEnabledException("User already created password");
-    }
-
-    private void validatePassword(String password){
-        if(passwordValidationService.isPasswordBreached(password))
-            throw new PasswordValidationException("This password has been compromised. Use a new, unique password"
-                    , BAD_REQUEST.value());
+        if(!user.isEnabled() && user.getPassword() != null)
+            throw new UserAlreadyEnabledException("User already created password");
+        user.setEnabled(true);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        updateUserCache(userRepository.save(user));
+        tokenService.deleteToken(shepsToken);
+        JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(user);
+        return BaseResponse.buildResponse("Librarian password created successfully", AuthResponse.builder()
+                        .accessToken(jwtTokenResponse.getAccessToken())
+                        .refreshToken(jwtTokenResponse.getRefreshToken())
+                .build());
     }
 
     @CachePut(value = "userCache", key = "#user.email")
     public void updateUserCache(User user) {
         log.info("::::: Updating cache for user with email: {} :::::", user.getEmail());
-    }
-
-    private static BaseResponse<AuthResponse> getCreatePasswordResponse(JwtTokenResponse jwtTokenResponse){
-        return BaseResponse.buildResponse("Librarian password created successfully", AuthResponse.builder()
-                        .accessToken(jwtTokenResponse.getAccessToken())
-                        .refreshToken(jwtTokenResponse.getRefreshToken())
-                .build());
     }
 }

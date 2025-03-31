@@ -1,4 +1,4 @@
-package com.shepherd.shepslibrary.service.notification;
+package com.shepherd.shepslibrary.service.emailValidator;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shepherd.shepslibrary.exceptions.EmailValidationException;
@@ -42,7 +42,12 @@ public class EmailValidationServiceImpl implements EmailValidationService{
     );
 
     @Override
-    public boolean isValidEmail(String email) {
+    public void checkAndValidateEmail(String email) {
+        if(!isValidEmail(email))
+            throw new EmailValidationException("Your email address is not acceptable");
+    }
+
+    private boolean isValidEmail(String email) {
         email = email.toLowerCase().trim();
         log.info("Initiating email validation for: {}", email);
 

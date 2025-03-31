@@ -25,7 +25,7 @@ public class InviteLibrarianRequest {
     private String lastName;
 
     @NotBlank(message = ValidationMessage.BLANK_EMAIL)
-    @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
+    @Pattern(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
     private String email;
 
     private Gender gender;

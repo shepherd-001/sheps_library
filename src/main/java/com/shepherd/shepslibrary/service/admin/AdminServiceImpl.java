@@ -9,10 +9,11 @@ import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
-import com.shepherd.shepslibrary.exceptions.EmailValidationException;
+import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
-import com.shepherd.shepslibrary.service.notification.EmailValidationService;
+import com.shepherd.shepslibrary.mapper.UserMapper;
+import com.shepherd.shepslibrary.service.emailValidator.EmailValidationService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
 import jakarta.annotation.PostConstruct;
@@ -37,22 +38,25 @@ public class AdminServiceImpl implements AdminService {
     private final TokenService tokenService;
     private final MailNotificationService mailNotificationService;
     private final EmailValidationService emailValidationService;
+    private final UserMapper userMapper;
 
     @PostConstruct
     private void createAdmin() {
-        if(!userRepository.existsByRole(Role.ADMIN)){
-            User user = new User();
-            user.setFirstName("Admin");
-            user.setLastName("Admin");
-            user.setGender(Gender.MALE);
-            user.setEmail(adminEmail.toLowerCase());
-            user.setPassword(passwordEncoder.encode(adminPassword));
-            user.setRole(Role.ADMIN);
-            user.setEnabled(true);
-            user.setRevoked(false);
-            userRepository.save(user);
-            log.info("::::: Admin created successfully :::::");
-        }
+        userRepository.findByRole(Role.ADMIN).ifPresentOrElse(
+                admin -> log.info("::::: Admin already exists :::::"), ()->{
+                    User admin = User.builder()
+                            .firstName("Admin")
+                            .lastName("Admin")
+                            .gender(Gender.MALE)
+                            .email(adminEmail.toLowerCase())
+                            .password(passwordEncoder.encode(adminPassword))
+                            .role(Role.ADMIN)
+                            .isEnabled(true)
+                            .isRevoked(false)
+                            .build();
+                    userRepository.save(admin);
+                    log.info("::::: Admin created successfully :::::");
+                });
     }
 
     @Override
@@ -60,53 +64,29 @@ public class AdminServiceImpl implements AdminService {
     public BaseResponse<InviteLibrarianResponse> inviteLibrarian(InviteLibrarianRequest request) {
         if(userRepository.existsByEmailEqualsIgnoreCase(request.getEmail().trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
+//        emailValidationService.checkAndValidateEmail(request.getEmail());
 
-        User user = createUser(request);
+        User librarian = userRepository.save(userMapper.mapToLibrarian(request));
 
+        sendLibrarianInvite(librarian);
+        return BaseResponse.buildResponse("Librarian invited successfully",
+                userMapper.mapToInviteLibrarianResponse(librarian));
+    }
+
+    private void sendLibrarianInvite(User user) {
         String token = tokenService.generateToken(user, TokenType.LIBRARIAN_INVITATION);
         mailNotificationService.sendLibrarianInvitation(user, token);
-        log.info("::::: Librarian invited successfully :::::");
-        InviteLibrarianResponse inviteResponse = getInviteResponse(user);
-        return BaseResponse.buildResponse("Librarian invited successfully", inviteResponse);
-    }
-
-    private User createUser(InviteLibrarianRequest request){
-//        validateEmailAddress(request.getEmail());
-        User user = new User();
-        user.setFirstName(request.getFirstName().trim());
-        user.setLastName(request.getLastName().trim());
-        user.setEmail(request.getEmail().toLowerCase().trim());
-        user.setGender(request.getGender());
-        user.setRole(Role.LIBRARIAN);
-        return userRepository.save(user);
-    }
-
-    private void validateEmailAddress(String email) {
-        if(!emailValidationService.isValidEmail(email))
-            throw new EmailValidationException("Your email address is not acceptable");
-    }
-
-    private static InviteLibrarianResponse getInviteResponse(User user){
-        return InviteLibrarianResponse.builder()
-                .librarianId(user.getId())
-                .librarianEmail(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .gender(user.getGender())
-                .isEnabled(user.isEnabled())
-                .isRevoked(user.isRevoked())
-                .build();
+        log.info("::::: Librarian invited successfully to {} :::::", user.getEmail());
     }
 
     @Override
+    @Transactional
     public BaseResponse<String> resendInvite(String inviteeEmail) {
         log.info("::::: Initiating resend invitation for email: {} :::::", inviteeEmail);
         return userRepository.findByEmailEqualsIgnoreCase(inviteeEmail.trim())
                 .map(this::handleResendInvite)
-                .orElseGet(()-> {
-                    log.info("::::: User not found :::::");
-                    return getResendLibrarianInviteResponse();
-                });
+                .orElseThrow(
+                        ()-> new ResourceNotFoundException("User not found. Invitation not resent"));
     }
 
     private BaseResponse<String> handleResendInvite(User user) {
@@ -114,18 +94,12 @@ public class AdminServiceImpl implements AdminService {
             log.error("::::: User with email {} is already enabled :::::", user.getEmail());
             throw new UserAlreadyEnabledException("User is already verified. Resend invitation not applicable");
         }
-        if(user.getRole() != Role.LIBRARIAN){
+        if(!user.getRole().equals(Role.LIBRARIAN)){
             log.warn("::::: User does not have the role LIBRARIAN");
-            throw new ShepsLibraryException("User is not a librarian. Resend invitation not applicable.");
+            throw new ShepsLibraryException("User is not a librarian. Resend invitation not applicable");
         }
 
-        String token = tokenService.generateToken(user, TokenType.LIBRARIAN_INVITATION);
-        mailNotificationService.sendLibrarianInvitation(user, token);
-        log.info("::::: Invitation successfully resent to {} :::::", user.getEmail());
-        return getResendLibrarianInviteResponse();
-    }
-
-    private BaseResponse<String> getResendLibrarianInviteResponse(){
+        sendLibrarianInvite(user);
         return BaseResponse.buildResponse("Librarian invite has been resent successfully");
     }
 }

@@ -16,6 +16,7 @@ import lombok.*;
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
 public class Book extends BaseModel{
+    @Column(unique = true)
     private String title;
     private String author;
     private String genre;

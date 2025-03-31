@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +25,13 @@ public class PasswordValidationServiceImpl implements PasswordValidationService{
 
 
     @Override
-    public boolean isPasswordBreached(String password) {
+    public void validatePasswordNotBreached(String password) {
+        if(isPasswordBreached(password))
+            throw new PasswordValidationException("This password has been compromised. Use a new, unique password"
+                    , BAD_REQUEST.value());
+    }
+
+    private boolean isPasswordBreached(String password) {
         checkPasswordNotBlank(password);
 
         String sha1Hash = DigestUtils.sha1Hex(password).toUpperCase();
