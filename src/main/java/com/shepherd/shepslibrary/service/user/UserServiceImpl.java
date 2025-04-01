@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.NUMBER_OF_ITEMS_PER_PAGE;
 import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
@@ -73,7 +72,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Cacheable(value = "userCache", key = "#userId")
-    public BaseResponse<UserResponse> getUserById(UUID userId) {
+    public BaseResponse<UserResponse> getUserById(String userId) {
         log.info("::::: Fetching a user by id :::::");
         return userRepository.findById(userId)
                 .map(user -> BaseResponse.buildResponse(userMapper.mapToUserResponse(user)))

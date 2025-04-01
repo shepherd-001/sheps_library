@@ -31,7 +31,7 @@ public final class ValidationMessage {
     public static final String INVALID_ISBN = "Book ISBN must be exactly 13 digits in length";
 
 
-    public static final String NULL_BOOK_ID = "Book id is required";
+    public static final String BLANK_BOOK_ID = "Book id is required";
     public static final String NULL_RESERVATION_ID = "Reservation id is required";
     public static final String NULL_USER_ID = "User id is required";
     public static final String NULL_USER_ROLE = "User role is required";

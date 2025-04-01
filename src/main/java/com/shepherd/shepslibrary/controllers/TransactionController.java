@@ -2,13 +2,13 @@ package com.shepherd.shepslibrary.controllers;
 
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
 import com.shepherd.shepslibrary.service.transaction.TransactionService;
+import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,12 +24,15 @@ public class TransactionController {
 
     @PreAuthorize("hasRole('MEMBER')")
     @PutMapping("/return-book")
-    public ResponseEntity<Object> returnBook(@RequestParam UUID transactionId){
+    public ResponseEntity<Object> returnBook(@RequestParam @NotBlank(message = ValidationMessage.NULL_TRANSACTION_ID)
+                                                 String transactionId){
         return ResponseEntity.ok(transactionService.returnBook(transactionId));
     }
 
     @GetMapping("/get/all/{userId}")
-    public ResponseEntity<Object> getAllTransactions(@PathVariable UUID userId, @RequestParam(defaultValue = "0") int pageNumber){
+    public ResponseEntity<Object> getAllTransactions(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
+                                                         String userId,
+                                                     @RequestParam(defaultValue = "0") int pageNumber){
         return ResponseEntity.ok(transactionService.getAllTransactionByUserId(userId, pageNumber));
     }
 

@@ -3,14 +3,14 @@ package com.shepherd.shepslibrary.controllers;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.data.model.Role;
 import com.shepherd.shepslibrary.service.user.UserService;
+import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,7 +25,8 @@ public class UserController {
     }
 
     @GetMapping("/get/id")
-    public ResponseEntity<Object> getUserById(@RequestParam UUID userId) {
+    public ResponseEntity<Object> getUserById(@RequestParam @NotBlank(message = ValidationMessage.NULL_USER_ID)
+                                                  String userId) {
         return ResponseEntity.ok(userService.getUserById(userId));
     }
 

@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.NUMBER_OF_ITEMS_PER_PAGE;
@@ -71,14 +70,14 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Cacheable(value = "bookCache", key = "#id", unless = "#result == null")
-    public BaseResponse<BookResponse> getBookById(UUID id) {
+    public BaseResponse<BookResponse> getBookById(String id) {
         log.info("::::: Fetching book by id :::::");
         Book book = fetchBookById(id);
         return BaseResponse.buildResponse(bookMapper.mapToBookResponse(book));
     }
 
     @Override
-    public Book fetchBookById(UUID id) {
+    public Book fetchBookById(String id) {
         return bookRepository.findById(id).orElseThrow
                 (()-> new ResourceNotFoundException("Book with the provided ID not found"));
     }
@@ -93,9 +92,9 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    @CachePut(value = "bookCache", key = "#updateBookRequest.bookId")
-    public BaseResponse<BookResponse> updateBook(UpdateBookRequest updateBookRequest) {
-        Book book = fetchBookById(updateBookRequest.getBookId());
+    @CachePut(value = "bookCache", key = "#bookId")
+    public BaseResponse<BookResponse> updateBook(UpdateBookRequest updateBookRequest, String bookId) {
+        Book book = fetchBookById(bookId);
         bookMapper.updateBookFromRequest(updateBookRequest, book);
         book.setUpdatedBy(AppUtils.getCurrentUser().getUpdatedBy());
         Book savedBook = bookRepository.save(book);
@@ -143,7 +142,7 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     @CacheEvict(value = "bookCache", allEntries = true)
-    public BaseResponse<String> deleteBook(UUID bookId) {
+    public BaseResponse<String> deleteBook(String bookId) {
         if(!bookRepository.existsById(bookId))
             throw new ResourceNotFoundException("Book with the provided ID not found");
         bookRepository.deleteById(bookId);

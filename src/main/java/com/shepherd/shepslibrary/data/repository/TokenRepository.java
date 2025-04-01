@@ -4,11 +4,9 @@ import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
-public interface TokenRepository extends JpaRepository<ShepsToken, UUID> {
+public interface TokenRepository extends JpaRepository<ShepsToken, String> {
 //    @Query("""
 //           select t from ShepsToken t
 //           where t.user.email = :email and t.token = :token
@@ -17,6 +15,6 @@ public interface TokenRepository extends JpaRepository<ShepsToken, UUID> {
 //    ShepsToken findByUserAndTokenAndTokenType(@Param("email") String email,
 //         @Param("token") String token, @Param("tokenType") TokenType tokenType);
     Optional<ShepsToken> findByTokenAndTokenType(String token, TokenType tokenType);
-    List<ShepsToken> findAllByUserIdAndTokenType(UUID userId, TokenType tokenType);
+//    List<ShepsToken> findAllByUserIdAndTokenType(String userId, TokenType tokenType);
     void deleteAllByUserEmailAndTokenType(String email, TokenType tokenType);
 }

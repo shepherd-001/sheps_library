@@ -26,7 +26,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.NUMBER_OF_ITEMS_PER_PAGE;
 import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
@@ -107,7 +106,7 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
-    public BaseResponse<TransactionResponse> returnBook(UUID transactionId) {
+    public BaseResponse<TransactionResponse> returnBook(String transactionId) {
         log.info("::::: Initiating return book :::::");
         Transaction transaction = getTransactionById(transactionId);
         Book book = transaction.getBook();
@@ -123,14 +122,14 @@ public class TransactionServiceImpl implements TransactionService{
         return BaseResponse.buildResponse(mapToTransactionResponse(savedTransaction));
     }
 
-    private Transaction getTransactionById(UUID transactionId) {
+    private Transaction getTransactionById(String transactionId) {
         return transactionRepository.findById(transactionId).orElseThrow(
                 ()-> new ShepsLibraryException("Transaction with the provided ID not found"));
     }
 
     @Override
     @Cacheable(value = "transactionCache", key = "'user:' + #userId + ':page:' + #pageNumber")
-    public BaseResponse<PaginatedResponse<TransactionResponse>> getAllTransactionByUserId(UUID userId, int pageNumber) {
+    public BaseResponse<PaginatedResponse<TransactionResponse>> getAllTransactionByUserId(String userId, int pageNumber) {
         log.info("::::: Fetching all transactions by user id :::::");
         Pageable pageable = buildPageable(pageNumber);
         Page<Transaction> transactions = transactionRepository.findAllByUserId(userId, pageable);

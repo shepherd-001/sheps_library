@@ -12,8 +12,7 @@ import java.util.UUID;
 @Setter
 public abstract class BaseModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
@@ -25,6 +24,7 @@ public abstract class BaseModel {
 
     @PrePersist
     protected void onCreated(){
+        this.id = UUID.randomUUID().toString();
         this.createdAt = LocalDateTime.now();
     }
 

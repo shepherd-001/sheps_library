@@ -25,7 +25,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.NUMBER_OF_ITEMS_PER_PAGE;
 import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
@@ -39,7 +38,7 @@ public class ReservationServiceImpl implements ReservationService{
     private final MailNotificationService mailNotificationService;
 
     @Override
-    public BaseResponse<ReservationResponse> reserveBook(UUID bookId) {
+    public BaseResponse<ReservationResponse> reserveBook(String bookId) {
         log.info("::::: Initiating the reservation of book :::::");
         User user = AppUtils.getCurrentUser();
         checkIfUserIsRevoked(user);
@@ -75,7 +74,7 @@ public class ReservationServiceImpl implements ReservationService{
 
     @Override
     @Cacheable(value = "reservationCache", key = "#reservationId")
-    public BaseResponse<ReservationResponse> getReservationById(UUID reservationId) {
+    public BaseResponse<ReservationResponse> getReservationById(String reservationId) {
         log.info("::::: Fetching reservation by id :::::");
         return reservationRepository.findById(reservationId)
                 .map(reservation -> BaseResponse.
@@ -94,7 +93,7 @@ public class ReservationServiceImpl implements ReservationService{
 
     @Override
     @Cacheable(value = "reservationCache", key = "'user:' + #userId + ':page:' + #pageNumber")
-    public BaseResponse<PaginatedResponse<ReservationResponse>> getAllReservationByUserId(UUID userId, int pageNumber) {
+    public BaseResponse<PaginatedResponse<ReservationResponse>> getAllReservationByUserId(String userId, int pageNumber) {
         log.info("::::: Fetching all reservations for a user :::::");
         Pageable pageable = buildPageable(pageNumber);
         Page<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageable);
@@ -129,7 +128,7 @@ public class ReservationServiceImpl implements ReservationService{
     @Override
     @Transactional
     @CacheEvict(value = "reservationCache", key = "#reservationId")
-    public BaseResponse<String> deleteReservation(UUID reservationId, UUID userId) {
+    public BaseResponse<String> deleteReservation(String reservationId, String userId) {
         if(!reservationRepository.existsByIdAndUserId(reservationId, userId))
             throw new ResourceNotFoundException("Reservation not found");
         log.info("::::: Initiating the deletion of a user reservation :::::");
@@ -141,7 +140,7 @@ public class ReservationServiceImpl implements ReservationService{
     @Override
     @Transactional
     @CacheEvict(value = "reservationCache", key = "'user:' + #userId")
-    public BaseResponse<String> deleteAllReservation(UUID userId) {
+    public BaseResponse<String> deleteAllReservation(String userId) {
         log.info("::::: Initiating the deletion of all user reservations :::::");
         reservationRepository.deleteAllByUserId(userId);
         log.info("::::: Deleted all user reservations :::::");

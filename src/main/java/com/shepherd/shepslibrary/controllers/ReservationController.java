@@ -1,12 +1,12 @@
 package com.shepherd.shepslibrary.controllers;
 
 import com.shepherd.shepslibrary.service.transaction.ReservationService;
+import com.shepherd.shepslibrary.utils.ValidationMessage;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,19 +16,22 @@ public class ReservationController {
 
     @PreAuthorize("hasRole('MEMBER')")
     @PostMapping("/create")
-    public ResponseEntity<Object> reserveBook(@RequestParam UUID bookId){
+    public ResponseEntity<Object> reserveBook(@RequestParam @NotBlank(message = ValidationMessage.BLANK_BOOK_ID)
+                                                  String bookId){
         return ResponseEntity.ok(reservationService.reserveBook(bookId));
     }
 
     @PreAuthorize("hasRole('MEMBER')")
     @GetMapping("/get")
-    public ResponseEntity<Object> getReservationById(@RequestParam UUID reservationId){
+    public ResponseEntity<Object> getReservationById(@RequestParam @NotBlank(message = ValidationMessage.NULL_RESERVATION_ID)
+                                                         String reservationId){
         return ResponseEntity.ok(reservationService.getReservationById(reservationId));
     }
 
     @PreAuthorize("hasRole('MEMBER')")
     @GetMapping("/get-all-by-user")
-    public ResponseEntity<Object> getAllReservationsByUserId(@RequestParam UUID userId,
+    public ResponseEntity<Object> getAllReservationsByUserId(@RequestParam @NotBlank(message = ValidationMessage.NULL_USER_ID)
+                                                                 String userId,
                                                              @RequestParam(defaultValue = "0") int pageNumber){
         return ResponseEntity.ok(reservationService.getAllReservationByUserId(userId, pageNumber));
     }
@@ -41,13 +44,17 @@ public class ReservationController {
 
     @DeleteMapping("/delete/{reservationId}/{userId}")
     @PreAuthorize("hasRole('MEMBER')")
-    public ResponseEntity<Object> deleteReservation(@PathVariable UUID reservationId, @PathVariable UUID userId){
+    public ResponseEntity<Object> deleteReservation(@PathVariable @NotBlank(message = ValidationMessage.NULL_RESERVATION_ID)
+                                                        String reservationId,
+                                                    @PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
+                                                    String userId){
         return ResponseEntity.ok(reservationService.deleteReservation(reservationId, userId));
     }
 
     @DeleteMapping("/delete/all/{userId}")
     @PreAuthorize("hasRole('MEMBER')")
-    public ResponseEntity<Object> deleteAllReservations(@PathVariable UUID userId){
+    public ResponseEntity<Object> deleteAllReservations(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
+                                                            String userId){
         return ResponseEntity.ok(reservationService.deleteAllReservation(userId));
     }
 }

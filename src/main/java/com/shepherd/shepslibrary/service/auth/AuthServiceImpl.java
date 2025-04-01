@@ -4,12 +4,16 @@ import com.shepherd.shepslibrary.controllers.response.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
-import com.shepherd.shepslibrary.data.dto.response.*;
+import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
+import com.shepherd.shepslibrary.data.dto.response.EmailConfirmationResponse;
+import com.shepherd.shepslibrary.data.dto.response.JwtTokenResponse;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
-import com.shepherd.shepslibrary.exceptions.*;
+import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
+import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
+import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
@@ -135,10 +139,10 @@ public class AuthServiceImpl implements AuthService{
         log.info("::::: Initiating password reset :::::");
         ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.getToken(),
                 TokenType.RESET_PASSWORD, resetPasswordRequest.getEmail());
+        tokenService.deleteToken(shepsToken);
         passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
         User user = shepsToken.getUser();
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
-        tokenService.deleteToken(shepsToken);
         updateUserCache(userRepository.save(user));
         return BaseResponse.buildResponse("Password reset successful", generateJwtTokens(user));
     }
