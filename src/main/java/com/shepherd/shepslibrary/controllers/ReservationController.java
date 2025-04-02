@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/reservation")
@@ -17,21 +19,21 @@ public class ReservationController {
     @PreAuthorize("hasRole('MEMBER')")
     @PostMapping("/create")
     public ResponseEntity<Object> reserveBook(@RequestParam @NotBlank(message = ValidationMessage.BLANK_BOOK_ID)
-                                                  String bookId){
+                                              UUID bookId){
         return ResponseEntity.ok(reservationService.reserveBook(bookId));
     }
 
     @PreAuthorize("hasRole('MEMBER')")
     @GetMapping("/get")
     public ResponseEntity<Object> getReservationById(@RequestParam @NotBlank(message = ValidationMessage.NULL_RESERVATION_ID)
-                                                         String reservationId){
+                                                         UUID reservationId){
         return ResponseEntity.ok(reservationService.getReservationById(reservationId));
     }
 
     @PreAuthorize("hasRole('MEMBER')")
     @GetMapping("/get-all-by-user")
     public ResponseEntity<Object> getAllReservationsByUserId(@RequestParam @NotBlank(message = ValidationMessage.NULL_USER_ID)
-                                                                 String userId,
+                                                                 UUID userId,
                                                              @RequestParam(defaultValue = "0") int pageNumber){
         return ResponseEntity.ok(reservationService.getAllReservationByUserId(userId, pageNumber));
     }
@@ -45,16 +47,16 @@ public class ReservationController {
     @DeleteMapping("/delete/{reservationId}/{userId}")
     @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<Object> deleteReservation(@PathVariable @NotBlank(message = ValidationMessage.NULL_RESERVATION_ID)
-                                                        String reservationId,
+                                                        UUID reservationId,
                                                     @PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
-                                                    String userId){
+                                                    UUID userId){
         return ResponseEntity.ok(reservationService.deleteReservation(reservationId, userId));
     }
 
     @DeleteMapping("/delete/all/{userId}")
     @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<Object> deleteAllReservations(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
-                                                            String userId){
+                                                            UUID userId){
         return ResponseEntity.ok(reservationService.deleteAllReservation(userId));
     }
 }

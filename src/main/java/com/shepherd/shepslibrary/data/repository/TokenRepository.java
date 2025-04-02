@@ -5,8 +5,9 @@ import com.shepherd.shepslibrary.data.model.TokenType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public interface TokenRepository extends JpaRepository<ShepsToken, String> {
+public interface TokenRepository extends JpaRepository<ShepsToken, UUID> {
 //    @Query("""
 //           select t from ShepsToken t
 //           where t.user.email = :email and t.token = :token

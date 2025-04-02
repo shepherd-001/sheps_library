@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 public class MailNotificationServiceImpl implements MailNotificationService {
     private final MailSenderService mailSenderService;
     @Value("${client_url}")
-    private String baseUrl;
+    private String clientUrl;
     private final SpringTemplateEngine templateEngine;
     private final ExecutorService executorService;
 
@@ -35,7 +35,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
 
     @Override
     public void sendVerificationMail(User user, String token) {
-        String verificationLink = "%s/verify?token=%s".formatted(baseUrl, token);
+        String verificationLink = "%s/verify?token=%s".formatted(clientUrl, token);
         Map<String, Object> variables = Map.of(
                 "firstName", user.getFirstName(),
                 "confirmationLink", verificationLink
@@ -45,7 +45,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
 
     @Override
     public void sendResetPasswordMail(User user, String token) {
-        String resetPasswordLink = "%s/reset-password?token=%s".formatted(baseUrl, token);
+        String resetPasswordLink = "%s/reset-password?token=%s".formatted(clientUrl, token);
         Map<String, Object> variables = Map.of(
                 "firstName", user.getFirstName(),
                 "resetPasswordLink", resetPasswordLink
@@ -55,7 +55,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
 
     @Override
     public void sendLibrarianInvitation(User user, String token) {
-        String invitationLink = "%s/invitation?token=%s".formatted(baseUrl, token);
+        String invitationLink = "%s/invitation?token=%s".formatted(clientUrl, token);
         Map<String, Object> variables = Map.of(
                 "invitationLink", invitationLink,
                 "firstName", user.getFirstName()

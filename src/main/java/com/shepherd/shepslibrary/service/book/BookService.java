@@ -9,14 +9,16 @@ import com.shepherd.shepslibrary.data.dto.response.BookResponse;
 import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
 import com.shepherd.shepslibrary.data.model.Book;
 
+import java.util.UUID;
+
 public interface BookService {
     BaseResponse<AddBookResponse> addBook(AddBookRequest request);
-    BaseResponse<BookResponse> getBookById(String id);
-    Book fetchBookById(String bookId);
+    BaseResponse<BookResponse> getBookById(UUID book);
+    Book fetchBookById(UUID bookId);
     BaseResponse<BookResponse> getBookByIsbn(String isbn);
-    BaseResponse<BookResponse> updateBook(UpdateBookRequest request, String bookId);
+    BaseResponse<BookResponse> updateBook(UpdateBookRequest request, UUID bookId);
     BaseResponse<PaginatedResponse<BookResponse>> getAllBooks(int pageNumber);
     BaseResponse<PaginatedResponse<BookResponse>> filterBook(FilterBookRequest request);
-    BaseResponse<String> deleteBook(String id);
+    BaseResponse<String> deleteBook(UUID id);
     Book saveBook(Book book);
 }

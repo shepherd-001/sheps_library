@@ -43,21 +43,15 @@ public class EmailValidationServiceImpl implements EmailValidationService{
 
     @Override
     public void checkAndValidateEmail(String email) {
+        email = email.toLowerCase().trim();
+        log.info("Initiating email validation for: {}", email);
+        checkEmailNotBlank(email);
+        validateNonDisposableEmail(email);
         if(!isValidEmail(email))
-            throw new EmailValidationException("Your email address is not acceptable");
+            throw new EmailValidationException("Invalid email address. Please use a valid one");
     }
 
     private boolean isValidEmail(String email) {
-        email = email.toLowerCase().trim();
-        log.info("Initiating email validation for: {}", email);
-
-        checkEmailNotBlank(email);
-        validateNonDisposableEmail(email);
-
-        return validateEmailWithExternalService(email);
-    }
-
-    private boolean validateEmailWithExternalService(String email) {
         String url = buildValidationUrl(email);
 
         try {
@@ -116,15 +110,11 @@ public class EmailValidationServiceImpl implements EmailValidationService{
     }
 
     private static void validateNonDisposableEmail(String email) {
-        String domain = extractDomainFromEmail(email);
+        String domain = email.substring(email.indexOf('@') + 1);
         if (DISPOSABLE_EMAIL_DOMAINS.contains(domain)) {
             log.error("Disposable email detected: {}", email);
             throw new EmailValidationException("Disposable email addresses are not allowed.");
         }
-    }
-
-    private static String extractDomainFromEmail(String email) {
-        return email.substring(email.indexOf('@') + 1);
     }
 
     private String buildValidationUrl(String email) {

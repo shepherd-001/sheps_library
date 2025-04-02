@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
@@ -26,7 +28,7 @@ public class UserController {
 
     @GetMapping("/get/id")
     public ResponseEntity<Object> getUserById(@RequestParam @NotBlank(message = ValidationMessage.NULL_USER_ID)
-                                                  String userId) {
+                                              UUID userId) {
         return ResponseEntity.ok(userService.getUserById(userId));
     }
 

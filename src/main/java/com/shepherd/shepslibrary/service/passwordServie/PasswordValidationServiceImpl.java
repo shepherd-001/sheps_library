@@ -32,7 +32,7 @@ public class PasswordValidationServiceImpl implements PasswordValidationService{
     }
 
     private boolean isPasswordBreached(String password) {
-        checkPasswordNotBlank(password);
+        validatePasswordNotBlank(password);
 
         String sha1Hash = DigestUtils.sha1Hex(password).toUpperCase();
         String prefix = sha1Hash.substring(0, SHA1_PREFIX_LENGTH);
@@ -62,7 +62,7 @@ public class PasswordValidationServiceImpl implements PasswordValidationService{
             }
                     }
 
-    private void checkPasswordNotBlank(String password) {
+    private void validatePasswordNotBlank(String password) {
         if (password == null || password.isBlank()) {
             throw new PasswordValidationException("Password is required to proceed with validation", 400);
         }
@@ -79,5 +79,4 @@ public class PasswordValidationServiceImpl implements PasswordValidationService{
             default -> String.format("Unexpected error when validating password. Code %s", statusCode.value());
         };
     }
-
 }

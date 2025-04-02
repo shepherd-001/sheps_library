@@ -42,22 +42,26 @@ public class AdminServiceImpl implements AdminService {
 
     @PostConstruct
     private void createAdmin() {
-        userRepository.findByRole(Role.ADMIN).ifPresentOrElse(
-                admin -> log.info("::::: Admin already exists :::::"), ()->{
-                    User admin = User.builder()
-                            .firstName("Admin")
-                            .lastName("Admin")
-                            .gender(Gender.MALE)
-                            .email(adminEmail.toLowerCase())
-                            .password(passwordEncoder.encode(adminPassword))
-                            .role(Role.ADMIN)
-                            .isEnabled(true)
-                            .isRevoked(false)
-                            .build();
-                    userRepository.save(admin);
-                    log.info("::::: Admin created successfully :::::");
-                });
+        if (userRepository.existsByRole(Role.ADMIN)) {
+            log.info("::::: Admin already exists :::::");
+            return;
+        }
+
+        User admin = User.builder()
+                .firstName("Admin")
+                .lastName("Admin")
+                .gender(Gender.MALE)
+                .email(adminEmail.toLowerCase())
+                .password(passwordEncoder.encode(adminPassword))
+                .role(Role.ADMIN)
+                .isEnabled(true)
+                .isRevoked(false)
+                .build();
+
+        userRepository.save(admin);
+        log.info("::::: Admin created successfully :::::");
     }
+
 
     @Override
     @Transactional

@@ -5,11 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Builder
 @Getter
 public class TransactionResponse {
-    private String transactionId;
+    private UUID transactionId;
     private TransactionType transactionType;
     private String firstName;
     private String lastName;

@@ -5,10 +5,12 @@ import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
 import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
 import com.shepherd.shepslibrary.data.dto.response.TransactionResponse;
 
+import java.util.UUID;
+
 public interface TransactionService {
     BaseResponse<TransactionResponse> borrowBook(BorrowBookRequest request);
-    BaseResponse<TransactionResponse> returnBook(String transactionId);
-    BaseResponse<PaginatedResponse<TransactionResponse>> getAllTransactionByUserId(String userId, int pageNumber);
+    BaseResponse<TransactionResponse> returnBook(UUID transactionId);
+    BaseResponse<PaginatedResponse<TransactionResponse>> getAllTransactionByUserId(UUID userId, int pageNumber);
     BaseResponse<PaginatedResponse<TransactionResponse>> getAllTransactions(int pageNumber);
 //    void sendBookOverdueNotifications();
 }

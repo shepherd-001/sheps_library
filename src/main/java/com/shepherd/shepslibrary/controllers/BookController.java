@@ -8,7 +8,6 @@ import com.shepherd.shepslibrary.service.book.BookService;
 import com.shepherd.shepslibrary.utils.RegexPattern;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,7 +33,7 @@ public class BookController {
     }
 
     @GetMapping("/{bookId}")
-    public ResponseEntity<Object> getBookById(@PathVariable(required = false) String bookId){
+    public ResponseEntity<Object> getBookById(@PathVariable(required = false) UUID bookId){
         checkBookNotBlank(bookId);
         return ResponseEntity.ok(bookService.getBookById(bookId));
     }
@@ -50,7 +51,7 @@ public class BookController {
     @PutMapping("/{bookId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Object> updateBook(@Valid @RequestBody UpdateBookRequest updateBookRequest,
-                                             @PathVariable String bookId){
+                                             @PathVariable UUID bookId){
         checkBookNotBlank(bookId);
         return ResponseEntity.ok(bookService.updateBook(updateBookRequest, bookId));
     }
@@ -68,13 +69,14 @@ public class BookController {
 
     @DeleteMapping("/{bookId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> deleteBook(@PathVariable String bookId){
+    public ResponseEntity<Object> deleteBook(@PathVariable UUID bookId){
         checkBookNotBlank(bookId);
-        return ResponseEntity.ok(bookService.deleteBook(bookId));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body(bookService.deleteBook(bookId));
     }
 
-    private static void checkBookNotBlank(String bookId) {
-        if(bookId == null || bookId.isBlank())
+    private static void checkBookNotBlank(UUID bookId) {
+        if(bookId == null)
             throw new ShepsLibraryException(ValidationMessage.BLANK_BOOK_ID);
     }
 }
