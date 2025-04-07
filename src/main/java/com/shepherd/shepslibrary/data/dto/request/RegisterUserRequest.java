@@ -3,6 +3,7 @@ package com.shepherd.shepslibrary.data.dto.request;
 import com.shepherd.shepslibrary.data.model.Gender;
 import com.shepherd.shepslibrary.utils.RegexPattern;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
+import com.shepherd.shepslibrary.utils.validator.EnumValid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -34,5 +35,7 @@ public class RegisterUserRequest {
     @Pattern(regexp = RegexPattern.PASSWORD, message = ValidationMessage.INVALID_PASSWORD)
     private String password;
 
-    private Gender gender;
+    @NotBlank(message = ValidationMessage.BLANK_GENDER)
+    @EnumValid(enumClass = Gender.class, ignoreCase = true, message = ValidationMessage.INVALID_GENDER)
+    private String gender;
 }

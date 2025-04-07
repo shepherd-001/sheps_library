@@ -3,11 +3,14 @@ package com.shepherd.shepslibrary.mapper;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.data.dto.response.*;
+import com.shepherd.shepslibrary.data.model.Gender;
 import com.shepherd.shepslibrary.data.model.User;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Arrays;
 
 @Mapper(config = CentralConfig.class)
 public interface UserMapper {
@@ -15,8 +18,13 @@ public interface UserMapper {
     @Mapping(target = "lastName", expression = "java(request.getLastName().trim())")
     @Mapping(target = "email", expression = "java(request.getEmail().toLowerCase().trim())")
     @Mapping(target = "password", expression = "java(passwordEncoder.encode(request.getPassword()))")
+    @Mapping(target = "gender", expression = "java(toGender(request.getGender()))")
     @Mapping(target = "role", constant = "MEMBER")
     User mapToUser(RegisterUserRequest request, @Context PasswordEncoder passwordEncoder);
+
+    default Gender toGender(String value) {
+        return value == null ? null : Gender.valueOf(value.trim().toUpperCase());
+    }
 
 
     @Mapping(target = "userId", source = "user.id")
@@ -49,7 +57,7 @@ public interface UserMapper {
     @Mapping(target = "firstName", expression = "java(request.getFirstName().trim())")
     @Mapping(target = "lastName", expression = "java(request.getLastName().trim())")
     @Mapping(target = "email", expression = "java(request.getEmail().toLowerCase().trim())")
-    @Mapping(target = "gender", source = "gender")
+    @Mapping(target = "gender", expression = "java(toGender(request.getGender()))")
     @Mapping(target = "role", constant = "LIBRARIAN")
     User mapToLibrarian(InviteLibrarianRequest request);
 
