@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.controllers;
 
+import com.shepherd.shepslibrary.controllers.response.ApiResponse;
 import com.shepherd.shepslibrary.service.transaction.ReservationService;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.constraints.NotBlank;
@@ -18,45 +19,51 @@ public class ReservationController {
 
     @PreAuthorize("hasRole('MEMBER')")
     @PostMapping("/create")
-    public ResponseEntity<Object> reserveBook(@RequestParam @NotBlank(message = ValidationMessage.BLANK_BOOK_ID)
+    public ResponseEntity<ApiResponse<?>> reserveBook(@RequestParam @NotBlank(message = ValidationMessage.BLANK_BOOK_ID)
                                               UUID bookId){
-        return ResponseEntity.ok(reservationService.reserveBook(bookId));
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse("Book reserved successfully", reservationService.reserveBook(bookId)));
     }
 
     @PreAuthorize("hasRole('MEMBER')")
-    @GetMapping("/get")
-    public ResponseEntity<Object> getReservationById(@RequestParam @NotBlank(message = ValidationMessage.NULL_RESERVATION_ID)
+    @GetMapping
+    public ResponseEntity<ApiResponse<?>> getReservationById(@RequestParam @NotBlank(message = ValidationMessage.NULL_RESERVATION_ID)
                                                          UUID reservationId){
-        return ResponseEntity.ok(reservationService.getReservationById(reservationId));
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(reservationService.getReservationById(reservationId)));
     }
 
     @PreAuthorize("hasRole('MEMBER')")
-    @GetMapping("/get-all-by-user")
-    public ResponseEntity<Object> getAllReservationsByUserId(@RequestParam @NotBlank(message = ValidationMessage.NULL_USER_ID)
+    @GetMapping("/all/user-id")
+    public ResponseEntity<ApiResponse<?>> getAllReservationsByUserId(@RequestParam @NotBlank(message = ValidationMessage.NULL_USER_ID)
                                                                  UUID userId,
                                                              @RequestParam(defaultValue = "0") int pageNumber){
-        return ResponseEntity.ok(reservationService.getAllReservationByUserId(userId, pageNumber));
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(reservationService.getAllReservationByUserId(userId, pageNumber)));
     }
 
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    @GetMapping("/get-all")
-    public ResponseEntity<Object> getAllReservations(@RequestParam(defaultValue = "0") int pageNumber){
-        return ResponseEntity.ok(reservationService.getAllReservations(pageNumber));
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<?>> getAllReservations(@RequestParam(defaultValue = "0") int pageNumber){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(reservationService.getAllReservations(pageNumber)));
     }
 
-    @DeleteMapping("/delete/{reservationId}/{userId}")
+    @DeleteMapping("/{reservationId}/{userId}")
     @PreAuthorize("hasRole('MEMBER')")
-    public ResponseEntity<Object> deleteReservation(@PathVariable @NotBlank(message = ValidationMessage.NULL_RESERVATION_ID)
+    public ResponseEntity<ApiResponse<?>> deleteReservation(@PathVariable @NotBlank(message = ValidationMessage.NULL_RESERVATION_ID)
                                                         UUID reservationId,
                                                     @PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
                                                     UUID userId){
-        return ResponseEntity.ok(reservationService.deleteReservation(reservationId, userId));
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(reservationService.deleteReservation(reservationId, userId)));
     }
 
-    @DeleteMapping("/delete/all/{userId}")
+    @DeleteMapping("/all/{userId}")
     @PreAuthorize("hasRole('MEMBER')")
-    public ResponseEntity<Object> deleteAllReservations(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
+    public ResponseEntity<ApiResponse<?>> deleteAllReservations(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
                                                             UUID userId){
-        return ResponseEntity.ok(reservationService.deleteAllReservation(userId));
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(reservationService.deleteAllReservation(userId)));
     }
 }

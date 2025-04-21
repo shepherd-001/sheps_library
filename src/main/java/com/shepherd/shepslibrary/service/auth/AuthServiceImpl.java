@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.service.auth;
 
-import com.shepherd.shepslibrary.controllers.response.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
@@ -46,7 +45,7 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     @Transactional
-    public BaseResponse<EmailConfirmationResponse> verifyEmail(String token, String email) {
+    public EmailConfirmationResponse verifyEmail(String token, String email) {
         ShepsToken shepsToken = tokenService.validateToken(token, TokenType.EMAIL_CONFIRMATION, email);
         User user = shepsToken.getUser();
 
@@ -57,13 +56,12 @@ public class AuthServiceImpl implements AuthService{
         updateUserCache(userRepository.save(user));
         tokenService.deleteToken(shepsToken);
 
-        return BaseResponse.buildResponse("User verified successfully",
-                userMapper.mapToEmailConfirmationResponse(user, tokenService.generateJwtTokens(user)));
+        return userMapper.mapToEmailConfirmationResponse(user, tokenService.generateJwtTokens(user));
     }
 
     @Override
     @Transactional
-    public BaseResponse<AuthResponse> login(LoginRequest loginRequest){
+    public AuthResponse login(LoginRequest loginRequest){
         Authentication authentication = authenticateUser(loginRequest);
         User user = getUserByEmail(authentication.getName());
 
@@ -71,7 +69,7 @@ public class AuthServiceImpl implements AuthService{
             throw new ShepsLibraryException("Verify your email address before you proceed");
 
         tokenService.deleteAllTokenByUserAndType(user.getEmail(), TokenType.JWT);
-        return BaseResponse.buildResponse("User logged in successfully", generateJwtTokens(user));
+        return generateJwtTokens(user);
     }
 
     private Authentication authenticateUser(LoginRequest loginRequest) {
@@ -94,7 +92,7 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     @Transactional
-    public BaseResponse<AuthResponse> changePassword(ChangePasswordRequest changePasswordRequest) {
+    public AuthResponse changePassword(ChangePasswordRequest changePasswordRequest) {
         log.info("::::: Initiating change password request :::::");
         User user = getCurrentUser();
         validatePasswordChange(user.getPassword(), changePasswordRequest);
@@ -102,7 +100,7 @@ public class AuthServiceImpl implements AuthService{
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         updateUserCache(userRepository.save(user));
         tokenService.deleteAllTokenByUserAndType(user.getEmail(), TokenType.JWT);
-        return BaseResponse.buildResponse("Password changed successfully", generateJwtTokens(user));
+        return generateJwtTokens(user);
     }
 
     private void validatePasswordChange(String currentEncodedPassword, ChangePasswordRequest request) {
@@ -110,7 +108,7 @@ public class AuthServiceImpl implements AuthService{
             throw new BadCredentialsException("Invalid current password");
 
         if (request.getCurrentPassword().equals(request.getNewPassword()))
-            throw new BadCredentialsException("New password cannot be the same as the old password");
+            throw new BadCredentialsException("New password cannot be the same as the current password");
 
         if (!request.getNewPassword().equals(request.getConfirmPassword()))
             throw new BadCredentialsException("Passwords do not match");
@@ -119,12 +117,11 @@ public class AuthServiceImpl implements AuthService{
     }
 
     @Override
-    public BaseResponse<String> requestPasswordReset(String email) {
+    public String requestPasswordReset(String email) {
         userRepository.findByEmailEqualsIgnoreCase(email.trim())
                 .filter(User::isEnabled)
                 .ifPresent(this::sendPasswordResetToken);
-        return BaseResponse.buildResponse
-                ("If the email exists, a reset password link has been sent to your email address");
+        return "If the email exists, a reset password link has been sent to your email address";
     }
 
     private void sendPasswordResetToken(User user) {
@@ -135,7 +132,7 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     @Transactional
-    public BaseResponse<AuthResponse> resetPassword(ResetPasswordRequest resetPasswordRequest) {
+    public AuthResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
         log.info("::::: Initiating password reset :::::");
         ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.getToken(),
                 TokenType.RESET_PASSWORD, resetPasswordRequest.getEmail());
@@ -144,7 +141,7 @@ public class AuthServiceImpl implements AuthService{
         User user = shepsToken.getUser();
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
         updateUserCache(userRepository.save(user));
-        return BaseResponse.buildResponse("Password reset successful", generateJwtTokens(user));
+        return generateJwtTokens(user);
     }
 
     @CachePut(value = "userCache", key = "#user.email")

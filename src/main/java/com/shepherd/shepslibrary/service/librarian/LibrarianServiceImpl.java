@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.service.librarian;
 
-import com.shepherd.shepslibrary.controllers.response.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.CreatePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
 import com.shepherd.shepslibrary.data.dto.response.JwtTokenResponse;
@@ -28,7 +27,7 @@ public class LibrarianServiceImpl implements LibrarianService{
     private final PasswordValidationService passwordValidationService;
 
     @Override
-    public BaseResponse<AuthResponse> createPassword(CreatePasswordRequest request) {
+    public AuthResponse createPassword(CreatePasswordRequest request) {
         ShepsToken shepsToken = tokenService.validateToken(request.getToken(), TokenType.LIBRARIAN_INVITATION, request.getEmail());
 //        passwordValidationService.validatePasswordNotBreached(request.getPassword());
         User user = shepsToken.getUser();
@@ -39,10 +38,10 @@ public class LibrarianServiceImpl implements LibrarianService{
         updateUserCache(userRepository.save(user));
         tokenService.deleteToken(shepsToken);
         JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(user);
-        return BaseResponse.buildResponse("Librarian password created successfully", AuthResponse.builder()
-                        .accessToken(jwtTokenResponse.getAccessToken())
-                        .refreshToken(jwtTokenResponse.getRefreshToken())
-                .build());
+        return AuthResponse.builder()
+                .accessToken(jwtTokenResponse.getAccessToken())
+                .refreshToken(jwtTokenResponse.getRefreshToken())
+                .build();
     }
 
     @CachePut(value = "userCache", key = "#user.email")

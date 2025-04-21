@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.service.transaction;
 
-import com.shepherd.shepslibrary.controllers.response.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
 import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
 import com.shepherd.shepslibrary.data.dto.response.TransactionResponse;
@@ -42,7 +41,7 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Override
     @Transactional
-    public BaseResponse<TransactionResponse> borrowBook(BorrowBookRequest request) {
+    public TransactionResponse borrowBook(BorrowBookRequest request) {
         log.info("::::: Initiating borrow book request :::::");
         User user = AppUtils.getCurrentUser();
         checkIfUserIsRevoked(user);
@@ -62,7 +61,7 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.setCreatedBy(user.getEmail());
         Transaction savedTransaction = transactionRepository.save(transaction);
         log.info("::::: Book borrowed successfully :::::");
-        return BaseResponse.buildResponse(mapToTransactionResponse(savedTransaction));
+        return mapToTransactionResponse(savedTransaction);
     }
 
     private void checkIfUserIsRevoked(User user){
@@ -107,7 +106,7 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
-    public BaseResponse<TransactionResponse> returnBook(UUID transactionId) {
+    public TransactionResponse returnBook(UUID transactionId) {
         log.info("::::: Initiating return book :::::");
         Transaction transaction = getTransactionById(transactionId);
         Book book = transaction.getBook();
@@ -120,7 +119,7 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.setUpdatedBy(AppUtils.getCurrentUser().getEmail());
         Transaction savedTransaction = transactionRepository.save(transaction);
         updateTransactionCache(savedTransaction);
-        return BaseResponse.buildResponse(mapToTransactionResponse(savedTransaction));
+        return mapToTransactionResponse(savedTransaction);
     }
 
     private Transaction getTransactionById(UUID transactionId) {
@@ -130,11 +129,11 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Override
     @Cacheable(value = "transactionCache", key = "'user:' + #userId + ':page:' + #pageNumber")
-    public BaseResponse<PaginatedResponse<TransactionResponse>> getAllTransactionByUserId(UUID userId, int pageNumber) {
+    public PaginatedResponse<TransactionResponse> getAllTransactionByUserId(UUID userId, int pageNumber) {
         log.info("::::: Fetching all transactions by user id :::::");
         Pageable pageable = buildPageable(pageNumber);
         Page<Transaction> transactions = transactionRepository.findAllByUserId(userId, pageable);
-        return BaseResponse.buildResponse(getTransactionPaginatedResponse(transactions));
+        return getTransactionPaginatedResponse(transactions);
     }
 
     private Pageable buildPageable(int pageNumber){
@@ -154,11 +153,11 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
-    public BaseResponse<PaginatedResponse<TransactionResponse>> getAllTransactions(int pageNumber) {
+    public PaginatedResponse<TransactionResponse> getAllTransactions(int pageNumber) {
         log.info("::::: Fetching all transactions :::::");
         Pageable pageable = buildPageable(pageNumber);
         Page<Transaction> transactions = transactionRepository.findAll(pageable);
-        return BaseResponse.buildResponse(getTransactionPaginatedResponse(transactions));
+        return getTransactionPaginatedResponse(transactions);
     }
 
 //    @Override

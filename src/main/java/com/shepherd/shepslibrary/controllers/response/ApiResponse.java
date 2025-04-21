@@ -14,15 +14,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BaseResponse<T> {
+public class ApiResponse<T> {
     private String message;
     private T data;
     private boolean isSuccessful;
     @JsonFormat(pattern = "HH:mm:ss, dd-MM-yyyy")
     private LocalDateTime timeStamp;
 
-    public static <T> BaseResponse<T> buildResponse(String message, T data) {
-        return BaseResponse.<T>builder()
+    public static <T> ApiResponse<T> buildResponse(String message, T data) {
+        return ApiResponse.<T>builder()
                 .message(message)
                 .data(data)
                 .isSuccessful(true)
@@ -30,35 +30,19 @@ public class BaseResponse<T> {
                 .build();
     }
 
-    public static <T> BaseResponse<T> buildResponse(String message){
-        return BaseResponse.<T>builder()
+    public static <T> ApiResponse<T> buildResponse(String message){
+        return ApiResponse.<T>builder()
                 .message(message)
                 .isSuccessful(true)
                 .timeStamp(LocalDateTime.now())
                 .build();
     }
 
-    public static <T> BaseResponse<T> buildResponse(T data){
-        return BaseResponse.<T>builder()
+    public static <T> ApiResponse<T> buildResponse(T data){
+        return ApiResponse.<T>builder()
                 .data(data)
                 .isSuccessful(true)
                 .timeStamp(LocalDateTime.now())
                 .build();
     }
-//
-//    public static BaseResponse<Object> buildResponse(Object data){
-//        return BaseResponse.builder()
-//                .data(data)
-//                .isSuccessful(true)
-//                .timeStamp(LocalDateTime.now())
-//                .build();
-//    }
-//
-//    public static BaseResponse<Object> buildResponse(String message){
-//        return BaseResponse.builder()
-//                .message(message)
-//                .isSuccessful(true)
-//                .timeStamp(LocalDateTime.now())
-//                .build();
-//    }
 }

@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.service.transaction;
 
-import com.shepherd.shepslibrary.controllers.response.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
 import com.shepherd.shepslibrary.data.dto.response.ReservationResponse;
 import com.shepherd.shepslibrary.data.model.Book;
@@ -41,7 +40,7 @@ public class ReservationServiceImpl implements ReservationService{
     private final ReservationMapper reservationMapper;
 
     @Override
-    public BaseResponse<ReservationResponse> reserveBook(UUID bookId) {
+    public ReservationResponse reserveBook(UUID bookId) {
         log.info("::::: Initiating the reservation of book :::::");
         User user = AppUtils.getCurrentUser();
         checkIfUserIsRevoked(user);
@@ -60,8 +59,7 @@ public class ReservationServiceImpl implements ReservationService{
 
         Reservation savedReservation = reservationRepository.save(reservation);
         log.info("::::: Book reserved successfully :::::");
-        return BaseResponse.buildResponse("Book reserved successfully",
-                reservationMapper.mapToReservationResponse(savedReservation));
+        return reservationMapper.mapToReservationResponse(savedReservation);
     }
 
     private void checkIfUserIsRevoked(User user){
@@ -77,21 +75,20 @@ public class ReservationServiceImpl implements ReservationService{
 
     @Override
     @Cacheable(value = "reservationCache", key = "#reservationId")
-    public BaseResponse<ReservationResponse> getReservationById(UUID reservationId) {
+    public ReservationResponse getReservationById(UUID reservationId) {
         log.info("::::: Fetching reservation by id :::::");
         return reservationRepository.findById(reservationId)
-                .map(reservation -> BaseResponse.
-                        buildResponse(reservationMapper.mapToReservationResponse(reservation)))
+                .map(reservationMapper::mapToReservationResponse)
                 .orElseThrow(()-> new ResourceNotFoundException("Reservation not found"));
     }
 
     @Override
     @Cacheable(value = "reservationCache", key = "'user:' + #userId + ':page:' + #pageNumber")
-    public BaseResponse<PaginatedResponse<ReservationResponse>> getAllReservationByUserId(UUID userId, int pageNumber) {
+    public PaginatedResponse<ReservationResponse> getAllReservationByUserId(UUID userId, int pageNumber) {
         Pageable pageable = buildPageable(pageNumber);
         Page<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageable);
         log.info("::::: Fetched all reservations for a user :::::");
-        return BaseResponse.buildResponse(paginatedReservationResponse(reservations));
+        return paginatedReservationResponse(reservations);
     }
 
     private Pageable buildPageable(int pageNumber){
@@ -112,31 +109,31 @@ public class ReservationServiceImpl implements ReservationService{
 
     @Override
     @Cacheable(value = "reservationCache", key = "'allReservations:page:' + #pageNumber")
-    public BaseResponse<PaginatedResponse<ReservationResponse>> getAllReservations(int pageNumber) {
+    public PaginatedResponse<ReservationResponse> getAllReservations(int pageNumber) {
         Pageable pageable = buildPageable(pageNumber);
         Page<Reservation> reservations = reservationRepository.findAll(pageable);
         log.info("::::: Fetched all reservations :::::");
-        return BaseResponse.buildResponse(paginatedReservationResponse(reservations));
+        return paginatedReservationResponse(reservations);
     }
 
     @Override
     @Transactional
     @CacheEvict(value = "reservationCache", key = "#reservationId")
-    public BaseResponse<String> deleteReservation(UUID reservationId, UUID userId) {
+    public String deleteReservation(UUID reservationId, UUID userId) {
         if(!reservationRepository.existsByIdAndUserId(reservationId, userId))
             throw new ResourceNotFoundException("Reservation not found");
         reservationRepository.deleteByIdAndUserId(reservationId, userId);
         log.info("::::: Reservation deleted successfully :::::");
-        return BaseResponse.buildResponse("Reservation deleted successfully");
+        return "Reservation deleted successfully";
     }
 
     @Override
     @Transactional
     @CacheEvict(value = "reservationCache", key = "'user:' + #userId")
-    public BaseResponse<String> deleteAllReservation(UUID userId) {
+    public String deleteAllReservation(UUID userId) {
         reservationRepository.deleteAllByUserId(userId);
         log.info("::::: Deleted all user reservations :::::");
-        return BaseResponse.buildResponse("Successfully deleted all reservations");
+        return "Successfully deleted all reservations";
     }
 
 //    @Override

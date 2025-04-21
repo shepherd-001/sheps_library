@@ -10,8 +10,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Arrays;
-
 @Mapper(config = CentralConfig.class)
 public interface UserMapper {
     @Mapping(target = "firstName", expression = "java(request.getFirstName().trim())")

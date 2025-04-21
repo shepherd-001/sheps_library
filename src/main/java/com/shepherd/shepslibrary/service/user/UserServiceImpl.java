@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.service.user;
 
-import com.shepherd.shepslibrary.controllers.response.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
 import com.shepherd.shepslibrary.data.dto.response.RegisterUserResponse;
@@ -48,15 +47,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public BaseResponse<RegisterUserResponse> registerUser(RegisterUserRequest registerUserRequest) {
+    public RegisterUserResponse registerUser(RegisterUserRequest registerUserRequest) {
         validateRegisterRequest(registerUserRequest);
 
         User savedUser = userRepository.save(userMapper.mapToUser(registerUserRequest, passwordEncoder));
         sendEmailConfirmation(savedUser);
 
         log.info("::::: User with the first name {} registered successfully :::::", savedUser.getFirstName());
-        return BaseResponse.buildResponse("User registered successfully",
-                userMapper.mapToRegisterResponse(savedUser));
+        return userMapper.mapToRegisterResponse(savedUser);
     }
 
     private void validateRegisterRequest(RegisterUserRequest registerUserRequest) {
@@ -73,20 +71,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Cacheable(value = "userCache", key = "#userId")
-    public BaseResponse<UserResponse> getUserById(UUID userId) {
+    public UserResponse getUserById(UUID userId) {
         log.info("::::: Fetching a user by id :::::");
         return userRepository.findById(userId)
-                .map(user -> BaseResponse.buildResponse(userMapper.mapToUserResponse(user)))
+                .map(userMapper::mapToUserResponse)
                 .orElseThrow(()-> new ResourceNotFoundException("User with the provided Id not found"));
     }
 
     @Override
     @Cacheable(value = "userCache", key = "'role:' + #role + ':page:' + #pageNumber")
-    public BaseResponse<PaginatedResponse<UserResponse>> getAllUsersByRole(Role role, int pageNumber) {
+    public PaginatedResponse<UserResponse> getAllUsersByRole(Role role, int pageNumber) {
         log.info("::::: Fetching all users by role :::::");
         Pageable pageable = findAllUsersPageRequest(pageNumber);
         Page<User> users = userRepository.findAllByRole(role, pageable);
-        return BaseResponse.buildResponse(buildPaginatedUserResponse(users));
+        return buildPaginatedUserResponse(users);
     }
 
     private Pageable findAllUsersPageRequest(int pageNumber){
@@ -108,10 +106,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Cacheable(value = "userCache", key = "'status:' + #status + ':page:' + #pageNumber")
-    public BaseResponse<PaginatedResponse<UserResponse>> getAllUsersByStatus(boolean status, int pageNumber) {
+    public PaginatedResponse<UserResponse> getAllUsersByStatus(boolean status, int pageNumber) {
         log.info("::::: Fetching all users by status :::::");
         Pageable pageable = findAllUsersPageRequest(pageNumber);
         Page<User> users = userRepository.findAllByIsEnabled(status, pageable);
-        return BaseResponse.buildResponse(buildPaginatedUserResponse(users));
+        return buildPaginatedUserResponse(users);
     }
 }

@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.controllers;
 
+import com.shepherd.shepslibrary.controllers.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.FilterBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
@@ -27,52 +28,55 @@ public class BookController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> addBook(@Valid @RequestBody AddBookRequest addBookRequest){
+    public ResponseEntity<ApiResponse<?>> addBook(@Valid @RequestBody AddBookRequest addBookRequest){
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(bookService.addBook(addBookRequest));
+                .body(ApiResponse
+                        .buildResponse("Book added successfully", bookService.addBook(addBookRequest)));
     }
 
     @GetMapping("/{bookId}")
-    public ResponseEntity<Object> getBookById(@PathVariable(required = false) UUID bookId){
+    public ResponseEntity<ApiResponse<?>> getBookById(@PathVariable(required = false) UUID bookId){
         checkBookNotBlank(bookId);
-        return ResponseEntity.ok(bookService.getBookById(bookId));
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(bookService.getBookById(bookId)));
     }
 
     @GetMapping("/isbn/{isbn}")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public ResponseEntity<Object> getBookByIsbn(@PathVariable
+    public ResponseEntity<ApiResponse<?>> getBookByIsbn(@PathVariable
                                                     @Pattern(message= ValidationMessage.INVALID_ISBN, regexp = RegexPattern.ISBN)
                                                     String isbn){
         if(isbn.isBlank())
             throw new ShepsLibraryException(ValidationMessage.BLANK_ISBN);
-        return ResponseEntity.ok(bookService.getBookByIsbn(isbn));
+        return ResponseEntity.ok(ApiResponse.buildResponse(bookService.getBookByIsbn(isbn)));
     }
 
     @PutMapping("/{bookId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> updateBook(@Valid @RequestBody UpdateBookRequest updateBookRequest,
+    public ResponseEntity<ApiResponse<?>> updateBook(@Valid @RequestBody UpdateBookRequest updateBookRequest,
                                              @PathVariable UUID bookId){
         checkBookNotBlank(bookId);
-        return ResponseEntity.ok(bookService.updateBook(updateBookRequest, bookId));
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse("Book updated successfully", bookService.updateBook(updateBookRequest, bookId)));
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllBooks(@RequestParam(defaultValue = "0")
+    public ResponseEntity<ApiResponse<?>> getAllBooks(@RequestParam(defaultValue = "0")
                                                   int pageNumber){
-        return ResponseEntity.ok(bookService.getAllBooks(pageNumber));
+        return ResponseEntity.ok(ApiResponse.buildResponse(bookService.getAllBooks(pageNumber)));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Object> filterBook(@Valid @RequestBody FilterBookRequest filterBookRequest){
-        return ResponseEntity.ok(bookService.filterBook(filterBookRequest));
+    public ResponseEntity<ApiResponse<?>> filterBook(@Valid @RequestBody FilterBookRequest filterBookRequest){
+        return ResponseEntity.ok(ApiResponse.buildResponse(bookService.filterBook(filterBookRequest)));
     }
 
     @DeleteMapping("/{bookId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> deleteBook(@PathVariable UUID bookId){
+    public ResponseEntity<ApiResponse<?>> deleteBook(@PathVariable UUID bookId){
         checkBookNotBlank(bookId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .body(bookService.deleteBook(bookId));
+                .body(ApiResponse.buildResponse(bookService.deleteBook(bookId)));
     }
 
     private static void checkBookNotBlank(UUID bookId) {

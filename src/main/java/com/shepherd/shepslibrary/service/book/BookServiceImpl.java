@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.service.book;
 
-import com.shepherd.shepslibrary.controllers.response.BaseResponse;
 import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.FilterBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
@@ -43,7 +42,7 @@ public class BookServiceImpl implements BookService {
     private final BookMapper bookMapper;
 
     @Override
-    public BaseResponse<AddBookResponse> addBook(AddBookRequest request) {
+    public AddBookResponse addBook(AddBookRequest request) {
         if(bookRepository.existsByTitle(request.getTitle()))
             throw new AlreadyExistsException("Book with title '%s' already exists".formatted(request.getTitle()));
         Book book = bookMapper.mapToBook(request);
@@ -51,8 +50,7 @@ public class BookServiceImpl implements BookService {
         book.setCreatedBy(AppUtils.getCurrentUser().getEmail());
         Book savedBook = bookRepository.save(book);
         log.info("::::: New book added :::::");
-        return BaseResponse.buildResponse("Book added successfully",
-                bookMapper.mapToAddBookResponse(savedBook));
+        return bookMapper.mapToAddBookResponse(savedBook);
     }
 
     private String generateRandomIsbn() {
@@ -68,10 +66,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Cacheable(value = "bookCache", key = "#bookId", unless = "#result == null")
-    public BaseResponse<BookResponse> getBookById(UUID bookId) {
+    public BookResponse getBookById(UUID bookId) {
         log.info("::::: Fetching book by id :::::");
         Book book = fetchBookById(bookId);
-        return BaseResponse.buildResponse(bookMapper.mapToBookResponse(book));
+        return bookMapper.mapToBookResponse(book);
     }
 
     @Override
@@ -82,31 +80,31 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Cacheable(value = "bookCache", key = "#isbn", unless = "#result == null")
-    public BaseResponse<BookResponse> getBookByIsbn(String isbn) {
+    public BookResponse getBookByIsbn(String isbn) {
         log.info("::::: Fetching book by isbn :::::");
         return bookRepository.findByIsbn(isbn)
-                .map(book -> BaseResponse.buildResponse(bookMapper.mapToBookResponse(book)))
+                .map(bookMapper::mapToBookResponse)
                 .orElseThrow(()-> new ResourceNotFoundException("Book with the provided ISBN not found"));
     }
 
     @Override
     @Transactional
     @CachePut(value = "bookCache", key = "#bookId")
-    public BaseResponse<BookResponse> updateBook(UpdateBookRequest updateBookRequest, UUID bookId) {
+    public BookResponse updateBook(UpdateBookRequest updateBookRequest, UUID bookId) {
         Book book = fetchBookById(bookId);
         bookMapper.updateBookFromRequest(updateBookRequest, book);
         book.setUpdatedBy(AppUtils.getCurrentUser().getUpdatedBy());
         Book savedBook = bookRepository.save(book);
         log.info("::::: Updated a book :::::");
-        return BaseResponse.buildResponse("Book updated successfully", bookMapper.mapToBookResponse(savedBook));
+        return bookMapper.mapToBookResponse(savedBook);
     }
 
     @Override
-    public BaseResponse<PaginatedResponse<BookResponse>> getAllBooks(int pageNumber) {
+    public PaginatedResponse<BookResponse> getAllBooks(int pageNumber) {
         log.info("::::: Fetching all books :::::");
         Pageable pageable = findAllBooksPageRequest(pageNumber);
         Page<Book> books = bookRepository.findAll(pageable);
-        return BaseResponse.buildResponse(buildPaginatedBookResponse(books));
+        return buildPaginatedBookResponse(books);
     }
 
     private Pageable findAllBooksPageRequest(int pageNumber) {
@@ -127,7 +125,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Cacheable(value = "bookCache", key = "#request.title + ':' + #request.author + ':' + #request.genre + ':' + #request.pageNumber")
-    public BaseResponse<PaginatedResponse<BookResponse>> filterBook(FilterBookRequest request) {
+    public PaginatedResponse<BookResponse> filterBook(FilterBookRequest request) {
         log.info(":::::  Filtering book :::::");
         Pageable pageable = findAllBooksPageRequest(request.getPageNumber());
         Specification<Book> bookSpecification = Specification.where(
@@ -135,19 +133,19 @@ public class BookServiceImpl implements BookService {
                 .and(BookSpecification.hasAuthor(request.getAuthor()))
                 .and(BookSpecification.hasGenre(request.getGenre()));
         Page<Book> books = bookRepository.findAll(bookSpecification, pageable);
-        return BaseResponse.buildResponse(buildPaginatedBookResponse(books));
+        return buildPaginatedBookResponse(books);
     }
 
     @Override
     @Transactional
     @CacheEvict(value = "bookCache", key = "bookId")
 //    @CacheEvict(value = "bookCache", allEntries = true)
-    public BaseResponse<String> deleteBook(UUID bookId) {
+    public String deleteBook(UUID bookId) {
         if(!bookRepository.existsById(bookId))
             throw new ResourceNotFoundException("Book with the provided ID not found");
         bookRepository.deleteById(bookId);
         log.info("::::: Deleted a book by id :::::");
-        return BaseResponse.buildResponse("Book deleted successfully");
+        return "Book deleted successfully";
     }
 
     @Override
