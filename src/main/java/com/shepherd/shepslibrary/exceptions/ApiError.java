@@ -24,4 +24,14 @@ public class ApiError {
                 .status(false)
                 .build();
     }
+
+    public static ApiError buildErrorResponse(Object error){
+        return ApiError.builder()
+                .error(error)
+                .timestamp(LocalDateTime.now())
+                .status(false)
+                .build();
+    }
+
+
 }

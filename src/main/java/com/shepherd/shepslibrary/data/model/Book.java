@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.data.model;
 
+import com.shepherd.shepslibrary.data.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
@@ -15,7 +16,7 @@ import lombok.*;
 @Table(indexes = {
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
-public class Book extends BaseModel{
+public class Book extends BaseEntity {
     @Column(unique = true)
     private String title;
     private String author;

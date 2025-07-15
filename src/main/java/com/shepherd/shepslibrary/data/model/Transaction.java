@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.data.model;
 
+import com.shepherd.shepslibrary.data.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 @Table(indexes = {
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
-public class Transaction extends BaseModel{
+public class Transaction extends BaseEntity {
     @ManyToOne
     private User user;
     @ManyToOne

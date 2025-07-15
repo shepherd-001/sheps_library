@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/transaction")
@@ -29,14 +27,14 @@ public class TransactionController {
     @PreAuthorize("hasRole('MEMBER')")
     @PutMapping("/return-book")
     public ResponseEntity<ApiResponse<?>> returnBook(@RequestParam @NotBlank(message = ValidationMessage.NULL_TRANSACTION_ID)
-                                             UUID transactionId){
+                                                         String transactionId){
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(transactionService.returnBook(transactionId)));
     }
 
     @GetMapping("/all/{userId}")
     public ResponseEntity<ApiResponse<?>> getAllTransactions(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
-                                                         UUID userId,
+                                                                 String userId,
                                                      @RequestParam(defaultValue = "0") int pageNumber){
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(transactionService.getAllTransactionByUserId(userId, pageNumber)));

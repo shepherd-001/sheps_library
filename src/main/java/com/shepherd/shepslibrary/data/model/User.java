@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.data.model;
 
+import com.shepherd.shepslibrary.data.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,7 @@ import lombok.*;
         @Index(name = "idx_email", columnList = "email"),
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
-public class User extends BaseModel{
+public class User extends BaseEntity {
     private String firstName;
     private String lastName;
     @Column(unique = true)

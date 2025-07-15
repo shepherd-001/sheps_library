@@ -25,7 +25,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.NUMBER_OF_ITEMS_PER_PAGE;
 import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
@@ -40,7 +39,7 @@ public class ReservationServiceImpl implements ReservationService{
     private final ReservationMapper reservationMapper;
 
     @Override
-    public ReservationResponse reserveBook(UUID bookId) {
+    public ReservationResponse reserveBook(String bookId) {
         log.info("::::: Initiating the reservation of book :::::");
         User user = AppUtils.getCurrentUser();
         checkIfUserIsRevoked(user);
@@ -55,7 +54,6 @@ public class ReservationServiceImpl implements ReservationService{
         reservation.setBook(book);
         reservation.setUser(user);
         reservation.setReservationDate(LocalDate.now());
-        reservation.setCreatedBy(user.getEmail());
 
         Reservation savedReservation = reservationRepository.save(reservation);
         log.info("::::: Book reserved successfully :::::");
@@ -75,7 +73,7 @@ public class ReservationServiceImpl implements ReservationService{
 
     @Override
     @Cacheable(value = "reservationCache", key = "#reservationId")
-    public ReservationResponse getReservationById(UUID reservationId) {
+    public ReservationResponse getReservationById(String reservationId) {
         log.info("::::: Fetching reservation by id :::::");
         return reservationRepository.findById(reservationId)
                 .map(reservationMapper::mapToReservationResponse)
@@ -84,7 +82,7 @@ public class ReservationServiceImpl implements ReservationService{
 
     @Override
     @Cacheable(value = "reservationCache", key = "'user:' + #userId + ':page:' + #pageNumber")
-    public PaginatedResponse<ReservationResponse> getAllReservationByUserId(UUID userId, int pageNumber) {
+    public PaginatedResponse<ReservationResponse> getAllReservationByUserId(String userId, int pageNumber) {
         Pageable pageable = buildPageable(pageNumber);
         Page<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageable);
         log.info("::::: Fetched all reservations for a user :::::");
@@ -119,7 +117,7 @@ public class ReservationServiceImpl implements ReservationService{
     @Override
     @Transactional
     @CacheEvict(value = "reservationCache", key = "#reservationId")
-    public String deleteReservation(UUID reservationId, UUID userId) {
+    public String deleteReservation(String reservationId, String userId) {
         if(!reservationRepository.existsByIdAndUserId(reservationId, userId))
             throw new ResourceNotFoundException("Reservation not found");
         reservationRepository.deleteByIdAndUserId(reservationId, userId);
@@ -130,7 +128,7 @@ public class ReservationServiceImpl implements ReservationService{
     @Override
     @Transactional
     @CacheEvict(value = "reservationCache", key = "'user:' + #userId")
-    public String deleteAllReservation(UUID userId) {
+    public String deleteAllReservation(String userId) {
         reservationRepository.deleteAllByUserId(userId);
         log.info("::::: Deleted all user reservations :::::");
         return "Successfully deleted all reservations";

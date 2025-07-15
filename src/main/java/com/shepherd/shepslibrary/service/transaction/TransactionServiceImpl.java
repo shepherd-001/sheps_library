@@ -25,7 +25,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.NUMBER_OF_ITEMS_PER_PAGE;
 import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
@@ -58,7 +57,6 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.setBook(savedBook);
         transaction.setBorrowDate(LocalDate.now());
         transaction.setReturnDate(request.getReturnDate());
-        transaction.setCreatedBy(user.getEmail());
         Transaction savedTransaction = transactionRepository.save(transaction);
         log.info("::::: Book borrowed successfully :::::");
         return mapToTransactionResponse(savedTransaction);
@@ -106,7 +104,7 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
-    public TransactionResponse returnBook(UUID transactionId) {
+    public TransactionResponse returnBook(String transactionId) {
         log.info("::::: Initiating return book :::::");
         Transaction transaction = getTransactionById(transactionId);
         Book book = transaction.getBook();
@@ -116,20 +114,19 @@ public class TransactionServiceImpl implements TransactionService{
 
         transaction.setTransactionType(TransactionType.RETURN_BOOK);
         transaction.setReturnDate(LocalDate.now());
-        transaction.setUpdatedBy(AppUtils.getCurrentUser().getEmail());
         Transaction savedTransaction = transactionRepository.save(transaction);
         updateTransactionCache(savedTransaction);
         return mapToTransactionResponse(savedTransaction);
     }
 
-    private Transaction getTransactionById(UUID transactionId) {
+    private Transaction getTransactionById(String transactionId) {
         return transactionRepository.findById(transactionId).orElseThrow(
                 ()-> new ShepsLibraryException("Transaction with the provided ID not found"));
     }
 
     @Override
     @Cacheable(value = "transactionCache", key = "'user:' + #userId + ':page:' + #pageNumber")
-    public PaginatedResponse<TransactionResponse> getAllTransactionByUserId(UUID userId, int pageNumber) {
+    public PaginatedResponse<TransactionResponse> getAllTransactionByUserId(String userId, int pageNumber) {
         log.info("::::: Fetching all transactions by user id :::::");
         Pageable pageable = buildPageable(pageNumber);
         Page<Transaction> transactions = transactionRepository.findAllByUserId(userId, pageable);
@@ -139,7 +136,7 @@ public class TransactionServiceImpl implements TransactionService{
     private Pageable buildPageable(int pageNumber){
         return AppUtils.createPageRequest(pageNumber, NUMBER_OF_ITEMS_PER_PAGE, SORT_BY_CREATED_AT, Sort.Direction.ASC);
     }
-    
+
     private PaginatedResponse<TransactionResponse> getTransactionPaginatedResponse(Page<Transaction> transactions){
         return PaginatedResponse.<TransactionResponse>builder()
                 .content(transactions.stream()

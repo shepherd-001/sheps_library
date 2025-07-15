@@ -9,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/reservation")
@@ -19,8 +17,7 @@ public class ReservationController {
 
     @PreAuthorize("hasRole('MEMBER')")
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<?>> reserveBook(@RequestParam @NotBlank(message = ValidationMessage.BLANK_BOOK_ID)
-                                              UUID bookId){
+    public ResponseEntity<ApiResponse<?>> reserveBook(@RequestParam String bookId){
         return ResponseEntity.ok(ApiResponse
                 .buildResponse("Book reserved successfully", reservationService.reserveBook(bookId)));
     }
@@ -28,7 +25,7 @@ public class ReservationController {
     @PreAuthorize("hasRole('MEMBER')")
     @GetMapping
     public ResponseEntity<ApiResponse<?>> getReservationById(@RequestParam @NotBlank(message = ValidationMessage.NULL_RESERVATION_ID)
-                                                         UUID reservationId){
+                                                                 String reservationId){
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(reservationService.getReservationById(reservationId)));
     }
@@ -36,7 +33,7 @@ public class ReservationController {
     @PreAuthorize("hasRole('MEMBER')")
     @GetMapping("/all/user-id")
     public ResponseEntity<ApiResponse<?>> getAllReservationsByUserId(@RequestParam @NotBlank(message = ValidationMessage.NULL_USER_ID)
-                                                                 UUID userId,
+                                                                         String userId,
                                                              @RequestParam(defaultValue = "0") int pageNumber){
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(reservationService.getAllReservationByUserId(userId, pageNumber)));
@@ -52,9 +49,9 @@ public class ReservationController {
     @DeleteMapping("/{reservationId}/{userId}")
     @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<ApiResponse<?>> deleteReservation(@PathVariable @NotBlank(message = ValidationMessage.NULL_RESERVATION_ID)
-                                                        UUID reservationId,
+                                                                String reservationId,
                                                     @PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
-                                                    UUID userId){
+                                                    String userId){
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(reservationService.deleteReservation(reservationId, userId)));
     }
@@ -62,7 +59,7 @@ public class ReservationController {
     @DeleteMapping("/all/{userId}")
     @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<ApiResponse<?>> deleteAllReservations(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
-                                                            UUID userId){
+                                                                    String userId){
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(reservationService.deleteAllReservation(userId)));
     }

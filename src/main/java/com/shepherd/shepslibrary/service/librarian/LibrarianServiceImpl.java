@@ -32,7 +32,7 @@ public class LibrarianServiceImpl implements LibrarianService{
 //        passwordValidationService.validatePasswordNotBreached(request.getPassword());
         User user = shepsToken.getUser();
         if(!user.isEnabled() && user.getPassword() != null)
-            throw new UserAlreadyEnabledException("User already created password");
+            throw new UserAlreadyEnabledException("User already created a password");
         user.setEnabled(true);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         updateUserCache(userRepository.save(user));

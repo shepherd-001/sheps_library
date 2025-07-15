@@ -1,6 +1,7 @@
 package com.shepherd.shepslibrary.data.model;
 
 
+import com.shepherd.shepslibrary.data.common.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.OneToOne;
@@ -18,7 +19,7 @@ import java.time.LocalDate;
 @Table(indexes = {
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
-public class Reservation extends BaseModel{
+public class Reservation extends BaseEntity {
     @OneToOne
     private Book book;
     @OneToOne

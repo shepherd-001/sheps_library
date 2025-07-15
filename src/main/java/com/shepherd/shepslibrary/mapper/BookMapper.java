@@ -41,6 +41,6 @@ public interface BookMapper {
     @Mapping(target = "title", expression = "java(request.getTitle().trim())")
     @Mapping(target = "author", expression = "java(request.getAuthor().trim())")
     @Mapping(target = "genre", expression = "java(request.getGenre().trim())")
-    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "lastModifiedBy", ignore = true)
     void updateBookFromRequest(UpdateBookRequest request, @MappingTarget Book book);
 }

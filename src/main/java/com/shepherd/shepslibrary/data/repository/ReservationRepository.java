@@ -6,17 +6,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.UUID;
-
-public interface ReservationRepository extends JpaRepository<Reservation, UUID> {
-    Page<Reservation> findAllByUserId(UUID userId, Pageable pageable);
-    void deleteByIdAndUserId(UUID reservationId, UUID userId);
-    void deleteAllByUserId(UUID userId);
+public interface ReservationRepository extends JpaRepository<Reservation, String> {
+    Page<Reservation> findAllByUserId(String userId, Pageable pageable);
+    void deleteByIdAndUserId(String reservationId, String userId);
+    void deleteAllByUserId(String userId);
     @Query("""
            select reservation from Reservation reservation
            where reservation.book.isAvailable = true
            """)
     Page<Reservation> findAllAvailableReservations(Pageable pageable);
-    boolean existsByUserIdAndBookId(UUID userId, UUID bookId);
-    boolean existsByIdAndUserId(UUID reservationId, UUID userId);
+    boolean existsByUserIdAndBookId(String userId, String bookId);
+    boolean existsByIdAndUserId(String reservationId, String userId);
 }

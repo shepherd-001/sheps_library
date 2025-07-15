@@ -28,8 +28,6 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.NUMBER_OF_ITEMS_PER_PAGE;
 import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
@@ -40,40 +38,30 @@ import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     @Override
     public AddBookResponse addBook(AddBookRequest request) {
         if(bookRepository.existsByTitle(request.getTitle()))
             throw new AlreadyExistsException("Book with title '%s' already exists".formatted(request.getTitle()));
         Book book = bookMapper.mapToBook(request);
-        book.setIsbn(generateRandomIsbn());
-        book.setCreatedBy(AppUtils.getCurrentUser().getEmail());
+//        todo cater for the uniqueness of ISBN generated.
+        book.setIsbn(AppUtils.generateISBN());
         Book savedBook = bookRepository.save(book);
         log.info("::::: New book added :::::");
         return bookMapper.mapToAddBookResponse(savedBook);
     }
 
-    private String generateRandomIsbn() {
-        SecureRandom random = new SecureRandom();
-        int prefix = (random.nextBoolean()) ? 978 : 979;
-        String suffix = random.ints(9, 0, 10)
-                .mapToObj(String::valueOf)
-                .collect(Collectors.joining());
-
-        log.info("::::: Generated new ISBN :::::");
-        return String.format("%d%s", prefix, suffix);
-    }
-
     @Override
     @Cacheable(value = "bookCache", key = "#bookId", unless = "#result == null")
-    public BookResponse getBookById(UUID bookId) {
+    public BookResponse getBookById(String bookId) {
         log.info("::::: Fetching book by id :::::");
         Book book = fetchBookById(bookId);
         return bookMapper.mapToBookResponse(book);
     }
 
     @Override
-    public Book fetchBookById(UUID bookId) {
+    public Book fetchBookById(String bookId) {
         return bookRepository.findById(bookId).orElseThrow
                 (()-> new ResourceNotFoundException("Book with the provided ID not found"));
     }
@@ -90,10 +78,9 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     @CachePut(value = "bookCache", key = "#bookId")
-    public BookResponse updateBook(UpdateBookRequest updateBookRequest, UUID bookId) {
+    public BookResponse updateBook(UpdateBookRequest updateBookRequest, String bookId) {
         Book book = fetchBookById(bookId);
         bookMapper.updateBookFromRequest(updateBookRequest, book);
-        book.setUpdatedBy(AppUtils.getCurrentUser().getUpdatedBy());
         Book savedBook = bookRepository.save(book);
         log.info("::::: Updated a book :::::");
         return bookMapper.mapToBookResponse(savedBook);
@@ -140,7 +127,7 @@ public class BookServiceImpl implements BookService {
     @Transactional
     @CacheEvict(value = "bookCache", key = "bookId")
 //    @CacheEvict(value = "bookCache", allEntries = true)
-    public String deleteBook(UUID bookId) {
+    public String deleteBook(String bookId) {
         if(!bookRepository.existsById(bookId))
             throw new ResourceNotFoundException("Book with the provided ID not found");
         bookRepository.deleteById(bookId);

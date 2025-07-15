@@ -17,8 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/books")
@@ -35,8 +33,7 @@ public class BookController {
     }
 
     @GetMapping("/{bookId}")
-    public ResponseEntity<ApiResponse<?>> getBookById(@PathVariable(required = false) UUID bookId){
-        checkBookNotBlank(bookId);
+    public ResponseEntity<ApiResponse<?>> getBookById(@PathVariable String bookId){
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(bookService.getBookById(bookId)));
     }
@@ -54,8 +51,7 @@ public class BookController {
     @PutMapping("/{bookId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<?>> updateBook(@Valid @RequestBody UpdateBookRequest updateBookRequest,
-                                             @PathVariable UUID bookId){
-        checkBookNotBlank(bookId);
+                                             @PathVariable String bookId){
         return ResponseEntity.ok(ApiResponse
                 .buildResponse("Book updated successfully", bookService.updateBook(updateBookRequest, bookId)));
     }
@@ -73,14 +69,13 @@ public class BookController {
 
     @DeleteMapping("/{bookId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<?>> deleteBook(@PathVariable UUID bookId){
-        checkBookNotBlank(bookId);
+    public ResponseEntity<ApiResponse<?>> deleteBook(@PathVariable String bookId){
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .body(ApiResponse.buildResponse(bookService.deleteBook(bookId)));
     }
-
-    private static void checkBookNotBlank(UUID bookId) {
-        if(bookId == null)
-            throw new ShepsLibraryException(ValidationMessage.BLANK_BOOK_ID);
-    }
+//
+//    private static void checkBookNotBlank(UUID bookId) {
+//        if(bookId == null)
+//            throw new ShepsLibraryException(ValidationMessage.BLANK_BOOK_ID);
+//    }
 }
