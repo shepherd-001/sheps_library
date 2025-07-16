@@ -1,6 +1,7 @@
 package com.shepherd.shepslibrary.controllers;
 
 import com.shepherd.shepslibrary.controllers.response.ApiResponse;
+import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
 import com.shepherd.shepslibrary.service.transaction.ReservationService;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.constraints.NotBlank;
@@ -41,9 +42,9 @@ public class ReservationController {
 
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     @GetMapping("/all")
-    public ResponseEntity<ApiResponse<?>> getAllReservations(@RequestParam(defaultValue = "0") int pageNumber){
+    public ResponseEntity<ApiResponse<?>> getAllReservations(@RequestBody PaginationRequest request){
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(reservationService.getAllReservations(pageNumber)));
+                .buildResponse(reservationService.getAllReservations(request)));
     }
 
     @DeleteMapping("/{reservationId}/{userId}")

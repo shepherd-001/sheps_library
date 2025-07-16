@@ -10,23 +10,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class FilterBookRequest {
-    private String title;
-    private String author;
-    private String genre;
-
+public class PaginationRequest {
     private int pageNumber;
     private Integer pageSize;
     private String sortBy;
     private String sortDirection;
 
 
-    public String toCacheKey() {
+    public String toCacheKey(String prefix) {
         return String.format(
-                "filter:title:%s:author:%s:genre:%s:page:%d:size:%d:sortBy:%s:direction:%s",
-                title != null ? title.trim().toLowerCase() : "any",
-                author != null ? author.trim().toLowerCase() : "any",
-                genre != null ? genre.trim().toLowerCase() : "any",
+                "%s:page:%d:size:%s:sortBy:%s:direction:%s",
+                prefix,
                 pageNumber,
                 pageSize != null ? pageSize : AppUtils.PAGE_SIZE,
                 sortBy != null ? sortBy.toLowerCase() : AppUtils.SORT_BY_CREATED_AT,

@@ -7,10 +7,10 @@ import java.util.List;
 
 @Builder
 @Getter
-public class PaginatedResponse<T> {
+public class PaginationResponse<T> {
     private List<T> content;
     private int numberOfElements;
     private int totalPages;
     private long totalElements;
-    private boolean last;
+    private boolean isLast;
 }

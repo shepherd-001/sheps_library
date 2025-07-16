@@ -12,6 +12,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -71,18 +72,18 @@ public class MailNotificationServiceImpl implements MailNotificationService {
         Book book = transaction.getBook();
         String bookTitle = book.getTitle();
         String bookAuthor = book.getAuthor();
-        LocalDate borrowedDate = transaction.getBorrowDate();
-        LocalDate dueDate = transaction.getReturnDate();
+        LocalDateTime borrowDateTime = transaction.getBorrowDateTime();
+        LocalDateTime dueDateTime = transaction.getReturnDateTime();
 
-        long overdueDays = ChronoUnit.DAYS.between(dueDate, LocalDate.now());
+        long overdueDays = ChronoUnit.DAYS.between(dueDateTime, LocalDateTime.now());
 
         Map<String, Object> variables = Map.of(
                 "firstName", firstName,
                 "overdueDays", overdueDays,
                 "bookTitle", bookTitle,
                 "bookAuthor", bookAuthor,
-                "borrowedDate", borrowedDate,
-                "dueDate", dueDate
+                "borrowedDate", borrowDateTime,
+                "dueDate", dueDateTime
         );
         sendEmail("overdue-book", "Overdue Book Notification", email, variables);
     }

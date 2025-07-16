@@ -1,7 +1,7 @@
 package com.shepherd.shepslibrary.service.user;
 
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
-import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
+import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.response.RegisterUserResponse;
 import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 import com.shepherd.shepslibrary.data.model.Role;
@@ -22,15 +22,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
 
-import static com.shepherd.shepslibrary.utils.AppUtils.NUMBER_OF_ITEMS_PER_PAGE;
-import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
+import static com.shepherd.shepslibrary.utils.AppUtils.*;
 
 @Service
 @RequiredArgsConstructor
@@ -79,36 +77,32 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Cacheable(value = "userCache", key = "'role:' + #role + ':page:' + #pageNumber")
-    public PaginatedResponse<UserResponse> getAllUsersByRole(Role role, int pageNumber) {
-        log.info("::::: Fetching all users by role :::::");
-        Pageable pageable = findAllUsersPageRequest(pageNumber);
+    public PaginationResponse<UserResponse> getAllUsersByRole(Role role, int pageNumber) {
+        log.info("::::: Fetching all users by role {} :::::", role);
+        Pageable pageable = AppUtils.createPageRequest(pageNumber, PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
         Page<User> users = userRepository.findAllByRole(role, pageable);
-        return buildPaginatedUserResponse(users);
+        return mapToPaginatedUserResponse(users);
     }
 
-    private Pageable findAllUsersPageRequest(int pageNumber){
-        return AppUtils.createPageRequest(pageNumber, NUMBER_OF_ITEMS_PER_PAGE, SORT_BY_CREATED_AT, Sort.Direction.DESC);
-    }
-
-    private PaginatedResponse<UserResponse> buildPaginatedUserResponse(Page<User> users) {
+    private PaginationResponse<UserResponse> mapToPaginatedUserResponse(Page<User> users) {
         List<UserResponse> content = users.isEmpty() ? Collections.emptyList() :
                 users.stream().map(userMapper::mapToUserResponse).toList();
 
-        return PaginatedResponse.<UserResponse>builder()
+        return PaginationResponse.<UserResponse>builder()
                 .content(content)
                 .numberOfElements(users.getNumberOfElements())
                 .totalPages(users.getTotalPages())
                 .totalElements(users.getTotalElements())
-                .last(users.isLast())
+                .isLast(users.isLast())
                 .build();
     }
 
     @Override
     @Cacheable(value = "userCache", key = "'status:' + #status + ':page:' + #pageNumber")
-    public PaginatedResponse<UserResponse> getAllUsersByStatus(boolean status, int pageNumber) {
-        log.info("::::: Fetching all users by status :::::");
-        Pageable pageable = findAllUsersPageRequest(pageNumber);
+    public PaginationResponse<UserResponse> getAllUsersByStatus(boolean status, int pageNumber) {
+        log.info("::::: Fetching all users by status {} :::::", status);
+        Pageable pageable = AppUtils.createPageRequest(pageNumber, PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
         Page<User> users = userRepository.findAllByIsEnabled(status, pageable);
-        return buildPaginatedUserResponse(users);
+        return mapToPaginatedUserResponse(users);
     }
 }

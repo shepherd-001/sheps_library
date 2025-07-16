@@ -1,6 +1,7 @@
 package com.shepherd.shepslibrary.service.transaction;
 
-import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
+import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
+import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.response.ReservationResponse;
 import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.model.Reservation;
@@ -21,13 +22,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
-import static com.shepherd.shepslibrary.utils.AppUtils.NUMBER_OF_ITEMS_PER_PAGE;
-import static com.shepherd.shepslibrary.utils.AppUtils.SORT_BY_CREATED_AT;
+import static com.shepherd.shepslibrary.utils.AppUtils.*;
 
 @Service
 @RequiredArgsConstructor
@@ -81,34 +80,36 @@ public class ReservationServiceImpl implements ReservationService{
     }
 
     @Override
-    @Cacheable(value = "reservationCache", key = "'user:' + #userId + ':page:' + #pageNumber")
-    public PaginatedResponse<ReservationResponse> getAllReservationByUserId(String userId, int pageNumber) {
-        Pageable pageable = buildPageable(pageNumber);
+    @Cacheable(value = "reservationCache", key = "'user:' + #userId + ':page:' + #pageNumber",
+                unless = "#result == null || #result.content.isEmpty()")
+    public PaginationResponse<ReservationResponse> getAllReservationByUserId(String userId, int pageNumber) {
+        Pageable pageable = AppUtils.createPageRequest(pageNumber, PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
         Page<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageable);
         log.info("::::: Fetched all reservations for a user :::::");
         return paginatedReservationResponse(reservations);
     }
 
-    private Pageable buildPageable(int pageNumber){
-        return AppUtils.createPageRequest(pageNumber, NUMBER_OF_ITEMS_PER_PAGE, SORT_BY_CREATED_AT, Sort.Direction.ASC);
-    }
-
-    private PaginatedResponse<ReservationResponse> paginatedReservationResponse(Page<Reservation> reservations){
-        return PaginatedResponse.<ReservationResponse>builder()
+    private PaginationResponse<ReservationResponse> paginatedReservationResponse(Page<Reservation> reservations){
+        return PaginationResponse.<ReservationResponse>builder()
                 .content(reservations.stream()
                         .map(reservationMapper::mapToReservationResponse)
                         .toList())
                 .numberOfElements(reservations.getNumberOfElements())
                 .totalElements(reservations.getTotalElements())
                 .totalPages(reservations.getTotalPages())
-                .last(reservations.isLast())
+                .isLast(reservations.isLast())
                 .build();
     }
 
     @Override
-    @Cacheable(value = "reservationCache", key = "'allReservations:page:' + #pageNumber")
-    public PaginatedResponse<ReservationResponse> getAllReservations(int pageNumber) {
-        Pageable pageable = buildPageable(pageNumber);
+    @Cacheable(
+            value = "reservationCache",
+            key = "#paginationRequest.toCacheKey('allReservations')",
+            unless = "#result == null || #result.content.isEmpty()"
+    )
+    public PaginationResponse<ReservationResponse> getAllReservations(PaginationRequest paginationRequest) {
+        Pageable pageable = AppUtils.createPageRequest(paginationRequest.getPageNumber(), paginationRequest.getPageSize(),
+                paginationRequest.getSortBy(), paginationRequest.getSortDirection());
         Page<Reservation> reservations = reservationRepository.findAll(pageable);
         log.info("::::: Fetched all reservations :::::");
         return paginatedReservationResponse(reservations);

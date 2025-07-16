@@ -3,6 +3,7 @@ package com.shepherd.shepslibrary.controllers;
 import com.shepherd.shepslibrary.controllers.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.FilterBookRequest;
+import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
 import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
 import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.service.book.BookService;
@@ -57,9 +58,8 @@ public class BookController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllBooks(@RequestParam(defaultValue = "0")
-                                                  int pageNumber){
-        return ResponseEntity.ok(ApiResponse.buildResponse(bookService.getAllBooks(pageNumber)));
+    public ResponseEntity<ApiResponse<?>> getAllBooks(@RequestBody PaginationRequest paginationRequest){
+        return ResponseEntity.ok(ApiResponse.buildResponse(bookService.getAllBooks(paginationRequest)));
     }
 
     @GetMapping("/search")
@@ -73,9 +73,4 @@ public class BookController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .body(ApiResponse.buildResponse(bookService.deleteBook(bookId)));
     }
-//
-//    private static void checkBookNotBlank(UUID bookId) {
-//        if(bookId == null)
-//            throw new ShepsLibraryException(ValidationMessage.BLANK_BOOK_ID);
-//    }
 }

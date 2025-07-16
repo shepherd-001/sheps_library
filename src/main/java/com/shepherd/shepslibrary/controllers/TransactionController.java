@@ -2,6 +2,7 @@ package com.shepherd.shepslibrary.controllers;
 
 import com.shepherd.shepslibrary.controllers.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
+import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
 import com.shepherd.shepslibrary.service.transaction.TransactionService;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.Valid;
@@ -42,8 +43,8 @@ public class TransactionController {
 
     @GetMapping("/all")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public ResponseEntity<ApiResponse<?>> getAllTransactions(@RequestParam(defaultValue = "0") int pageNumber){
+    public ResponseEntity<ApiResponse<?>> getAllTransactions(@RequestBody PaginationRequest paginationRequest){
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(transactionService.getAllTransactions(pageNumber)));
+                .buildResponse(transactionService.getAllTransactions(paginationRequest)));
     }
 }

@@ -15,7 +15,7 @@ public class ApiError {
     @JsonFormat(pattern = "HH:mm:ss, dd-MM-yyyy")
     private final LocalDateTime timestamp;
     private final boolean status;
-    private final Object error;
+    private final Object errors;
 
     public static ApiError buildErrorResponse(String message){
         return ApiError.builder()
@@ -27,7 +27,7 @@ public class ApiError {
 
     public static ApiError buildErrorResponse(Object error){
         return ApiError.builder()
-                .error(error)
+                .errors(error)
                 .timestamp(LocalDateTime.now())
                 .status(false)
                 .build();
