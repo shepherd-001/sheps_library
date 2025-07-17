@@ -4,7 +4,7 @@ import com.shepherd.shepslibrary.data.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @AllArgsConstructor
@@ -24,6 +24,6 @@ public class Transaction extends BaseEntity {
     private Book book;
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType;
-    private LocalDateTime borrowDateTime;
-    private LocalDateTime returnDateTime;
+    private Instant borrowDateTime;
+    private Instant returnDateTime;
 }

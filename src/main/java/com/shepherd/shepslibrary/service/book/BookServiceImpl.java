@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 
-import static com.shepherd.shepslibrary.utils.AppUtils.*;
+import static com.shepherd.shepslibrary.utils.AppUtils.createPageRequest;
 
 @Service
 @RequiredArgsConstructor

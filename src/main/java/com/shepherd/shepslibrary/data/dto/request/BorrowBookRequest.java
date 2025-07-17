@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,5 +13,5 @@ import java.time.LocalDateTime;
 @Setter
 public class BorrowBookRequest {
     private String bookId;
-    private LocalDateTime returnDateTime;
+    private Instant returnDateTime;
 }

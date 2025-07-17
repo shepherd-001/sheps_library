@@ -22,7 +22,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.*;
 
@@ -50,7 +51,7 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.setTransactionType(TransactionType.BORROW_BOOK);
         transaction.setUser(user);
         transaction.setBook(savedBook);
-        transaction.setBorrowDateTime(LocalDateTime.now());
+        transaction.setBorrowDateTime(Instant.now());
         transaction.setReturnDateTime(request.getReturnDateTime());
         Transaction savedTransaction = transactionRepository.save(transaction);
         log.info("::::: Book borrowed successfully :::::");
@@ -68,12 +69,14 @@ public class TransactionServiceImpl implements TransactionService{
             throw new TransactionException("Book is not available");
     }
 
-    private void validateReturnDateTime(LocalDateTime returnDateTime) {
-        LocalDateTime now = LocalDateTime.now();
+    private void validateReturnDateTime(Instant returnDateTime) {
+        Instant now = Instant.now();
+
         if (returnDateTime.isBefore(now)) {
             throw new TransactionException("Return date cannot be in the past.");
         }
-        if (returnDateTime.isAfter(now.plusMonths(MAX_BORROW_MONTHS))) {
+
+        if (returnDateTime.isAfter(now.plus(MAX_BORROW_MONTHS, ChronoUnit.MONTHS))) {
             throw new TransactionException("Return date cannot be more than %d months from today.".formatted(MAX_BORROW_MONTHS));
         }
     }
@@ -101,7 +104,7 @@ public class TransactionServiceImpl implements TransactionService{
         bookService.saveBook(book);
 
         transaction.setTransactionType(TransactionType.RETURN_BOOK);
-        transaction.setReturnDateTime(LocalDateTime.now());
+        transaction.setReturnDateTime(Instant.now());
         Transaction savedTransaction = transactionRepository.save(transaction);
         return mapToTransactionResponse(savedTransaction);
     }

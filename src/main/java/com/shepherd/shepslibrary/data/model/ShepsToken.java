@@ -5,7 +5,7 @@ import com.shepherd.shepslibrary.data.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Builder
@@ -29,5 +29,5 @@ public class ShepsToken extends BaseEntity {
     private TokenType tokenType;
     private boolean isExpired;
     private boolean isRevoked;
-    private LocalDateTime expirationTime;
+    private Instant expirationTime;
 }

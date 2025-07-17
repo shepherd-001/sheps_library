@@ -24,7 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.*;
 
@@ -52,7 +52,7 @@ public class ReservationServiceImpl implements ReservationService{
         Reservation reservation = new Reservation();
         reservation.setBook(book);
         reservation.setUser(user);
-        reservation.setReservationDateTime(LocalDateTime.now());
+        reservation.setReservationDateTime(Instant.now());
 
         Reservation savedReservation = reservationRepository.save(reservation);
         log.info("::::: Book reserved successfully :::::");

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -72,8 +72,8 @@ public class MailNotificationServiceImpl implements MailNotificationService {
         Book book = transaction.getBook();
         String bookTitle = book.getTitle();
         String bookAuthor = book.getAuthor();
-        LocalDateTime borrowDateTime = transaction.getBorrowDateTime();
-        LocalDateTime dueDateTime = transaction.getReturnDateTime();
+        Instant borrowDateTime = transaction.getBorrowDateTime();
+        Instant dueDateTime = transaction.getReturnDateTime();
 
         long overdueDays = ChronoUnit.DAYS.between(dueDateTime, LocalDateTime.now());
 

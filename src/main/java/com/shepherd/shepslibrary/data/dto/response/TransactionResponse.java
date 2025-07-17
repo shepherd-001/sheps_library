@@ -4,7 +4,7 @@ import com.shepherd.shepslibrary.data.model.TransactionType;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Builder
 @Getter
@@ -16,6 +16,6 @@ public class TransactionResponse {
     private String title;
     private String author;
     private String genre;
-    private LocalDateTime borrowedDateTime;
-    private LocalDateTime returnDateTime;
+    private Instant borrowedDateTime;
+    private Instant returnDateTime;
 }
