@@ -36,11 +36,15 @@ public class JwtService {
     }
 
     public String generateAccessToken(String email, long accessTokenExpiration){
-        return buildJwtToken(new HashMap<>(), email, accessTokenExpiration);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("tokenType", "access");
+        return buildJwtToken(claims, email, accessTokenExpiration);
     }
 
     public String generateRefreshToken(String email, long refreshTokenExpiration){
-        return buildJwtToken(new HashMap<>(), email, refreshTokenExpiration);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("tokenType", "refresh");
+        return buildJwtToken(claims, email, refreshTokenExpiration);
     }
 
     private String buildJwtToken(Map<String, Object> claims, String email, long tokenExpiration){

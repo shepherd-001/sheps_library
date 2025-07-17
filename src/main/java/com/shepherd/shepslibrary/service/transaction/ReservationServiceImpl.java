@@ -24,7 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.*;
 
@@ -52,7 +52,7 @@ public class ReservationServiceImpl implements ReservationService{
         Reservation reservation = new Reservation();
         reservation.setBook(book);
         reservation.setUser(user);
-        reservation.setReservationDate(LocalDate.now());
+        reservation.setReservationDateTime(LocalDateTime.now());
 
         Reservation savedReservation = reservationRepository.save(reservation);
         log.info("::::: Book reserved successfully :::::");
@@ -83,7 +83,7 @@ public class ReservationServiceImpl implements ReservationService{
     @Cacheable(value = "reservationCache", key = "'user:' + #userId + ':page:' + #pageNumber",
                 unless = "#result == null || #result.content.isEmpty()")
     public PaginationResponse<ReservationResponse> getAllReservationByUserId(String userId, int pageNumber) {
-        Pageable pageable = AppUtils.createPageRequest(pageNumber, PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
+        Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
         Page<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageable);
         log.info("::::: Fetched all reservations for a user :::::");
         return paginatedReservationResponse(reservations);

@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 public final class AppUtils {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-    public static final int PAGE_SIZE = 10;
+    public static final int DEFAULT_PAGE_SIZE = 10;
     public static final String SORT_BY_CREATED_AT = "createdAt";
     public static final String SORT_DIRECTION_ASC = "ASC";
     public static final int MAX_ISBN_ATTEMPTS = 5;
@@ -38,11 +38,14 @@ public final class AppUtils {
     }
 
     public static Pageable createPageRequest(int pageNumber, Integer pageSize, String sortBy, String sortDirection) {
+        final int MAX_PAGE_SIZE = 100;
         pageNumber = Math.max(pageNumber - 1, 0);
+        int resolvedPageSize = (pageSize != null && pageSize > 0)
+                ? Math.min(pageSize, MAX_PAGE_SIZE)
+                : DEFAULT_PAGE_SIZE;
 
-        int resolvedPageSize = (pageSize != null && pageSize > 0) ? pageSize : PAGE_SIZE;
         String resolvedSortBy = (sortBy != null && !sortBy.isBlank()) ? sortBy : SORT_BY_CREATED_AT;
-        Sort.Direction resolvedDirection = SORT_DIRECTION_ASC.equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort.Direction resolvedDirection = SORT_DIRECTION_ASC.equalsIgnoreCase(sortDirection) ? Sort.Direction.ASC : Sort.Direction.DESC;
         return PageRequest.of(pageNumber, resolvedPageSize, Sort.by(resolvedDirection, resolvedSortBy));
     }
 
@@ -74,6 +77,6 @@ public final class AppUtils {
     }
 
     private AppUtils() {
-        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+        throw new UnsupportedOperationException(ErrorMessage.NON_INSTANTIABLE_UTILITY_CLASS);
     }
 }

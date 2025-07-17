@@ -22,7 +22,7 @@ public class PaginationRequest {
                 "%s:page:%d:size:%s:sortBy:%s:direction:%s",
                 prefix,
                 pageNumber,
-                pageSize != null ? pageSize : AppUtils.PAGE_SIZE,
+                pageSize != null ? pageSize : AppUtils.DEFAULT_PAGE_SIZE,
                 sortBy != null ? sortBy.toLowerCase() : AppUtils.SORT_BY_CREATED_AT,
                 sortDirection != null ? sortDirection.toUpperCase() : AppUtils.SORT_DIRECTION_ASC
         );

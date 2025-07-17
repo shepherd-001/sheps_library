@@ -41,18 +41,18 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public AddBookResponse addBook(AddBookRequest request) {
-        if (bookRepository.existsByTitle(request.getTitle())) {
+        if (bookRepository.existsByTitle(request.getTitle().trim())) {
             throw new AlreadyExistsException("Book with title '%s' already exists".formatted(request.getTitle()));
         }
 
         Book book = bookMapper.mapToBook(request);
-        Book savedBook = trySaveBookWithUniqueIsbn(book);
+        Book savedBook = saveBookWithUniqueIsbn(book);
         log.info("::::: Book added with title='{}' :::::", savedBook.getTitle());
 
         return bookMapper.mapToAddBookResponse(savedBook);
     }
 
-    private Book trySaveBookWithUniqueIsbn(Book book) {
+    private Book saveBookWithUniqueIsbn(Book book) {
         int maxAttempts = AppUtils.MAX_ISBN_ATTEMPTS;
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             book.setIsbn(AppUtils.generateISBN());

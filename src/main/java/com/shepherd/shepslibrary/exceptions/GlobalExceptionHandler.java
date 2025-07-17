@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -65,6 +66,12 @@ public class GlobalExceptionHandler {
 //
 //        log.error("::::: Method argument not valid exception: {} :::::", ex.getMessage());
 //        return new ResponseEntity<>(ApiError.buildErrorResponse(errorMessage), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleEnumConversionError(MethodArgumentTypeMismatchException ex) {
+        String message = "Invalid value for parameter '%s': %s".formatted(ex.getName(), ex.getValue());
+        return ResponseEntity.badRequest().body(ApiError.buildErrorResponse(message));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

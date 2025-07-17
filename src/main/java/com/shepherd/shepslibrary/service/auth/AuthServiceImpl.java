@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService{
             throw new UserAlreadyEnabledException("User is already verified");
 
         user.setEnabled(true);
-        updateUserCache(userRepository.save(user));
+        userRepository.save(user);
         tokenService.deleteToken(shepsToken);
 
         return userMapper.mapToEmailConfirmationResponse(user, tokenService.generateJwtTokens(user));
@@ -93,12 +93,12 @@ public class AuthServiceImpl implements AuthService{
     @Override
     @Transactional
     public AuthResponse changePassword(ChangePasswordRequest changePasswordRequest) {
-        log.info("::::: Initiating change password request :::::");
+        log.info("Change password request initiated for user");
         User user = getCurrentUser();
         validatePasswordChange(user.getPassword(), changePasswordRequest);
 
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
-        updateUserCache(userRepository.save(user));
+        userRepository.save(user);
         tokenService.deleteAllTokenByUserAndType(user.getEmail(), TokenType.JWT);
         return generateJwtTokens(user);
     }
@@ -140,12 +140,7 @@ public class AuthServiceImpl implements AuthService{
         passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
         User user = shepsToken.getUser();
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
-        updateUserCache(userRepository.save(user));
+        userRepository.save(user);
         return generateJwtTokens(user);
-    }
-
-    @CachePut(value = "userCache", key = "#user.email")
-    public void updateUserCache(User user) {
-        log.info("::::: Updating cache for user with email: {} :::::", user.getEmail());
     }
 }

@@ -8,7 +8,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @AllArgsConstructor
@@ -24,5 +24,5 @@ public class Reservation extends BaseEntity {
     private Book book;
     @OneToOne
     private User user;
-    private LocalDate reservationDate;
+    private LocalDateTime reservationDateTime;
 }

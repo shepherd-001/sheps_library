@@ -28,10 +28,13 @@ public class LogoutService implements LogoutHandler {
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         log.info("::::: Initiating logout process :::::");
         String authHeader = request.getHeader(AUTHORIZATION);
-        if(authHeader == null || !authHeader.startsWith(BEARER_PREFIX))
+        if(authHeader == null || !authHeader.startsWith(BEARER_PREFIX)){
+            log.warn("::::: Authorization header is missing or does not start with Bearer :::::");
             return;
+        }
         String jwt = authHeader.substring(BEARER_PREFIX_LENGTH);
         processLogout(jwt);
+        SecurityContextHolder.clearContext();
     }
 
     private void processLogout(String jwt) {
@@ -46,6 +49,5 @@ public class LogoutService implements LogoutHandler {
         String userEmail = shepsToken.getUser().getEmail();
         tokenRepository.deleteAllByUserEmailAndTokenType(userEmail, TokenType.JWT);
         log.info("::::: Tokens invalidated successfully :::::");
-        SecurityContextHolder.clearContext();
     }
 }

@@ -30,17 +30,14 @@ public class UserController {
 
     @GetMapping("/all/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<?>> getAllUsersByRole(@RequestParam Role role,
-                                                    @RequestParam(defaultValue = "0") int pageNumber) {
+    public ResponseEntity<ApiResponse<?>> getAllUsersByRole(@RequestParam Role role, int pageNumber) {
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(userService.getAllUsersByRole(role, pageNumber)));
     }
 
     @GetMapping("/all/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<?>> getAllUsersByStatus(@RequestParam boolean status,
-                                                      @RequestParam(defaultValue = "0")
-                                                      int pageNumber) {
+    public ResponseEntity<ApiResponse<?>> getAllUsersByStatus(@RequestParam boolean status, int pageNumber) {
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(userService.getAllUsersByStatus(status, pageNumber)));
     }

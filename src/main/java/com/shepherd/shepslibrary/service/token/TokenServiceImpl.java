@@ -129,4 +129,3 @@ public class TokenServiceImpl implements TokenService{
         log.info("::::: Deleted all tokens by user email :::::");
     }
 }
-

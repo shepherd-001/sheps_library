@@ -28,7 +28,7 @@ public class FilterBookRequest {
                 author != null ? author.trim().toLowerCase() : "any",
                 genre != null ? genre.trim().toLowerCase() : "any",
                 pageNumber,
-                pageSize != null ? pageSize : AppUtils.PAGE_SIZE,
+                pageSize != null ? pageSize : AppUtils.DEFAULT_PAGE_SIZE,
                 sortBy != null ? sortBy.toLowerCase() : AppUtils.SORT_BY_CREATED_AT,
                 sortDirection != null ? sortDirection.toUpperCase() : AppUtils.SORT_DIRECTION_ASC
         );

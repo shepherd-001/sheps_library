@@ -12,6 +12,6 @@ public final class RegexPattern {
 
 
     private RegexPattern() {
-        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+        throw new UnsupportedOperationException(ErrorMessage.NON_INSTANTIABLE_UTILITY_CLASS);
     }
 }

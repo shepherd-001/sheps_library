@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
     @Cacheable(value = "userCache", key = "'role:' + #role + ':page:' + #pageNumber")
     public PaginationResponse<UserResponse> getAllUsersByRole(Role role, int pageNumber) {
         log.info("::::: Fetching all users by role {} :::::", role);
-        Pageable pageable = AppUtils.createPageRequest(pageNumber, PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
+        Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
         Page<User> users = userRepository.findAllByRole(role, pageable);
         return mapToPaginatedUserResponse(users);
     }
@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
     @Cacheable(value = "userCache", key = "'status:' + #status + ':page:' + #pageNumber")
     public PaginationResponse<UserResponse> getAllUsersByStatus(boolean status, int pageNumber) {
         log.info("::::: Fetching all users by status {} :::::", status);
-        Pageable pageable = AppUtils.createPageRequest(pageNumber, PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
+        Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
         Page<User> users = userRepository.findAllByIsEnabled(status, pageable);
         return mapToPaginatedUserResponse(users);
     }

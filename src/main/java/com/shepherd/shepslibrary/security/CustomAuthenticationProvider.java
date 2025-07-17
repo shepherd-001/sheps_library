@@ -1,6 +1,7 @@
 package com.shepherd.shepslibrary.security;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,8 +12,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
+import static com.shepherd.shepslibrary.utils.ErrorMessage.INVALID_EMAIL_OR_PASSWORD;
+
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class CustomAuthenticationProvider implements AuthenticationProvider {
     private final CustomUserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
@@ -20,27 +26,30 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        String requestEmail = authentication.getPrincipal().toString();
-        String requestPassword = authentication.getCredentials().toString();
+        String email = Objects.toString(authentication.getPrincipal(), "").trim();
+        String rawPassword = Objects.toString(authentication.getCredentials(), "");
 
-        UserDetails userDetails;
-        try {
-            userDetails = userDetailsService.loadUserByUsername(requestEmail);
-        } catch (UsernameNotFoundException e) {
-            throw new BadCredentialsException("Invalid email or password", e);
+        if (email.isEmpty() || rawPassword.isEmpty()) {
+            log.warn("Authentication failed: empty email or password");
+            throw new BadCredentialsException(INVALID_EMAIL_OR_PASSWORD);
         }
-
-        if(passwordEncoder.matches(requestPassword, userDetails.getPassword()))
+        UserDetails userDetails;
+        try{
+            userDetails = userDetailsService.loadUserByUsername(email);
+        }catch (UsernameNotFoundException ex){
+            throw new BadCredentialsException(INVALID_EMAIL_OR_PASSWORD);
+        }
+        if (passwordEncoder.matches(rawPassword, userDetails.getPassword())) {
             return new UsernamePasswordAuthenticationToken(
-                    userDetails.getUsername(),
-                    userDetails.getPassword(),
-                    userDetails.getAuthorities()
+                    userDetails, null, userDetails.getAuthorities()
             );
-        throw new BadCredentialsException("Invalid email or password");
+        }
+        throw new BadCredentialsException(INVALID_EMAIL_OR_PASSWORD);
     }
 
     @Override
     public boolean supports(Class<?> authentication) {
         return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
     }
+
 }

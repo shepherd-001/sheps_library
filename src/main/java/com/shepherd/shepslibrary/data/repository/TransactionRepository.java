@@ -11,10 +11,10 @@ import java.time.LocalDate;
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
     Page<Transaction> findAllByUserId(String userId, Pageable pageable);
 
-    @Query("""
-            select t from Transaction t
-            where t.returnDate < :today
-            order by t.returnDate
-           """)
-    Page<Transaction> findOverdueTransactions(LocalDate today, Pageable pageable);
+//    @Query("""
+//            select t from Transaction t
+//            where t.returnDate < :today
+//            order by t.returnDate
+//           """)
+//    Page<Transaction> findOverdueTransactions(LocalDate today, Pageable pageable);
 }

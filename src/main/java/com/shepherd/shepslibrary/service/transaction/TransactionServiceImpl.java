@@ -19,11 +19,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.*;
@@ -44,7 +42,7 @@ public class TransactionServiceImpl implements TransactionService{
         checkIfUserIsRevoked(user);
         Book book = bookService.fetchBookById(request.getBookId());
         checkIfBookIsAvailable(book);
-        validateReturnDate(request.getReturnDateTime());
+        validateReturnDateTime(request.getReturnDateTime());
         book.setAvailable(false);
         Book savedBook = bookService.saveBook(book);
 
@@ -70,7 +68,7 @@ public class TransactionServiceImpl implements TransactionService{
             throw new TransactionException("Book is not available");
     }
 
-    private void validateReturnDate(LocalDateTime returnDateTime) {
+    private void validateReturnDateTime(LocalDateTime returnDateTime) {
         LocalDateTime now = LocalDateTime.now();
         if (returnDateTime.isBefore(now)) {
             throw new TransactionException("Return date cannot be in the past.");
@@ -117,7 +115,7 @@ public class TransactionServiceImpl implements TransactionService{
     @Cacheable(value = "transactionCache", key = "'user:' + #userId + ':page:' + #pageNumber")
     public PaginationResponse<TransactionResponse> getAllTransactionByUserId(String userId, int pageNumber) {
         log.info("::::: Fetching all transactions by user id :::::");
-        Pageable pageable = AppUtils.createPageRequest(pageNumber, PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
+        Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
         Page<Transaction> transactions = transactionRepository.findAllByUserId(userId, pageable);
         return getTransactionPaginatedResponse(transactions);
     }
@@ -150,22 +148,22 @@ public class TransactionServiceImpl implements TransactionService{
 
 //    @Override
 //    @Scheduled(cron = "0 0 9 * * ?")
-    public void sendBookOverdueNotifications(){
-        Pageable pageable = PageRequest.of(0, 100);
-        try{
-            while (true){
-                Page<Transaction> overdueTransactionsPage = transactionRepository.findOverdueTransactions(LocalDate.now(), pageable);
-                if (overdueTransactionsPage.isEmpty()) {
-                    log.info("::::: No transaction found :::::");
-                    break;
-                }
-                overdueTransactionsPage
-                        .getContent().forEach(mailNotificationService::sendOverdueBookMail);
-                log.info("::::: Processing transaction page number {} :::::", overdueTransactionsPage.getNumber());
-                pageable = pageable.next();
-            }
-        }catch (Exception exception){
-            throw new ShepsLibraryException(exception.getMessage());
-        }
-    }
+//    public void sendBookOverdueNotifications(){
+//        Pageable pageable = PageRequest.of(0, 100);
+//        try{
+//            while (true){
+//                Page<Transaction> overdueTransactionsPage = transactionRepository.findOverdueTransactions(LocalDate.now(), pageable);
+//                if (overdueTransactionsPage.isEmpty()) {
+//                    log.info("::::: No transaction found :::::");
+//                    break;
+//                }
+//                overdueTransactionsPage
+//                        .getContent().forEach(mailNotificationService::sendOverdueBookMail);
+//                log.info("::::: Processing transaction page number {} :::::", overdueTransactionsPage.getNumber());
+//                pageable = pageable.next();
+//            }
+//        }catch (Exception exception){
+//            throw new ShepsLibraryException(exception.getMessage());
+//        }
+//    }
 }

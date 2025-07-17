@@ -11,6 +11,6 @@ public interface ReservationMapper {
     @Mapping(target = "userId", source = "reservation.user.id")
     @Mapping(target = "reservationId", source = "reservation.id")
     @Mapping(target = "bookId", source = "reservation.book.id")
-    @Mapping(target = "reservationDate", source = "reservation.reservationDate")
+    @Mapping(target = "reservationDate", source = "reservation.reservationDateTime")
     ReservationResponse mapToReservationResponse(Reservation reservation);
 }

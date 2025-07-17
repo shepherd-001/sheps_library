@@ -70,7 +70,6 @@ public class BookController {
     @DeleteMapping("/{bookId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<?>> deleteBook(@PathVariable String bookId){
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .body(ApiResponse.buildResponse(bookService.deleteBook(bookId)));
+        return ResponseEntity.ok(ApiResponse.buildResponse(bookService.deleteBook(bookId)));
     }
 }
