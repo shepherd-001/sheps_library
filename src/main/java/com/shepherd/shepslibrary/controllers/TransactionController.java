@@ -35,8 +35,7 @@ public class TransactionController {
 
     @GetMapping("/all/{userId}")
     public ResponseEntity<ApiResponse<?>> getAllTransactions(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
-                                                                 String userId,
-                                                     @RequestParam(defaultValue = "0") int pageNumber){
+                                                                 String userId, int pageNumber){
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(transactionService.getAllTransactionByUserId(userId, pageNumber)));
     }

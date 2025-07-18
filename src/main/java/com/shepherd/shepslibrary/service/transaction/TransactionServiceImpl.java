@@ -23,7 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.ZoneId;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.*;
 
@@ -71,12 +71,15 @@ public class TransactionServiceImpl implements TransactionService{
 
     private void validateReturnDateTime(Instant returnDateTime) {
         Instant now = Instant.now();
+        Instant maxReturnInstant = now.atZone(ZoneId.systemDefault())
+                .plusMonths(MAX_BORROW_MONTHS)
+                .toInstant();
 
         if (returnDateTime.isBefore(now)) {
             throw new TransactionException("Return date cannot be in the past.");
         }
 
-        if (returnDateTime.isAfter(now.plus(MAX_BORROW_MONTHS, ChronoUnit.MONTHS))) {
+        if (returnDateTime.isAfter(maxReturnInstant)) {
             throw new TransactionException("Return date cannot be more than %d months from today.".formatted(MAX_BORROW_MONTHS));
         }
     }

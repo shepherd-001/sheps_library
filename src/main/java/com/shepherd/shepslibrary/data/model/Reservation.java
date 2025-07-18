@@ -2,10 +2,7 @@ package com.shepherd.shepslibrary.data.model;
 
 
 import com.shepherd.shepslibrary.data.common.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Index;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
@@ -22,7 +19,8 @@ import java.time.Instant;
 public class Reservation extends BaseEntity {
     @OneToOne
     private Book book;
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
     private Instant reservationDateTime;
 }

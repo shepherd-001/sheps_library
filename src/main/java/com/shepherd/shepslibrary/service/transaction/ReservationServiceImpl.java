@@ -14,6 +14,7 @@ import com.shepherd.shepslibrary.mapper.ReservationMapper;
 import com.shepherd.shepslibrary.service.book.BookService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.utils.AppUtils;
+import com.shepherd.shepslibrary.utils.ErrorMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -119,11 +121,14 @@ public class ReservationServiceImpl implements ReservationService{
     @Transactional
     @CacheEvict(value = "reservationCache", key = "#reservationId")
     public String deleteReservation(String reservationId, String userId) {
-        if(!reservationRepository.existsByIdAndUserId(reservationId, userId))
-            throw new ResourceNotFoundException("Reservation not found");
-        reservationRepository.deleteByIdAndUserId(reservationId, userId);
-        log.info("::::: Reservation deleted successfully :::::");
-        return "Reservation deleted successfully";
+        int deletedCount = reservationRepository.deleteByReservationIdAndUserId(reservationId, userId);
+        if(deletedCount > 0){
+            log.info("Reservation deleted successfully");
+            return "Reservation deleted successfully";
+        }
+        if(!reservationRepository.existsById(reservationId))
+            throw new ResourceNotFoundException(ErrorMessage.RESERVATION_NOT_FOUND);
+        throw new AuthorizationDeniedException(ErrorMessage.ACCESS_DENIED);
     }
 
     @Override
