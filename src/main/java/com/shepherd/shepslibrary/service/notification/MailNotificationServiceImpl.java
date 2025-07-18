@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.time.LocalDate;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -21,7 +22,7 @@ import java.util.concurrent.ExecutorService;
 public class MailNotificationServiceImpl implements MailNotificationService {
     private final MailSenderService mailSenderService;
     @Value("${client_url}")
-    private String baseUrl;
+    private String clientUrl;
     private final SpringTemplateEngine templateEngine;
     private final ExecutorService executorService;
 
@@ -35,7 +36,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
 
     @Override
     public void sendVerificationMail(User user, String token) {
-        String verificationLink = "%s/verify?token=%s".formatted(baseUrl, token);
+        String verificationLink = "%s/verify?token=%s".formatted(clientUrl, token);
         Map<String, Object> variables = Map.of(
                 "firstName", user.getFirstName(),
                 "confirmationLink", verificationLink
@@ -45,7 +46,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
 
     @Override
     public void sendResetPasswordMail(User user, String token) {
-        String resetPasswordLink = "%s/reset-password?token=%s".formatted(baseUrl, token);
+        String resetPasswordLink = "%s/reset-password?token=%s".formatted(clientUrl, token);
         Map<String, Object> variables = Map.of(
                 "firstName", user.getFirstName(),
                 "resetPasswordLink", resetPasswordLink
@@ -55,7 +56,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
 
     @Override
     public void sendLibrarianInvitation(User user, String token) {
-        String invitationLink = "%s/invitation?token=%s".formatted(baseUrl, token);
+        String invitationLink = "%s/invitation?token=%s".formatted(clientUrl, token);
         Map<String, Object> variables = Map.of(
                 "invitationLink", invitationLink,
                 "firstName", user.getFirstName()
@@ -71,18 +72,18 @@ public class MailNotificationServiceImpl implements MailNotificationService {
         Book book = transaction.getBook();
         String bookTitle = book.getTitle();
         String bookAuthor = book.getAuthor();
-        LocalDate borrowedDate = transaction.getBorrowDate();
-        LocalDate dueDate = transaction.getReturnDate();
+        Instant borrowDateTime = transaction.getBorrowDateTime();
+        Instant dueDateTime = transaction.getReturnDateTime();
 
-        long overdueDays = ChronoUnit.DAYS.between(dueDate, LocalDate.now());
+        long overdueDays = ChronoUnit.DAYS.between(dueDateTime, LocalDateTime.now());
 
         Map<String, Object> variables = Map.of(
                 "firstName", firstName,
                 "overdueDays", overdueDays,
                 "bookTitle", bookTitle,
                 "bookAuthor", bookAuthor,
-                "borrowedDate", borrowedDate,
-                "dueDate", dueDate
+                "borrowedDate", borrowDateTime,
+                "dueDate", dueDateTime
         );
         sendEmail("overdue-book", "Overdue Book Notification", email, variables);
     }

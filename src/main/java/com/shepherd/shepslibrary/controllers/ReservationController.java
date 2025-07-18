@@ -1,12 +1,13 @@
 package com.shepherd.shepslibrary.controllers;
 
+import com.shepherd.shepslibrary.controllers.response.ApiResponse;
+import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
 import com.shepherd.shepslibrary.service.transaction.ReservationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,39 +16,44 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PreAuthorize("hasRole('MEMBER')")
-    @PostMapping("/create")
-    public ResponseEntity<Object> reserveBook(@RequestParam UUID bookId){
-        return ResponseEntity.ok(reservationService.reserveBook(bookId));
+    @PostMapping("/create/{bookId}")
+    public ResponseEntity<ApiResponse<?>> reserveBook(@PathVariable String bookId){
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse
+                .buildResponse("Book reserved successfully", reservationService.reserveBook(bookId)));
     }
 
     @PreAuthorize("hasRole('MEMBER')")
-    @GetMapping("/get")
-    public ResponseEntity<Object> getReservationById(@RequestParam UUID reservationId){
-        return ResponseEntity.ok(reservationService.getReservationById(reservationId));
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<?>> getReservationById(@PathVariable String id){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(reservationService.getReservationById(id)));
     }
 
     @PreAuthorize("hasRole('MEMBER')")
-    @GetMapping("/get-all-by-user")
-    public ResponseEntity<Object> getAllReservationsByUserId(@RequestParam UUID userId,
-                                                             @RequestParam(defaultValue = "0") int pageNumber){
-        return ResponseEntity.ok(reservationService.getAllReservationByUserId(userId, pageNumber));
+    @GetMapping("/all/{userId}/{page}")
+    public ResponseEntity<ApiResponse<?>> getAllReservationsByUserId(@PathVariable String userId, @PathVariable  int page){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(reservationService.getAllReservationByUserId(userId, page)));
     }
 
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    @GetMapping("/get-all")
-    public ResponseEntity<Object> getAllReservations(@RequestParam(defaultValue = "0") int pageNumber){
-        return ResponseEntity.ok(reservationService.getAllReservations(pageNumber));
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<?>> getAllReservations(@RequestBody PaginationRequest request){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(reservationService.getAllReservations(request)));
     }
 
-    @DeleteMapping("/delete/{reservationId}/{userId}")
+    @DeleteMapping("/{reservationId}/{userId}")
     @PreAuthorize("hasRole('MEMBER')")
-    public ResponseEntity<Object> deleteReservation(@PathVariable UUID reservationId, @PathVariable UUID userId){
-        return ResponseEntity.ok(reservationService.deleteReservation(reservationId, userId));
+    public ResponseEntity<ApiResponse<?>> deleteReservation(@PathVariable String reservationId, @PathVariable String userId){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(reservationService.deleteReservation(reservationId, userId)));
     }
 
-    @DeleteMapping("/delete/all/{userId}")
+    @DeleteMapping("/all/{userId}")
     @PreAuthorize("hasRole('MEMBER')")
-    public ResponseEntity<Object> deleteAllReservations(@PathVariable UUID userId){
-        return ResponseEntity.ok(reservationService.deleteAllReservation(userId));
+    public ResponseEntity<ApiResponse<?>> deleteAllReservations(@PathVariable String userId){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(reservationService.deleteAllReservation(userId)));
     }
 }

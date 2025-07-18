@@ -1,9 +1,10 @@
 package com.shepherd.shepslibrary.data.model;
 
+import com.shepherd.shepslibrary.data.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 @Entity
 @AllArgsConstructor
@@ -14,13 +15,15 @@ import java.time.LocalDate;
 @Table(indexes = {
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
-public class Transaction extends BaseModel{
+public class Transaction extends BaseEntity {
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
     @ManyToOne
+    @JoinColumn(name = "book_id")
     private Book book;
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType;
-    private LocalDate borrowDate;
-    private LocalDate returnDate;
+    private Instant borrowDateTime;
+    private Instant returnDateTime;
 }

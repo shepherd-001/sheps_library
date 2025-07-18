@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.controllers;
 
+import com.shepherd.shepslibrary.controllers.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.CreatePasswordRequest;
 import com.shepherd.shepslibrary.service.librarian.LibrarianService;
 import jakarta.validation.Valid;
@@ -18,7 +19,8 @@ public class LibrarianController {
 
 
     @PostMapping("/create-password")
-    public ResponseEntity<Object> createPassword(@Valid @RequestBody CreatePasswordRequest createPasswordRequest){
-        return ResponseEntity.ok(librarianService.createPassword(createPasswordRequest));
+    public ResponseEntity<ApiResponse<?>> createPassword(@Valid @RequestBody CreatePasswordRequest createPasswordRequest){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse("Librarian password created successfully", librarianService.createPassword(createPasswordRequest)));
     }
 }

@@ -1,14 +1,16 @@
 package com.shepherd.shepslibrary.controllers;
 
+import com.shepherd.shepslibrary.controllers.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
+import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
 import com.shepherd.shepslibrary.service.transaction.TransactionService;
+import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,24 +20,30 @@ public class TransactionController {
 
     @PreAuthorize("hasRole('MEMBER')")
     @PostMapping("/borrow-book")
-    public ResponseEntity<Object> borrowBook(@Valid @RequestBody BorrowBookRequest borrowBookRequest){
-        return ResponseEntity.ok(transactionService.borrowBook(borrowBookRequest));
+    public ResponseEntity<ApiResponse<?>> borrowBook(@Valid @RequestBody BorrowBookRequest borrowBookRequest){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(transactionService.borrowBook(borrowBookRequest)));
     }
 
     @PreAuthorize("hasRole('MEMBER')")
     @PutMapping("/return-book")
-    public ResponseEntity<Object> returnBook(@RequestParam UUID transactionId){
-        return ResponseEntity.ok(transactionService.returnBook(transactionId));
+    public ResponseEntity<ApiResponse<?>> returnBook(@RequestParam @NotBlank(message = ValidationMessage.NULL_TRANSACTION_ID)
+                                                         String transactionId){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(transactionService.returnBook(transactionId)));
     }
 
-    @GetMapping("/get/all/{userId}")
-    public ResponseEntity<Object> getAllTransactions(@PathVariable UUID userId, @RequestParam(defaultValue = "0") int pageNumber){
-        return ResponseEntity.ok(transactionService.getAllTransactionByUserId(userId, pageNumber));
+    @GetMapping("/all/{userId}")
+    public ResponseEntity<ApiResponse<?>> getAllTransactions(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
+                                                                 String userId, int pageNumber){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(transactionService.getAllTransactionByUserId(userId, pageNumber)));
     }
 
-    @GetMapping("/get/all")
+    @GetMapping("/all")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public ResponseEntity<Object> getAllTransactions(@RequestParam(defaultValue = "0") int pageNumber){
-        return ResponseEntity.ok(transactionService.getAllTransactions(pageNumber));
+    public ResponseEntity<ApiResponse<?>> getAllTransactions(@RequestBody PaginationRequest paginationRequest){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(transactionService.getAllTransactions(paginationRequest)));
     }
 }

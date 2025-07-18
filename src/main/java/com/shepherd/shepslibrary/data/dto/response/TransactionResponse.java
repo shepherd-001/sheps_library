@@ -4,19 +4,18 @@ import com.shepherd.shepslibrary.data.model.TransactionType;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDate;
-import java.util.UUID;
+import java.time.Instant;
 
 @Builder
 @Getter
 public class TransactionResponse {
-    private UUID transactionId;
+    private String transactionId;
     private TransactionType transactionType;
     private String firstName;
     private String lastName;
     private String title;
     private String author;
     private String genre;
-    private LocalDate borrowedDate;
-    private LocalDate returnDate;
+    private Instant borrowedDateTime;
+    private Instant returnDateTime;
 }

@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.controllers;
 
+import com.shepherd.shepslibrary.controllers.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
 import com.shepherd.shepslibrary.service.admin.AdminService;
 import com.shepherd.shepslibrary.utils.RegexPattern;
@@ -23,16 +24,17 @@ public class AdminController {
 
     @PostMapping("/invite-librarian")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> inviteLibrarian(@Valid @RequestBody InviteLibrarianRequest request){
-        return ResponseEntity.status(HttpStatus.CREATED).body(adminService.inviteLibrarian(request));
+    public ResponseEntity<ApiResponse<?>> inviteLibrarian(@Valid @RequestBody InviteLibrarianRequest inviteLibrarianRequest){
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse
+                .buildResponse("Librarian invited successfully", adminService.inviteLibrarian(inviteLibrarianRequest)));
     }
 
     @PostMapping("/resend-librarian-invite")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> resendLibrarianInvitation(@RequestParam
+    public ResponseEntity<ApiResponse<?>> resendLibrarianInvitation(@RequestParam
                                                       @NotBlank(message = ValidationMessage.BLANK_EMAIL)
                                                       @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
                                                       String inviteeEmail){
-        return ResponseEntity.ok(adminService.resendInvite(inviteeEmail));
+        return ResponseEntity.ok(ApiResponse.buildResponse(adminService.resendInvite(inviteeEmail)));
     }
 }

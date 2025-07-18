@@ -1,4 +1,4 @@
-package com.shepherd.shepslibrary.service.notification;
+package com.shepherd.shepslibrary.service.emailValidator;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shepherd.shepslibrary.exceptions.EmailValidationException;
@@ -42,17 +42,16 @@ public class EmailValidationServiceImpl implements EmailValidationService{
     );
 
     @Override
-    public boolean isValidEmail(String email) {
+    public void checkAndValidateEmail(String email) {
         email = email.toLowerCase().trim();
         log.info("Initiating email validation for: {}", email);
-
         checkEmailNotBlank(email);
         validateNonDisposableEmail(email);
-
-        return validateEmailWithExternalService(email);
+        if(!isValidEmail(email))
+            throw new EmailValidationException("Invalid email address. Please use a valid one");
     }
 
-    private boolean validateEmailWithExternalService(String email) {
+    private boolean isValidEmail(String email) {
         String url = buildValidationUrl(email);
 
         try {
@@ -111,15 +110,11 @@ public class EmailValidationServiceImpl implements EmailValidationService{
     }
 
     private static void validateNonDisposableEmail(String email) {
-        String domain = extractDomainFromEmail(email);
+        String domain = email.substring(email.indexOf('@') + 1);
         if (DISPOSABLE_EMAIL_DOMAINS.contains(domain)) {
             log.error("Disposable email detected: {}", email);
             throw new EmailValidationException("Disposable email addresses are not allowed.");
         }
-    }
-
-    private static String extractDomainFromEmail(String email) {
-        return email.substring(email.indexOf('@') + 1);
     }
 
     private String buildValidationUrl(String email) {

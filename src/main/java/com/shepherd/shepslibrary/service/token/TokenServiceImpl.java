@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +55,7 @@ public class TokenServiceImpl implements TokenService{
                 .token(token)
                 .isExpired(false)
                 .isRevoked(false)
-                .expirationTime(LocalDateTime.now().plusSeconds(expirationTimeInSeconds))
+                .expirationTime(Instant.now().plusSeconds(expirationTimeInSeconds))
                 .build();
 
         deleteAllTokenByUserAndType(user.getEmail(), tokenType);
@@ -102,7 +102,7 @@ public class TokenServiceImpl implements TokenService{
             log.error("Token expiration time is null");
             throw new ShepsTokenException("Invalid token");
         }
-        if (shepsToken.getExpirationTime().isBefore(LocalDateTime.now())) {
+        if (shepsToken.getExpirationTime().isBefore(Instant.now())) {
             log.info("Token is expired");
             throw new ShepsTokenException("Token is expired");
         }
@@ -129,4 +129,3 @@ public class TokenServiceImpl implements TokenService{
         log.info("::::: Deleted all tokens by user email :::::");
     }
 }
-

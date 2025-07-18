@@ -1,13 +1,11 @@
 package com.shepherd.shepslibrary.data.model;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Index;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import com.shepherd.shepslibrary.data.common.BaseEntity;
+import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 @Entity
 @AllArgsConstructor
@@ -18,10 +16,11 @@ import java.time.LocalDate;
 @Table(indexes = {
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
-public class Reservation extends BaseModel{
+public class Reservation extends BaseEntity {
     @OneToOne
     private Book book;
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    private LocalDate reservationDate;
+    private Instant reservationDateTime;
 }

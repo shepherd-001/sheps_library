@@ -1,9 +1,8 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.response.BaseResponse;
+import com.shepherd.shepslibrary.controllers.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
-import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
 import com.shepherd.shepslibrary.service.auth.AuthService;
 import com.shepherd.shepslibrary.utils.RegexPattern;
@@ -12,7 +11,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,49 +23,49 @@ public class AuthController {
     private final AuthService authService;
 
 
-    @PostMapping("/signup")
-    public ResponseEntity<Object> signup(@Valid @RequestBody RegisterUserRequest registerRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(authService.registerUser(registerRequest));
-    }
 
     @PostMapping("/verify")
-    public ResponseEntity<Object> verifyEmail(@RequestParam
+    public ResponseEntity<ApiResponse<?>> verifyEmail(@RequestParam
                                                   @NotBlank(message = ValidationMessage.BLANK_TOKEN)
                                                   String token,
                                               @RequestParam
                                               @NotBlank(message = ValidationMessage.BLANK_EMAIL)
                                               @Email(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
                                               String email){
-        return ResponseEntity.ok(authService.verifyEmail(token, email));
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse("User verified successfully", authService.verifyEmail(token, email)));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@Valid @RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok(authService.login(loginRequest));
+    public ResponseEntity<ApiResponse<?>> login(@Valid @RequestBody LoginRequest loginRequest) {
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse("User logged in successfully", authService.login(loginRequest)));
     }
 
     @PutMapping("/change-password")
-    public ResponseEntity<Object> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
-        return ResponseEntity.ok(authService.changePassword(changePasswordRequest));
+    public ResponseEntity<ApiResponse<?>> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse("Password changed successfully", authService.changePassword(changePasswordRequest)));
     }
 
     @PostMapping("/request-password-reset")
-    public ResponseEntity<Object> requestPasswordReset(@RequestParam
+    public ResponseEntity<ApiResponse<?>> requestPasswordReset(@RequestParam
                                                            @NotBlank(message = ValidationMessage.BLANK_EMAIL)
                                                            @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
                                                            String email) {
-        return ResponseEntity.ok(authService.requestPasswordReset(email));
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(authService.requestPasswordReset(email)));
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Object> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
-        return ResponseEntity.ok(authService.resetPassword(resetPasswordRequest));
+    public ResponseEntity<ApiResponse<?>> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse("Password reset successful", authService.resetPassword(resetPasswordRequest)));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Object> logout(){
-        return ResponseEntity.ok(BaseResponse
+    public ResponseEntity<ApiResponse<?>> logout(){
+        return ResponseEntity.ok(ApiResponse
                 .buildResponse("User logged out successfully"));
     }
 }

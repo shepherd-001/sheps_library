@@ -1,14 +1,14 @@
 package com.shepherd.shepslibrary.service.user;
 
-import com.shepherd.shepslibrary.controllers.response.BaseResponse;
-import com.shepherd.shepslibrary.data.dto.response.PaginatedResponse;
+import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
+import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
+import com.shepherd.shepslibrary.data.dto.response.RegisterUserResponse;
 import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 import com.shepherd.shepslibrary.data.model.Role;
 
-import java.util.UUID;
-
 public interface UserService {
-    BaseResponse<UserResponse> getUserById(UUID userId);
-    BaseResponse<PaginatedResponse<UserResponse>> getAllUsersByRole(Role role, int pageNumber);
-    BaseResponse<PaginatedResponse<UserResponse>> getAllUsersByStatus(boolean status, int pageNumber);
+    RegisterUserResponse registerUser(RegisterUserRequest registerUserRequest);
+    UserResponse getUserById(String userId);
+    PaginationResponse<UserResponse> getAllUsersByRole(Role role, int pageNumber);
+    PaginationResponse<UserResponse> getAllUsersByStatus(boolean status, int pageNumber);
 }

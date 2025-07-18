@@ -1,10 +1,11 @@
 package com.shepherd.shepslibrary.data.model;
 
 
+import com.shepherd.shepslibrary.data.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Builder
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
         @Index(name = "idx_token", columnList = "token"),
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
-public class ShepsToken extends BaseModel{
+public class ShepsToken extends BaseEntity {
     @Column(unique = true, length = 500)
     private String token;
     @Column(length = 500)
@@ -28,5 +29,5 @@ public class ShepsToken extends BaseModel{
     private TokenType tokenType;
     private boolean isExpired;
     private boolean isRevoked;
-    private LocalDateTime expirationTime;
+    private Instant expirationTime;
 }

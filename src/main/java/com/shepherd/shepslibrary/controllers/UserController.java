@@ -1,16 +1,15 @@
 package com.shepherd.shepslibrary.controllers;
 
+import com.shepherd.shepslibrary.controllers.response.ApiResponse;
+import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.data.model.Role;
 import com.shepherd.shepslibrary.service.user.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,23 +17,28 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("/get/id")
-    public ResponseEntity<Object> getUserById(@RequestParam UUID userId) {
-        return ResponseEntity.ok(userService.getUserById(userId));
+    @PostMapping("/signup")
+    public ResponseEntity<ApiResponse<?>> signup(@Valid @RequestBody RegisterUserRequest registerRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse
+                .buildResponse("User registered successfully", userService.registerUser(registerRequest)));
+    }
+    @GetMapping("/{userId}")
+    public ResponseEntity<ApiResponse<?>> getUserById(@PathVariable String userId) {
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(userService.getUserById(userId)));
     }
 
-    @GetMapping("/get/all-by-role")
+    @GetMapping("/all/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> getAllUsersByRole(@RequestParam Role role,
-                                                    @RequestParam(defaultValue = "0") int pageNumber) {
-        return ResponseEntity.ok(userService.getAllUsersByRole(role, pageNumber));
+    public ResponseEntity<ApiResponse<?>> getAllUsersByRole(@RequestParam Role role, int pageNumber) {
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(userService.getAllUsersByRole(role, pageNumber)));
     }
 
-    @GetMapping("/get/all-by-status")
+    @GetMapping("/all/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Object> getAllUsersByStatus(@RequestParam boolean status,
-                                                      @RequestParam(defaultValue = "0")
-                                                      int pageNumber) {
-        return ResponseEntity.ok(userService.getAllUsersByStatus(status, pageNumber));
+    public ResponseEntity<ApiResponse<?>> getAllUsersByStatus(@RequestParam boolean status, int pageNumber) {
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(userService.getAllUsersByStatus(status, pageNumber)));
     }
 }

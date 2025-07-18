@@ -1,22 +1,31 @@
 package com.shepherd.shepslibrary.data.repository;
 
 import com.shepherd.shepslibrary.data.model.Reservation;
+import jakarta.annotation.Nonnull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.util.UUID;
-
-public interface ReservationRepository extends JpaRepository<Reservation, UUID> {
-    Page<Reservation> findAllByUserId(UUID userId, Pageable pageable);
-    void deleteByIdAndUserId(UUID reservationId, UUID userId);
-    void deleteAllByUserId(UUID userId);
+public interface ReservationRepository extends JpaRepository<Reservation, String> {
+    Page<Reservation> findAllByUserId(String userId, Pageable pageable);
     @Query("""
            select reservation from Reservation reservation
            where reservation.book.isAvailable = true
            """)
     Page<Reservation> findAllAvailableReservations(Pageable pageable);
-    boolean existsByUserIdAndBookId(UUID userId, UUID bookId);
-    boolean existsByIdAndUserId(UUID reservationId, UUID userId);
+    boolean existsByUserIdAndBookId(String userId, String bookId);
+    boolean existsById(@Nonnull String reservationId);
+
+    @Modifying
+    @Query("DELETE FROM Reservation r WHERE r.id = :reservationId AND r.user.id = :userId")
+    int deleteByReservationIdAndUserId(@Param("reservationId") String reservationId,
+                            @Param("userId") String userId);
+
+    @Modifying
+    @Query("DELETE FROM Reservation r WHERE r.user.id = :userId")
+    void deleteAllByUserId(@Param("userId") String userId);
+
 }

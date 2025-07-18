@@ -5,26 +5,39 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.time.Duration;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PasswordValidationServiceImpl implements PasswordValidationService{
-    private final WebClient webClient;
+    private final WebClient.Builder webClientBuilder;
     @Value("${have_i_been_pawned_url}")
     private String haveIBeenPawnedUrl;
     private static final int SHA1_PREFIX_LENGTH = 5;
+    private static final Duration API_TIMEOUT = Duration.ofSeconds(5);
+    private static final String USER_AGENT = "ShepsLibrary/1.0";
 
 
     @Override
-    public boolean isPasswordBreached(String password) {
-        checkPasswordNotBlank(password);
+    public void validatePasswordNotBreached(String password) {
+        if(isPasswordBreached(password))
+            throw new PasswordValidationException("This password has been compromised. Use a new, unique password"
+                    , BAD_REQUEST.value());
+    }
+
+    private boolean isPasswordBreached(String password) {
+        validatePasswordNotBlank(password);
 
         String sha1Hash = DigestUtils.sha1Hex(password).toUpperCase();
         String prefix = sha1Hash.substring(0, SHA1_PREFIX_LENGTH);
@@ -34,13 +47,17 @@ public class PasswordValidationServiceImpl implements PasswordValidationService{
         log.info("Checking password breach for prefix: {}", prefix);
 
         try {
-            String webClientResponse = webClient.get()
+            String webClientResponse = webClientBuilder
+                    .defaultHeader(HttpHeaders.USER_AGENT, USER_AGENT)
+                    .build()
+                    .get()
                     .uri(apiUrl)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, response -> {
                         throw new PasswordValidationException(getErrorMessage(response.statusCode()), response.statusCode().value());
                     })
                     .bodyToMono(String.class)
+                    .timeout(API_TIMEOUT)
                     .block();
 
             return webClientResponse != null && webClientResponse.contains(suffix);
@@ -54,7 +71,7 @@ public class PasswordValidationServiceImpl implements PasswordValidationService{
             }
                     }
 
-    private void checkPasswordNotBlank(String password) {
+    private void validatePasswordNotBlank(String password) {
         if (password == null || password.isBlank()) {
             throw new PasswordValidationException("Password is required to proceed with validation", 400);
         }
@@ -71,5 +88,4 @@ public class PasswordValidationServiceImpl implements PasswordValidationService{
             default -> String.format("Unexpected error when validating password. Code %s", statusCode.value());
         };
     }
-
 }

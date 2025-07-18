@@ -40,6 +40,8 @@ public class SecurityConfig {
     private static final List<String> ALLOWED_HEADERS = List.of("Authorization", "Requestor-Type",
             "Origin", "X-Requested-With", "Accept",  "Content-Type", "Cache-Control");
 
+    private static final String LOGOUT_URL = "/api/v1/auth/logout";
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -56,7 +58,7 @@ public class SecurityConfig {
                                 .authenticated())
                 .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout ->
-                        logout.logoutUrl("/api/v1/auth/logout")
+                        logout.logoutUrl(LOGOUT_URL)
                                 .addLogoutHandler(logoutHandler)
                                 .logoutSuccessHandler(((request, response, authentication) -> {
                                     SecurityContextHolder.clearContext();
@@ -80,6 +82,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(12);
     }
 }
