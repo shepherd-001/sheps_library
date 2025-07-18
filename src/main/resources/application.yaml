@@ -9,7 +9,7 @@ spring:
   application:
     name: ShepsLibrary
   profiles:
-    active: local
+    active: ${ACTIVE_PROFILE:local}
 
   datasource:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?createDatabaseIfNotExist=true
