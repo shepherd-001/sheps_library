@@ -81,3 +81,9 @@ librarian_invite_expiration: ${LIBRARIAN_INVITATION_EXPIRATION}
 jwt_secret_key: ${JWT_SECRET_KEY}
 jwt_access_expiration: ${JWT_EXPIRATION}
 jwt_refresh_expiration: ${JWT_REFRESH_EXPIRATION}
+
+app:
+  roles:
+    - ADMIN
+    - LIBRARIAN
+    - MEMBER
