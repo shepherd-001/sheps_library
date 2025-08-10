@@ -6,7 +6,7 @@ DB_NAME: sheps_library
 DB_USERNAME: root
 DB_PASSWORD: 328436
 
-ADMIN_EMAIL: admin@shepherdlibrary.com
+ADMIN_EMAIL: admin@mailinator.com
 ADMIN_PASSWORD: Admin123$
 
 MAIL_HOST: smtp.gmail.com
