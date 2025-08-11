@@ -17,7 +17,7 @@ public interface UserMapper {
     @Mapping(target = "email", expression = "java(request.getEmail().toLowerCase().trim())")
     @Mapping(target = "password", expression = "java(passwordEncoder.encode(request.getPassword()))")
     @Mapping(target = "gender", expression = "java(toGender(request.getGender()))")
-    @Mapping(target = "role", constant = "MEMBER")
+//    @Mapping(target = "role", constant = "MEMBER")
     User mapToUser(RegisterUserRequest request, @Context PasswordEncoder passwordEncoder);
 
     default Gender toGender(String value) {
@@ -39,9 +39,9 @@ public interface UserMapper {
     @Mapping(target = "lastName", source = "user.lastName")
     @Mapping(target = "email", source = "user.email")
     @Mapping(target = "isEnabled", source = "user.enabled")
-    @Mapping(target = "accessToken", source = "jwtTokenResponse.accessToken")
-    @Mapping(target = "refreshToken", source = "jwtTokenResponse.refreshToken")
-    EmailConfirmationResponse mapToEmailConfirmationResponse(User user, JwtTokenResponse jwtTokenResponse);
+    @Mapping(target = "accessToken", source = "authResponse.accessToken")
+    @Mapping(target = "refreshToken", source = "authResponse.refreshToken")
+    EmailConfirmationResponse mapToEmailConfirmationResponse(User user, AuthResponse authResponse);
 
     @Mapping(target = "firstName", source = "firstName")
     @Mapping(target = "lastName", source = "lastName")
@@ -49,6 +49,7 @@ public interface UserMapper {
     @Mapping(target = "gender", source = "gender")
     @Mapping(target = "isEnabled", source = "enabled")
     @Mapping(target = "isRevoked", source = "revoked")
+    @Mapping(target = "role", ignore = true)
     UserResponse mapToUserResponse(User user);
 
 
@@ -56,7 +57,7 @@ public interface UserMapper {
     @Mapping(target = "lastName", expression = "java(request.getLastName().trim())")
     @Mapping(target = "email", expression = "java(request.getEmail().toLowerCase().trim())")
     @Mapping(target = "gender", expression = "java(toGender(request.getGender()))")
-    @Mapping(target = "role", constant = "LIBRARIAN")
+    @Mapping(target = "role", ignore = true)
     User mapToLibrarian(InviteLibrarianRequest request);
 
     @Mapping(target = "librarianId", source = "id")

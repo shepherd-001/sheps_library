@@ -5,18 +5,18 @@ import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
 import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
 import com.shepherd.shepslibrary.data.dto.response.EmailConfirmationResponse;
-import com.shepherd.shepslibrary.data.dto.response.JwtTokenResponse;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
+import com.shepherd.shepslibrary.exceptions.UserNotVerifiedException;
 import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
-import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
+import com.shepherd.shepslibrary.utils.ErrorMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.getCurrentUser;
+import static com.shepherd.shepslibrary.utils.ErrorMessage.*;
 
 @Service
 @RequiredArgsConstructor
@@ -65,10 +66,10 @@ public class AuthServiceImpl implements AuthService{
         User user = getUserByEmail(authentication.getName());
 
         if(!user.isEnabled())
-            throw new ShepsLibraryException("Verify your email address before you proceed");
+            throw new UserNotVerifiedException(VERIFY_EMAIL_ADDRESS);
 
         tokenService.deleteAllTokenByUserAndType(user.getEmail(), TokenType.JWT);
-        return generateJwtTokens(user);
+        return tokenService.generateJwtTokens(user);
     }
 
     private Authentication authenticateUser(LoginRequest loginRequest) {
@@ -76,17 +77,9 @@ public class AuthServiceImpl implements AuthService{
                 loginRequest.getEmail().trim(), loginRequest.getPassword()));
     }
 
-    private AuthResponse generateJwtTokens(User user) {
-        JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(user);
-        return AuthResponse.builder()
-                .accessToken(jwtTokenResponse.getAccessToken())
-                .refreshToken(jwtTokenResponse.getRefreshToken())
-                .build();
-    }
-
     private User getUserByEmail(String userEmail) {
         return userRepository.findByEmailEqualsIgnoreCase(userEmail)
-                .orElseThrow(()-> new ResourceNotFoundException("User with the provided email not found"));
+                .orElseThrow(()-> new ResourceNotFoundException(USER_WITH_EMAIL_NOT_FOUND));
     }
 
     @Override
@@ -99,18 +92,18 @@ public class AuthServiceImpl implements AuthService{
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         userRepository.save(user);
         tokenService.deleteAllTokenByUserAndType(user.getEmail(), TokenType.JWT);
-        return generateJwtTokens(user);
+        return tokenService.generateJwtTokens(user);
     }
 
     private void validatePasswordChange(String currentEncodedPassword, ChangePasswordRequest request) {
         if (!passwordEncoder.matches(request.getCurrentPassword(), currentEncodedPassword))
-            throw new BadCredentialsException("Invalid current password");
+            throw new BadCredentialsException(INVALID_CURRENT_PASSWORD);
 
         if (request.getCurrentPassword().equals(request.getNewPassword()))
-            throw new BadCredentialsException("New password cannot be the same as the current password");
+            throw new BadCredentialsException(SAME_OLD_AND_NEW_PASSWORD);
 
         if (!request.getNewPassword().equals(request.getConfirmPassword()))
-            throw new BadCredentialsException("Passwords do not match");
+            throw new BadCredentialsException(MISMATCH_PASSWORD);
 
         passwordValidationService.validatePasswordNotBreached(request.getNewPassword());
     }
@@ -140,6 +133,6 @@ public class AuthServiceImpl implements AuthService{
         User user = shepsToken.getUser();
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
         userRepository.save(user);
-        return generateJwtTokens(user);
+        return tokenService.generateJwtTokens(user);
     }
 }

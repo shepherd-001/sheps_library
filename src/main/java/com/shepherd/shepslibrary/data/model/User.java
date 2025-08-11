@@ -22,8 +22,11 @@ public class User extends BaseEntity {
     private String password;
     @Enumerated(EnumType.STRING)
     private Gender gender;
-    @Enumerated(EnumType.STRING)
-    private Role role;
+//    @Enumerated(EnumType.STRING)
+//    private Role role;
+
+    @OneToOne
+    private UserRole role;
     @Column(name = "enabled")
     private boolean isEnabled;
     @Column(name = "revoked")

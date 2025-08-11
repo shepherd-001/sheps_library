@@ -76,6 +76,14 @@ public final class AppUtils {
         return isbn.toString();
     }
 
+//    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+//
+//public static String generateOtp() {
+//    int number = SECURE_RANDOM.nextInt(900_000) + 100_000; // 100000-999999
+//    return String.valueOf(number);
+//}
+
+
     private AppUtils() {
         throw new UnsupportedOperationException(ErrorMessage.NON_INSTANTIABLE_UTILITY_CLASS);
     }

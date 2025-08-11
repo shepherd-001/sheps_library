@@ -2,7 +2,6 @@ package com.shepherd.shepslibrary.service.librarian;
 
 import com.shepherd.shepslibrary.data.dto.request.CreatePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
-import com.shepherd.shepslibrary.data.dto.response.JwtTokenResponse;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
@@ -36,10 +35,6 @@ public class LibrarianServiceImpl implements LibrarianService{
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
         tokenService.deleteToken(shepsToken);
-        JwtTokenResponse jwtTokenResponse = tokenService.generateJwtTokens(user);
-        return AuthResponse.builder()
-                .accessToken(jwtTokenResponse.getAccessToken())
-                .refreshToken(jwtTokenResponse.getRefreshToken())
-                .build();
+        return tokenService.generateJwtTokens(user);
     }
 }

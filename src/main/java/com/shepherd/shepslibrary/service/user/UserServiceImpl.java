@@ -4,9 +4,9 @@ import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.response.RegisterUserResponse;
 import com.shepherd.shepslibrary.data.dto.response.UserResponse;
-import com.shepherd.shepslibrary.data.model.Role;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
+import com.shepherd.shepslibrary.data.model.UserRole;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
 import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
@@ -15,6 +15,7 @@ import com.shepherd.shepslibrary.service.emailValidator.EmailValidationService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
+import com.shepherd.shepslibrary.service.userRole.RoleService;
 import com.shepherd.shepslibrary.utils.AppUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.*;
+import static com.shepherd.shepslibrary.utils.RoleUtils.MEMBER;
 
 @Service
 @RequiredArgsConstructor
@@ -41,17 +43,23 @@ public class UserServiceImpl implements UserService {
     private final EmailValidationService emailValidationService;
     private final PasswordValidationService passwordValidationService;
     private final UserMapper userMapper;
+    private final RoleService roleService;
 
     @Override
     @Transactional
     public RegisterUserResponse registerUser(RegisterUserRequest registerUserRequest) {
         validateRegisterRequest(registerUserRequest);
 
-        User savedUser = userRepository.save(userMapper.mapToUser(registerUserRequest, passwordEncoder));
-        sendEmailConfirmation(savedUser);
+        UserRole role = roleService.getRole(MEMBER);
 
-        log.info("::::: User with the first name {} registered successfully :::::", savedUser.getFirstName());
-        return userMapper.mapToRegisterResponse(savedUser);
+        User newUser = userMapper.mapToUser(registerUserRequest, passwordEncoder);
+        newUser.setRole(role);
+
+        newUser = userRepository.save(newUser);
+        sendEmailConfirmation(newUser);
+
+        log.info("::::: User with the first name {} registered successfully :::::", newUser.getFirstName());
+        return userMapper.mapToRegisterResponse(newUser);
     }
 
     private void validateRegisterRequest(RegisterUserRequest registerUserRequest) {
@@ -77,10 +85,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Cacheable(value = "userCache", key = "'role:' + #role + ':page:' + #pageNumber")
-    public PaginationResponse<UserResponse> getAllUsersByRole(Role role, int pageNumber) {
+    public PaginationResponse<UserResponse> getAllUsersByRole(String role, int pageNumber) {
         log.info("::::: Fetching all users by role {} :::::", role);
         Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
-        Page<User> users = userRepository.findAllByRole(role, pageable);
+        Page<User> users = userRepository.findAllByRoleName(role, pageable);
         return mapToPaginatedUserResponse(users);
     }
 

@@ -22,6 +22,7 @@ spring:
       connection-timeout: ${HIKARI_CONNECTION_TIMEOUT}
       idle-timeout: ${HIKARI_IDLE_TIMEOUT}
       max-lifetime: ${HIKARI_MAX_LIFETIME}
+      minimum-idle: ${HIKARI_MINIMUM_IDLE}
 
   jpa:
     hibernate:
@@ -65,7 +66,7 @@ admin_email: ${ADMIN_EMAIL}
 admin_password: ${ADMIN_PASSWORD}
 
 
-client_url: http://localhost:3000
+client_url: ${CLIENT_URL:http://localhost:3000}
 mail_from_email: ${MAIL_FROM_EMAIL}
 mail_from_name: ${MAIL_FROM_NAME}
 
@@ -80,3 +81,10 @@ librarian_invite_expiration: ${LIBRARIAN_INVITATION_EXPIRATION}
 jwt_secret_key: ${JWT_SECRET_KEY}
 jwt_access_expiration: ${JWT_EXPIRATION}
 jwt_refresh_expiration: ${JWT_REFRESH_EXPIRATION}
+
+app:
+  seed:
+    roles:
+      - ADMIN
+      - LIBRARIAN
+      - MEMBER
