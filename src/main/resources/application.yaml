@@ -83,7 +83,8 @@ jwt_access_expiration: ${JWT_EXPIRATION}
 jwt_refresh_expiration: ${JWT_REFRESH_EXPIRATION}
 
 app:
-  roles:
-    - ADMIN
-    - LIBRARIAN
-    - MEMBER
+  seed:
+    roles:
+      - ADMIN
+      - LIBRARIAN
+      - MEMBER

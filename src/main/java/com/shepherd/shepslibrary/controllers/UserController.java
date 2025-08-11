@@ -2,7 +2,6 @@ package com.shepherd.shepslibrary.controllers;
 
 import com.shepherd.shepslibrary.controllers.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
-import com.shepherd.shepslibrary.data.model.Role;
 import com.shepherd.shepslibrary.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,7 @@ public class UserController {
 
     @GetMapping("/all/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<?>> getAllUsersByRole(@RequestParam Role role, int pageNumber) {
+    public ResponseEntity<ApiResponse<?>> getAllUsersByRole(@RequestParam String role, int pageNumber) {
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(userService.getAllUsersByRole(role, pageNumber)));
     }

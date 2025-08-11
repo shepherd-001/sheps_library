@@ -5,6 +5,7 @@ import com.shepherd.shepslibrary.data.dto.response.InviteLibrarianResponse;
 
 
 public interface AdminService {
+    void createAdminIfNotExists();
     InviteLibrarianResponse inviteLibrarian(InviteLibrarianRequest request);
     String resendInvite(String inviteeEmail);
 }

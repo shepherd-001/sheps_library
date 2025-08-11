@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.service.token;
 
-import com.shepherd.shepslibrary.data.dto.response.JwtTokenResponse;
+import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
@@ -47,7 +47,7 @@ public class TokenServiceImpl implements TokenService{
     @Transactional
     public String generateToken(User user, TokenType tokenType) {
         long expirationTimeInSeconds = getExpirationTime(tokenType);
-        log.info("::::: Initiating the creation of a new {} token :::::", tokenType);
+        log.info("Initiating the creation of a new {} token", tokenType);
         String token = jwtService.generateAccessToken(user.getEmail(), expirationTimeInSeconds);
         ShepsToken shepsToken = ShepsToken.builder()
                 .user(user)
@@ -60,12 +60,12 @@ public class TokenServiceImpl implements TokenService{
 
         deleteAllTokenByUserAndType(user.getEmail(), tokenType);
         tokenRepository.save(shepsToken);
-        log.info("::::: Created a new {} token :::::", tokenType);
+        log.info("Created a new {} token", tokenType);
         return token;
     }
 
     @Override
-    public JwtTokenResponse generateJwtTokens(User user) {
+    public AuthResponse generateJwtTokens(User user) {
         String accessToken = jwtService.generateAccessToken(user.getEmail(), accessTokenExpiration);
         String refreshToken = jwtService.generateRefreshToken(user.getEmail(), refreshTokenExpiration);
         ShepsToken shepsToken = ShepsToken.builder()
@@ -77,7 +77,7 @@ public class TokenServiceImpl implements TokenService{
                 .isRevoked(false)
                 .build();
         tokenRepository.save(shepsToken);
-        return JwtTokenResponse.builder()
+        return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -118,14 +118,13 @@ public class TokenServiceImpl implements TokenService{
     @Override
     public void deleteToken(ShepsToken shepsToken) {
         tokenRepository.delete(shepsToken);
-        log.info("::::: Deleted a token :::::");
+        log.info("Deleted a token");
     }
 
     @Override
     @Transactional
     public void deleteAllTokenByUserAndType(String userEmail, TokenType tokenType) {
-        log.info("::::: Initiating the removal of a token by user email :::::");
         tokenRepository.deleteAllByUserEmailAndTokenType(userEmail, tokenType);
-        log.info("::::: Deleted all tokens by user email :::::");
+        log.info("Deleted all tokens by user email");
     }
 }
