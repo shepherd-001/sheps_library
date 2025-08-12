@@ -76,6 +76,7 @@ public class TokenServiceImpl implements TokenService{
                 .isExpired(false)
                 .isRevoked(false)
                 .build();
+
         tokenRepository.save(shepsToken);
         return AuthResponse.builder()
                 .accessToken(accessToken)

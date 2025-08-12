@@ -1,6 +1,7 @@
 package com.shepherd.shepslibrary.controllers;
 
 import com.shepherd.shepslibrary.controllers.response.ApiResponse;
+import com.shepherd.shepslibrary.data.dto.request.AddRoleRequest;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
 import com.shepherd.shepslibrary.service.admin.AdminService;
 import com.shepherd.shepslibrary.utils.RegexPattern;
@@ -36,5 +37,19 @@ public class AdminController {
                                                       @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
                                                       String inviteeEmail){
         return ResponseEntity.ok(ApiResponse.buildResponse(adminService.resendInvite(inviteeEmail)));
+    }
+
+    @PostMapping("/add-role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<?>> addRole(@Valid @RequestBody AddRoleRequest addRoleRequest){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(adminService.addRole(addRoleRequest)));
+    }
+
+    @DeleteMapping("/delete-role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<?>> deleteRole(@RequestParam String roleName){
+        return ResponseEntity.ok(ApiResponse
+                .buildResponse(adminService.deleteRole(roleName)));
     }
 }

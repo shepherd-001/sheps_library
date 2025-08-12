@@ -11,8 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.SecureRandom;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 
 @Slf4j
 public final class AppUtils {
@@ -49,10 +48,8 @@ public final class AppUtils {
         return PageRequest.of(pageNumber, resolvedPageSize, Sort.by(resolvedDirection, resolvedSortBy));
     }
 
-    public static String customAuthResponse(String message, LocalDateTime timestamp, boolean isSuccessful){
-        String formattedTimestamp =
-                timestamp.format(DateTimeFormatter.ofPattern("HH:mm:ss, dd-MM-yyyy"));
-        return String.format("{\"message\": \"%s\", \"timestamp\": \"%s\", \"isSuccessful\": \"%b\"}", message, formattedTimestamp, isSuccessful);
+    public static String customAuthResponse(String message, Instant timestamp, boolean isSuccessful){
+        return String.format("{\"message\": \"%s\", \"timestamp\": \"%s\", \"isSuccessful\": \"%b\"}", message, timestamp, isSuccessful);
     }
 
     public static String generateISBN() {
