@@ -20,6 +20,5 @@ public class AddRoleRequest {
     @Size(max = 100, message = ValidationMessage.ROLE_NAME_TOO_LONG)
     private String name;
 
-    @Size(max = 255, message = ValidationMessage.ROLE_DESCRIPTION_TOO_LONG)
-    private String description;
+//    permissions
 }

@@ -22,8 +22,6 @@ public class User extends BaseEntity {
     private String password;
     @Enumerated(EnumType.STRING)
     private Gender gender;
-//    @Enumerated(EnumType.STRING)
-//    private Role role;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", nullable = false)

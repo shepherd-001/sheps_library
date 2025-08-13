@@ -1,4 +1,4 @@
-package com.shepherd.shepslibrary.service.userRole;
+package com.shepherd.shepslibrary.service.userRoleAndPermission.role;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package com.shepherd.shepslibrary.service.userRole;
+package com.shepherd.shepslibrary.service.userRoleAndPermission.role;
 
 import com.shepherd.shepslibrary.data.model.UserRole;
 import com.shepherd.shepslibrary.data.repository.UserRoleRepository;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class RoleSeeder implements CommandLineRunner {
     private final UserRoleRepository userRoleRepository;
     private final AppRolesConfig appRolesConfig;
-    private final RoleService roleService;
+    private final RoleServiceImpl roleService;
 
 
     @Override
@@ -33,7 +33,6 @@ public class RoleSeeder implements CommandLineRunner {
                 .filter(roleName -> !existingRoles.contains(roleName.toUpperCase()))
                 .map(roleName -> UserRole.builder()
                         .name(roleName.trim().toUpperCase())
-                        .description(roleName + " role")
                         .build())
                 .toList();
         if(!newRoles.isEmpty()) {

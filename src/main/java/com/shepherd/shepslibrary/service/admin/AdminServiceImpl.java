@@ -16,7 +16,7 @@ import com.shepherd.shepslibrary.mapper.UserMapper;
 import com.shepherd.shepslibrary.service.emailValidator.EmailValidationService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
-import com.shepherd.shepslibrary.service.userRole.RoleService;
+import com.shepherd.shepslibrary.service.userRoleAndPermission.role.RoleService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -102,7 +102,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public String addRole(AddRoleRequest request) {
-        roleService.addRole(request.getName(), request.getDescription());
+        roleService.addRole(request.getName());
         return "Role added successfully";
     }
 
