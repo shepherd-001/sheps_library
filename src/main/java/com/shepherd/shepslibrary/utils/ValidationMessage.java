@@ -43,6 +43,13 @@ public final class ValidationMessage {
     public static final String NULL_PAGE_NUMBER = "Page number is required";
     public static final String INVALID_PAGE_NUMBER = "Page number must be a positive integer";
 
+
+    public static final String BLANK_ROLE = "Role is required";
+    public static final String INVALID_ROLE = "Role is invalid";
+    public static final String ROLE_NAME_TOO_LONG = "Role name is too long";
+    public static final String ROLE_DESCRIPTION_TOO_LONG = "Role description is too long";
+
+
     private ValidationMessage() {
         throw new UnsupportedOperationException(ErrorMessage.NON_INSTANTIABLE_UTILITY_CLASS);
     }

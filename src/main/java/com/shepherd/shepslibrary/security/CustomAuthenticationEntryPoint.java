@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Component
 @Slf4j
@@ -25,12 +25,12 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             @Nonnull HttpServletResponse response,
             @Nonnull AuthenticationException authException) throws IOException {
 
-        log.error("::::: Unauthorized access attempt: {} :::::", authException.getMessage());
+        log.error("Unauthorized access attempt: {}", authException.getMessage());
 
 
         if(!response.isCommitted())
             prepareUnauthorizedResponse(response, authException);
-        else log.warn("::::: Unauthorized request received, but response has already been committed. :::::");
+        else log.warn("Unauthorized request received, but response has already been committed.");
     }
 
     private void prepareUnauthorizedResponse(HttpServletResponse response, AuthenticationException authException) throws IOException {
@@ -38,7 +38,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         try(PrintWriter writer = response.getWriter()){
-            writer.write(AppUtils.customAuthResponse(authException.getMessage(), LocalDateTime.now(), false));
+            writer.write(AppUtils.customAuthResponse(authException.getMessage(), Instant.now(), false));
         }
     }
 }

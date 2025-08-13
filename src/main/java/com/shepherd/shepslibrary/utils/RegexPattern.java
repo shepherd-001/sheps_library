@@ -9,6 +9,7 @@ public final class RegexPattern {
     public static final String BOOK_AUTHOR = "^\\s*[a-zA-Z](?:[a-zA-Z' -]{0,73}[a-zA-Z])?\\s*$";
     public static final String BOOK_GENRE = "^\\s*[a-zA-Z]+(?:[ -][a-zA-Z]+){0,19}\\s*$";
     public static final String ISBN = "^\\d{13}$";
+    public static final String ROLE = "^[a-zA-Z0-9]+$";
 
 
     private RegexPattern() {

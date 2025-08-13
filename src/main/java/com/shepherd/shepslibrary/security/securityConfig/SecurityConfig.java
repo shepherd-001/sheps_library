@@ -23,7 +23,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Configuration
@@ -64,7 +64,7 @@ public class SecurityConfig {
                                     SecurityContextHolder.clearContext();
                                     response.setStatus(HttpServletResponse.SC_OK);
                                     response.getWriter().write(AppUtils
-                                            .customAuthResponse("User logged out successfully", LocalDateTime.now(), true));
+                                            .customAuthResponse("User logged out successfully", Instant.now(), true));
                                         })))
                 .build();
     }

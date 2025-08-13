@@ -48,6 +48,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public RegisterUserResponse registerUser(RegisterUserRequest registerUserRequest) {
+        log.info("=>> Registering user: {}", registerUserRequest.toString());
         validateRegisterRequest(registerUserRequest);
 
         UserRole role = roleService.getRole(MEMBER);

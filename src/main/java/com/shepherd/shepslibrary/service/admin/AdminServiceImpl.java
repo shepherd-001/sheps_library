@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.service.admin;
 
+import com.shepherd.shepslibrary.data.dto.request.AddRoleRequest;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
 import com.shepherd.shepslibrary.data.dto.response.InviteLibrarianResponse;
 import com.shepherd.shepslibrary.data.model.Gender;
@@ -97,6 +98,18 @@ public class AdminServiceImpl implements AdminService {
                 .map(this::handleResendInvite)
                 .orElseThrow(
                         ()-> new ResourceNotFoundException("User not found. Invitation not resent"));
+    }
+
+    @Override
+    public String addRole(AddRoleRequest request) {
+        roleService.addRole(request.getName(), request.getDescription());
+        return "Role added successfully";
+    }
+
+    @Override
+    public String deleteRole(String roleName) {
+        roleService.deleteRole(roleName);
+        return "Role deleted successfully";
     }
 
     private String handleResendInvite(User user) {

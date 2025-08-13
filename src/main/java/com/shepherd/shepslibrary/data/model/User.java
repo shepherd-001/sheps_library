@@ -25,8 +25,10 @@ public class User extends BaseEntity {
 //    @Enumerated(EnumType.STRING)
 //    private Role role;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "role_id", nullable = false)
     private UserRole role;
+
     @Column(name = "enabled")
     private boolean isEnabled;
     @Column(name = "revoked")
