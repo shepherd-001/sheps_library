@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.data.repository;
 
-//import com.shepherd.shepslibrary.data.model.Role;
 import com.shepherd.shepslibrary.data.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
