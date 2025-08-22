@@ -6,6 +6,8 @@ import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
 import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class PermissionServiceImpl implements PermissionService {
     private final PermissionRepository permissionRepository;
+    private final CacheManager cacheManager;
 
 
     @Override
@@ -48,6 +51,15 @@ public class PermissionServiceImpl implements PermissionService {
         Permission permission = getPermission(name);
         permissionRepository.delete(permission);
         log.info("Deleted permission '{}'", name);
+    }
+
+    @Override
+    public void clearCache() {
+        Cache cache = cacheManager.getCache("permissions");
+        if(cache != null) {
+            cache.clear();
+            log.info("Cache cleared");
+        }
     }
 
 

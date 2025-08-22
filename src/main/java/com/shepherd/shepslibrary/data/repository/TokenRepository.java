@@ -17,4 +17,7 @@ public interface TokenRepository extends JpaRepository<ShepsToken, String> {
     Optional<ShepsToken> findByTokenAndTokenType(String token, TokenType tokenType);
 //    List<ShepsToken> findAllByUserIdAndTokenType(String userId, TokenType tokenType);
     void deleteAllByUserEmailAndTokenType(String email, TokenType tokenType);
+    int deleteAllByUserIdAndTokenType(String userId, TokenType tokenType);
+
+    TokenType Token(String token);
 }

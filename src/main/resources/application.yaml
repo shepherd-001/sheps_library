@@ -70,6 +70,8 @@ client_url: ${CLIENT_URL:http://localhost:3000}
 mail_from_email: ${MAIL_FROM_EMAIL}
 mail_from_name: ${MAIL_FROM_NAME}
 
+brevo_api_key: ${MAILERSEND_API_KEY}
+
 zero_bounce_api_key: ${ZEROBOUNCE_API_KEY}
 zero_bounce_url: ${ZEROBOUNCE_URL}
 have_i_been_pawned_url: ${HAVE_I_BEEN_PAWNED_URL}

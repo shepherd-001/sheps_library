@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.security.securityConfig;
 
+import com.shepherd.shepslibrary.auditing.AuditLoggingFilter;
 import com.shepherd.shepslibrary.security.AllowedURIs;
 import com.shepherd.shepslibrary.security.CustomAuthenticationEntryPoint;
 import com.shepherd.shepslibrary.security.CustomAuthorizationFilter;
@@ -34,6 +35,7 @@ public class SecurityConfig {
     private final CustomAuthorizationFilter authorizationFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final LogoutHandler logoutHandler;
+    private final AuditLoggingFilter auditLoggingFilter;
 
     private static final List<String> ALLOWED_ORIGINS = List.of("http://localhost:3000","https://shepslibrary-production.up.railway.app");
     private static final List<String> ALLOWED_METHODS = List.of("GET", "POST", "DELETE", "PUT", "PATCH");
@@ -66,6 +68,7 @@ public class SecurityConfig {
                                     response.getWriter().write(AppUtils
                                             .customAuthResponse("User logged out successfully", Instant.now(), true));
                                         })))
+                .addFilterAfter(auditLoggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

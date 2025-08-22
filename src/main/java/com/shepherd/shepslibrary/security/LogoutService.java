@@ -26,28 +26,23 @@ public class LogoutService implements LogoutHandler {
     @Override
     @Transactional
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        log.info("::::: Initiating logout process :::::");
+        log.info("==>> Initiating logout process");
         String authHeader = request.getHeader(AUTHORIZATION);
         if(authHeader == null || !authHeader.startsWith(BEARER_PREFIX)){
-            log.warn("::::: Authorization header is missing or does not start with Bearer :::::");
+            log.warn("==>> Authorization header is missing or does not start with Bearer");
             return;
         }
         String jwt = authHeader.substring(BEARER_PREFIX_LENGTH);
-        processLogout(jwt);
+        tokenRepository.findByTokenAndTokenType(jwt, TokenType.JWT).ifPresentOrElse(
+                token -> invalidateAllUserTokens(token.getUser().getId()),
+                ()-> log.warn("==>> No matching token found for invalidation"));
         SecurityContextHolder.clearContext();
     }
 
-    private void processLogout(String jwt) {
-        log.info("::::: Processing logout :::::");
-        tokenRepository.findByTokenAndTokenType(jwt, TokenType.JWT)
-                .ifPresentOrElse(this::invalidateUserTokens,
-                        ()-> log.warn("::::: No matching token found for invalidation :::::"));
-    }
-
-    private void invalidateUserTokens(ShepsToken shepsToken) {
-        log.info("::::: Initiating user jwt tokens invalidation :::::");
-        String userEmail = shepsToken.getUser().getEmail();
-        tokenRepository.deleteAllByUserEmailAndTokenType(userEmail, TokenType.JWT);
-        log.info("::::: Tokens invalidated successfully :::::");
+    private void invalidateAllUserTokens(String userId) {
+        int deletedCount = tokenRepository.deleteAllByUserIdAndTokenType(userId, TokenType.JWT);
+        if(deletedCount > 0)
+            log.info("==>> Deleted {} token(s) for user with the provided identity", deletedCount);
+        else log.warn("==>> No token for user with the provided identity");
     }
 }

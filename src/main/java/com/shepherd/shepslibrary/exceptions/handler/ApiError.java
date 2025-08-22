@@ -1,4 +1,4 @@
-package com.shepherd.shepslibrary.exceptions;
+package com.shepherd.shepslibrary.exceptions.handler;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
@@ -15,7 +15,7 @@ public class ApiError {
     private final boolean status;
     private final Object errors;
 
-    public static ApiError buildErrorResponse(String message){
+    public static ApiError buildResponse(String message){
         return ApiError.builder()
                 .message(message)
                 .timestamp(Instant.now())
@@ -23,13 +23,11 @@ public class ApiError {
                 .build();
     }
 
-    public static ApiError buildErrorResponse(Object error){
+    public static ApiError buildResponse(Object error){
         return ApiError.builder()
                 .errors(error)
                 .timestamp(Instant.now())
                 .status(false)
                 .build();
     }
-
-
 }

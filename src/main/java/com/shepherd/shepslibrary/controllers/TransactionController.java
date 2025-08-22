@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.response.ApiResponse;
+import com.shepherd.shepslibrary.common.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
 import com.shepherd.shepslibrary.service.transaction.TransactionService;
@@ -18,15 +18,17 @@ import org.springframework.web.bind.annotation.*;
 public class TransactionController {
     private final TransactionService transactionService;
 
-    @PreAuthorize("hasRole('MEMBER')")
     @PostMapping("/borrow-book")
+//    @PreAuthorize("hasRole('MEMBER')")
+    @PreAuthorize("hasAuthority('member.create')")
     public ResponseEntity<ApiResponse<?>> borrowBook(@Valid @RequestBody BorrowBookRequest borrowBookRequest){
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(transactionService.borrowBook(borrowBookRequest)));
     }
 
-    @PreAuthorize("hasRole('MEMBER')")
     @PutMapping("/return-book")
+//    @PreAuthorize("hasRole('MEMBER')")
+    @PreAuthorize("hasAuthority('member.update')")
     public ResponseEntity<ApiResponse<?>> returnBook(@RequestParam @NotBlank(message = ValidationMessage.NULL_TRANSACTION_ID)
                                                          String transactionId){
         return ResponseEntity.ok(ApiResponse
@@ -34,6 +36,7 @@ public class TransactionController {
     }
 
     @GetMapping("/all/{userId}")
+    @PreAuthorize("hasAnyAuthority('member.read', 'librarian.read', 'admin.read')")
     public ResponseEntity<ApiResponse<?>> getAllTransactions(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
                                                                  String userId, int pageNumber){
         return ResponseEntity.ok(ApiResponse
@@ -41,7 +44,8 @@ public class TransactionController {
     }
 
     @GetMapping("/all")
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
+//    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
+    @PreAuthorize("hasAnyAuthority('librarian.read', 'admin.read')")
     public ResponseEntity<ApiResponse<?>> getAllTransactions(@RequestBody PaginationRequest paginationRequest){
         return ResponseEntity.ok(ApiResponse
                 .buildResponse(transactionService.getAllTransactions(paginationRequest)));

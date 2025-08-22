@@ -38,7 +38,6 @@ public class AuthenticatedUser implements UserDetails {
                     .forEach(authorities::add);
         }
         return authorities;
-//        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
     }
 
     @Override

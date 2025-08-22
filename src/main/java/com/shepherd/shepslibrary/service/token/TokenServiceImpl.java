@@ -58,7 +58,7 @@ public class TokenServiceImpl implements TokenService{
                 .expirationTime(Instant.now().plusSeconds(expirationTimeInSeconds))
                 .build();
 
-        deleteAllTokenByUserAndType(user.getEmail(), tokenType);
+         deleteAllTokenByUserAndType(user.getId(), tokenType);
         tokenRepository.save(shepsToken);
         log.info("Created a new {} token", tokenType);
         return token;
@@ -77,6 +77,7 @@ public class TokenServiceImpl implements TokenService{
                 .isRevoked(false)
                 .build();
 
+         deleteAllTokenByUserAndType(user.getId(), TokenType.JWT);
         tokenRepository.save(shepsToken);
         return AuthResponse.builder()
                 .accessToken(accessToken)
@@ -111,7 +112,7 @@ public class TokenServiceImpl implements TokenService{
 
     private void validateUserEmail(String userEmail, String expectedEmail) {
         if (!userEmail.trim().equals(expectedEmail.trim())){
-            log.error("User email doesn't match the expected email");
+            log.error("User email '{}' doesn't match the expected email '{}'",  userEmail, expectedEmail);
             throw new ShepsTokenException("Error validation token");
         }
     }
@@ -122,10 +123,20 @@ public class TokenServiceImpl implements TokenService{
         log.info("Deleted a token");
     }
 
+
     @Override
-    @Transactional
-    public void deleteAllTokenByUserAndType(String userEmail, TokenType tokenType) {
-        tokenRepository.deleteAllByUserEmailAndTokenType(userEmail, tokenType);
-        log.info("Deleted all tokens by user email");
+//    @Transactional
+    public void  deleteAllTokenByUserAndType(String userId, TokenType tokenType) {
+
+//            tokenRepository.findByUserAndTokenType(user, tokenType)
+//            .ifPresent(existing -> {
+//                existing.setExpired(true);
+//                existing.setRevoked(true);
+//                tokenRepository.save(existing);
+//            });
+//        int deleted = tokenRepository.deleteAllByUserIdAndTokenType(userId, tokenType);
+//        if (deleted > 0)
+//            log.info("==>> Deleted {} {} tokens", deleted, tokenType);
+//        else log.info("==>> No tokens deleted");
     }
 }

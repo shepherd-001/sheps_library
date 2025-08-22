@@ -8,6 +8,8 @@ import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.service.userRoleAndPermission.permission.PermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class RoleServiceImpl implements RoleService {
     private final UserRoleRepository userRoleRepository;
     private final PermissionService permissionService;
+    private final CacheManager cacheManager;
 
     @Override
     @Cacheable(value = "roles", key = "#name.toUpperCase()")
@@ -64,6 +67,14 @@ public class RoleServiceImpl implements RoleService {
         UserRole updatedRole = userRoleRepository.save(role);
         log.info("Assigned {} permissions to role '{}'", permissions.size(), role.getName());
         return updatedRole;
+    }
+
+    @Override
+    public void updateCache(UserRole role) {
+        Cache cache = cacheManager.getCache("roles");
+        if(cache != null) {
+            cache.put(role.getName().toUpperCase(), role);
+        }
     }
 
 //    private final UserRoleRepository userRoleRepository;

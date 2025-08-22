@@ -9,4 +9,5 @@ public interface RoleService {
     UserRole addRole(String name);
     void deleteRole(String name);
     UserRole assignPermissionsToRole(String name, List<String> permissionNames);
+    void updateCache(UserRole role);
 }

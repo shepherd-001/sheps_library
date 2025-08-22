@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.response.ApiResponse;
+import com.shepherd.shepslibrary.common.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;

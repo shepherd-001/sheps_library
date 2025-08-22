@@ -1,4 +1,4 @@
-package com.shepherd.shepslibrary.data.common;
+package com.shepherd.shepslibrary.common;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

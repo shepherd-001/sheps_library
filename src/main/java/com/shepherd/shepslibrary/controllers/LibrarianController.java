@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.response.ApiResponse;
+import com.shepherd.shepslibrary.common.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.CreatePasswordRequest;
 import com.shepherd.shepslibrary.service.librarian.LibrarianService;
 import jakarta.validation.Valid;

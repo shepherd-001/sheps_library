@@ -13,6 +13,7 @@ import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.exceptions.UserNotVerifiedException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
+import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
@@ -58,28 +59,31 @@ public class AuthServiceImpl implements AuthService{
         return userMapper.mapToEmailConfirmationResponse(user, tokenService.generateJwtTokens(user));
     }
 
+//    @Override
+//    public AuthResponse login(LoginRequest loginRequest){
+//        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+//                loginRequest.getEmail().trim(), loginRequest.getPassword()));
+//
+//        User user = getUserByEmail(authentication.getName());
+//
+//        return tokenService.generateJwtTokens(user);
+//    }
+//
+//    private User getUserByEmail(String userEmail) {
+//        return userRepository.findByEmailEqualsIgnoreCase(userEmail)
+//                .orElseThrow(()-> new ResourceNotFoundException(USER_WITH_EMAIL_NOT_FOUND));
+//    }
+
     @Override
-    @Transactional
-    public AuthResponse login(LoginRequest loginRequest){
-        Authentication authentication = authenticateUser(loginRequest);
-        User user = getUserByEmail(authentication.getName());
-
-        if(!user.isEnabled())
-            throw new UserNotVerifiedException(VERIFY_EMAIL_ADDRESS);
-
-        tokenService.deleteAllTokenByUserAndType(user.getEmail(), TokenType.JWT);
+    public AuthResponse login(LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
+        User user = authenticatedUser.getUser();
+        log.warn("User {} authenticated successfully", user.getEmail());
         return tokenService.generateJwtTokens(user);
     }
 
-    private Authentication authenticateUser(LoginRequest loginRequest) {
-        return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginRequest.getEmail().trim(), loginRequest.getPassword()));
-    }
-
-    private User getUserByEmail(String userEmail) {
-        return userRepository.findByEmailEqualsIgnoreCase(userEmail)
-                .orElseThrow(()-> new ResourceNotFoundException(USER_WITH_EMAIL_NOT_FOUND));
-    }
 
     @Override
     @Transactional
@@ -90,7 +94,6 @@ public class AuthServiceImpl implements AuthService{
 
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         userRepository.save(user);
-        tokenService.deleteAllTokenByUserAndType(user.getEmail(), TokenType.JWT);
         return tokenService.generateJwtTokens(user);
     }
 

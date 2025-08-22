@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,6 +24,8 @@ public class MailSenderServiceImpl implements MailSenderService {
     private String mailFromEmail;
     @Value("${mail_from_name}")
     private String mailFromName;
+//    @Value("${brevo_api_key}")
+//    private String brevoApiKey;
 
 
     @Override
@@ -41,7 +44,7 @@ public class MailSenderServiceImpl implements MailSenderService {
             mailSender.send(mimeMessage);
 
             log.info("::::: Email notification sent to {} :::::", to);
-        } catch (MessagingException | UnsupportedEncodingException ex) {
+        } catch (UnsupportedEncodingException | MessagingException ex) {
             log.error("::::: Unable to send email to '{}'.  Error: '{}' :::::", to, ex.getMessage());
             throw new MailSenderException(ex.getMessage());
         }

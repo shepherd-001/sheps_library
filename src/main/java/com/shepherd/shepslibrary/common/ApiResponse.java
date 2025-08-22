@@ -1,23 +1,19 @@
-package com.shepherd.shepslibrary.controllers.response;
+package com.shepherd.shepslibrary.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
-    private String message;
-    private T data;
-    private boolean isSuccessful;
-    private Instant timeStamp;
+    private final String message;
+    private final T data;
+    private final boolean isSuccessful;
+    private final Instant timeStamp;
 
     public static <T> ApiResponse<T> buildResponse(String message, T data) {
         return ApiResponse.<T>builder()

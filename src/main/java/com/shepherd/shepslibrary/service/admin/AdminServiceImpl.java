@@ -1,6 +1,7 @@
 package com.shepherd.shepslibrary.service.admin;
 
 import com.shepherd.shepslibrary.data.dto.request.AddRoleRequest;
+import com.shepherd.shepslibrary.data.dto.request.AssignPermissionRequest;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
 import com.shepherd.shepslibrary.data.dto.response.InviteLibrarianResponse;
 import com.shepherd.shepslibrary.data.model.Gender;
@@ -110,6 +111,11 @@ public class AdminServiceImpl implements AdminService {
     public String deleteRole(String roleName) {
         roleService.deleteRole(roleName);
         return "Role deleted successfully";
+    }
+
+    @Override
+    public UserRole assignPermissionsToRole(AssignPermissionRequest request) {
+        return roleService.assignPermissionsToRole(request.getRoleName(), request.getPermissionNames());
     }
 
     private String handleResendInvite(User user) {

@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.data.model;
 
-import com.shepherd.shepslibrary.data.common.BaseEntity;
+import com.shepherd.shepslibrary.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
