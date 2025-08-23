@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.auditing;
 
-import com.shepherd.shepslibrary.AuditEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

@@ -11,9 +11,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +60,7 @@ public class TokenServiceImpl implements TokenService{
                 .expirationTime(Instant.now().plusSeconds(expirationTimeInSeconds))
                 .build();
 
-         deleteAllTokenByUserAndType(user.getId(), tokenType);
+         revokeAllUserTokens(user.getId(), tokenType);
         tokenRepository.save(shepsToken);
         log.info("Created a new {} token", tokenType);
         return token;
@@ -77,7 +79,6 @@ public class TokenServiceImpl implements TokenService{
                 .isRevoked(false)
                 .build();
 
-         deleteAllTokenByUserAndType(user.getId(), TokenType.JWT);
         tokenRepository.save(shepsToken);
         return AuthResponse.builder()
                 .accessToken(accessToken)
@@ -125,18 +126,16 @@ public class TokenServiceImpl implements TokenService{
 
 
     @Override
-//    @Transactional
-    public void  deleteAllTokenByUserAndType(String userId, TokenType tokenType) {
+    public void revokeAllUserTokens(String userId, TokenType tokenType) {
+        int revoked = tokenRepository.revokeAllTokensForUser(userId, tokenType);
+        log.info("Revoked {} tokens", revoked);
+    }
 
-//            tokenRepository.findByUserAndTokenType(user, tokenType)
-//            .ifPresent(existing -> {
-//                existing.setExpired(true);
-//                existing.setRevoked(true);
-//                tokenRepository.save(existing);
-//            });
-//        int deleted = tokenRepository.deleteAllByUserIdAndTokenType(userId, tokenType);
-//        if (deleted > 0)
-//            log.info("==>> Deleted {} {} tokens", deleted, tokenType);
-//        else log.info("==>> No tokens deleted");
+    @Scheduled(cron = "0 0 9 * * ?")
+    @Transactional
+    public void deleteExpiredAndRevokedTokens() {
+        Instant cutoff = Instant.now().minus(1, ChronoUnit.DAYS);
+        int deleted = tokenRepository.deleteAllRevokedOrExpiredTokensOlderThan(cutoff);
+        log.info("Deleted {} revoked/expired tokens older than 1 day(s)", deleted);
     }
 }

@@ -4,8 +4,6 @@ import com.shepherd.shepslibrary.auditing.AuditLoggingFilter;
 import com.shepherd.shepslibrary.security.AllowedURIs;
 import com.shepherd.shepslibrary.security.CustomAuthenticationEntryPoint;
 import com.shepherd.shepslibrary.security.CustomAuthorizationFilter;
-import com.shepherd.shepslibrary.utils.AppUtils;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,17 +12,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.time.Instant;
 import java.util.List;
 
 @Configuration
@@ -34,7 +29,6 @@ import java.util.List;
 public class SecurityConfig {
     private final CustomAuthorizationFilter authorizationFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-    private final LogoutHandler logoutHandler;
     private final AuditLoggingFilter auditLoggingFilter;
 
     private static final List<String> ALLOWED_ORIGINS = List.of("http://localhost:3000","https://shepslibrary-production.up.railway.app");
@@ -59,15 +53,6 @@ public class SecurityConfig {
                                 .anyRequest()
                                 .authenticated())
                 .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class)
-                .logout(logout ->
-                        logout.logoutUrl(LOGOUT_URL)
-                                .addLogoutHandler(logoutHandler)
-                                .logoutSuccessHandler(((request, response, authentication) -> {
-                                    SecurityContextHolder.clearContext();
-                                    response.setStatus(HttpServletResponse.SC_OK);
-                                    response.getWriter().write(AppUtils
-                                            .customAuthResponse("User logged out successfully", Instant.now(), true));
-                                        })))
                 .addFilterAfter(auditLoggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

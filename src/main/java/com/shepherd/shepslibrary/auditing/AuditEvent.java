@@ -1,6 +1,5 @@
-package com.shepherd.shepslibrary;
+package com.shepherd.shepslibrary.auditing;
 
-import com.shepherd.shepslibrary.auditing.AuditLog;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

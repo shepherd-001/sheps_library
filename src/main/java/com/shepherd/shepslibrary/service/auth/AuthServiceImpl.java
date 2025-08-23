@@ -9,9 +9,7 @@ import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
-import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
-import com.shepherd.shepslibrary.exceptions.UserNotVerifiedException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
 import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
@@ -62,7 +60,7 @@ public class AuthServiceImpl implements AuthService{
 //    @Override
 //    public AuthResponse login(LoginRequest loginRequest){
 //        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-//                loginRequest.getEmail().trim(), loginRequest.getPassword()));
+//                loginRequest.getEmail(), loginRequest.getPassword()));
 //
 //        User user = getUserByEmail(authentication.getName());
 //
@@ -80,10 +78,9 @@ public class AuthServiceImpl implements AuthService{
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
         User user = authenticatedUser.getUser();
-        log.warn("User {} authenticated successfully", user.getEmail());
+        log.info("User {} authenticated successfully", user.getEmail());
         return tokenService.generateJwtTokens(user);
     }
-
 
     @Override
     @Transactional

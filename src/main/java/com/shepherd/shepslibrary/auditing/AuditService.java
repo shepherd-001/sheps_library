@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.auditing;
 
-import com.shepherd.shepslibrary.AuditEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
