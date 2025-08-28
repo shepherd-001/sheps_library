@@ -47,10 +47,11 @@ public class AuthServiceImpl implements AuthService{
         ShepsToken shepsToken = tokenService.validateToken(token, TokenType.EMAIL_CONFIRMATION, email);
         User user = shepsToken.getUser();
 
-        if(user.isEnabled())
+        if(user.isEnabled() || user.isEmailVerified())
             throw new UserAlreadyEnabledException("User is already verified");
 
         user.setEnabled(true);
+        user.setEmailVerified(true);
         userRepository.save(user);
         tokenService.deleteToken(shepsToken);
 
@@ -87,8 +88,9 @@ public class AuthServiceImpl implements AuthService{
     public AuthResponse changePassword(ChangePasswordRequest changePasswordRequest) {
         log.info("Change password request initiated for user");
         User user = getCurrentUser();
-        validatePasswordChange(user.getPassword(), changePasswordRequest);
+        //passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
 
+        validatePasswordChange(user.getPassword(), changePasswordRequest);
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         userRepository.save(user);
         return tokenService.generateJwtTokens(user);
@@ -127,10 +129,10 @@ public class AuthServiceImpl implements AuthService{
         log.info("::::: Initiating password reset :::::");
         ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.getToken(),
                 TokenType.RESET_PASSWORD, resetPasswordRequest.getEmail());
-        tokenService.deleteToken(shepsToken);
-        passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
+//        passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
         User user = shepsToken.getUser();
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
+        tokenService.deleteToken(shepsToken);
         userRepository.save(user);
         return tokenService.generateJwtTokens(user);
     }

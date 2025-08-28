@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import static com.shepherd.shepslibrary.utils.ErrorMessage.VERIFY_EMAIL_ADDRESS;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +25,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                     return new UsernameNotFoundException("User with the provided email not found");
                 });
         if(!user.isEnabled())
-            throw new UserNotVerifiedException(VERIFY_EMAIL_ADDRESS);
+            throw new UserNotVerifiedException("Your account is currently disabled. Please contact your admin");
+        if(!user.isEmailVerified())
+            throw new UserNotVerifiedException("Verify your email address before you proceed");
 
         return AuthenticatedUser.builder()
                 .user(user)

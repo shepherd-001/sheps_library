@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -27,11 +28,14 @@ public class MailNotificationServiceImpl implements MailNotificationService {
     private final ExecutorService executorService;
 
     private void sendEmail(String templateName, String subject, String email, Map<String, Object> variables) {
-        Context context = new Context();
-        context.setVariables(variables);
-        String htmlContent = templateEngine.process(templateName, context);
-        log.info("::::: Mail ready to be sent to {} :::::", email);
-        executorService.submit(() -> mailSenderService.sendEmail(email, subject, htmlContent));
+        try {
+            Context context = new Context();
+            context.setVariables(variables);
+            String htmlContent = templateEngine.process(templateName, context);
+            executorService.submit(() -> mailSenderService.sendEmail(email, subject, htmlContent));
+        } catch (Exception e) {
+            log.error("==>> Failed to send email [{}] to {}: {}", templateName, email, e.getMessage());
+        }
     }
 
     @Override

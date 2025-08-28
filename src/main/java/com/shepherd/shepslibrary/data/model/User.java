@@ -29,6 +29,7 @@ public class User extends BaseEntity {
 
     @Column(name = "enabled")
     private boolean isEnabled;
+    private boolean isEmailVerified;
     @Column(name = "revoked")
     private boolean isRevoked;
 }

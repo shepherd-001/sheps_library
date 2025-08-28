@@ -60,18 +60,28 @@ public class AuditLoggingFilter extends OncePerRequestFilter {
     }
 
     private String getClientIp(HttpServletRequest request) {
-        String xForwardedForHeader = request.getHeader("X-Forwarded-For");
-        if(xForwardedForHeader != null && !xForwardedForHeader.isEmpty()) {
-            // The first IP in X-Forwarded_For is the client IP
-            return xForwardedForHeader.split(",")[0].trim();
+        String[] headers = {"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"};
+        for (String header : headers) {
+            String ip = request.getHeader(header);
+            if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                return ip.split(",")[0].trim();
+            }
         }
-        //Fallback to other headers if needed (e.g., X-Real-IP for some proxies)
-        String xRealIp = request.getHeader("X-Real-IP");
-        if(xRealIp != null && !xRealIp.isEmpty()) {
-            return xRealIp;
-        }
-
-        //Fallback to getRemoteAddr if no proxy headers are present
         return request.getRemoteAddr();
     }
+//    private String getClientIp(HttpServletRequest request) {
+//        String xForwardedForHeader = request.getHeader("X-Forwarded-For");
+//        if(xForwardedForHeader != null && !xForwardedForHeader.isEmpty()) {
+//            // The first IP in X-Forwarded_For is the client IP
+//            return xForwardedForHeader.split(",")[0].trim();
+//        }
+//        //Fallback to other headers if needed (e.g., X-Real-IP for some proxies)
+//        String xRealIp = request.getHeader("X-Real-IP");
+//        if(xRealIp != null && !xRealIp.isEmpty()) {
+//            return xRealIp;
+//        }
+//
+//        //Fallback to getRemoteAddr if no proxy headers are present
+//        return request.getRemoteAddr();
+//    }
 }

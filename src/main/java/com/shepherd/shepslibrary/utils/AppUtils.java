@@ -48,10 +48,6 @@ public final class AppUtils {
         return PageRequest.of(pageNumber, resolvedPageSize, Sort.by(resolvedDirection, resolvedSortBy));
     }
 
-    public static String customAuthResponse(String message, Instant timestamp, boolean isSuccessful){
-        return String.format("{\"message\": \"%s\", \"timestamp\": \"%s\", \"isSuccessful\": \"%b\"}", message, timestamp, isSuccessful);
-    }
-
     public static String generateISBN() {
         StringBuilder isbn = new StringBuilder(13);
         int checksum = 0;
