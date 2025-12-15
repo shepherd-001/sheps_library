@@ -75,6 +75,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ApiError.buildResponse("You do not have permission to view this resource"),
                 HttpStatus.FORBIDDEN);
     }
+
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<ApiError> handleException(AuthorizationDeniedException ex){
         log.error("Authorization denied exception: {}", ex.getMessage());

@@ -4,7 +4,6 @@ import com.shepherd.shepslibrary.common.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
-import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.exceptions.UnauthorizedException;
 import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.security.LogoutService;
@@ -95,7 +94,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<?>> logoutAllSessions(Authentication authentication) {
         ensureAuthentication(authentication);
         AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
-        logoutService.logoutAllDevices(authenticatedUser.getUser());
+        logoutService.logoutAllSessions(authenticatedUser.getUser());
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(ApiResponse
                 .buildResponse("User logged out from all sessions"));

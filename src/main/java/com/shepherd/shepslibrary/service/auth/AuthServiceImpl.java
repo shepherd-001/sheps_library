@@ -58,21 +58,6 @@ public class AuthServiceImpl implements AuthService{
         return userMapper.mapToEmailConfirmationResponse(user, tokenService.generateJwtTokens(user));
     }
 
-//    @Override
-//    public AuthResponse login(LoginRequest loginRequest){
-//        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-//                loginRequest.getEmail(), loginRequest.getPassword()));
-//
-//        User user = getUserByEmail(authentication.getName());
-//
-//        return tokenService.generateJwtTokens(user);
-//    }
-//
-//    private User getUserByEmail(String userEmail) {
-//        return userRepository.findByEmailEqualsIgnoreCase(userEmail)
-//                .orElseThrow(()-> new ResourceNotFoundException(USER_WITH_EMAIL_NOT_FOUND));
-//    }
-
     @Override
     public AuthResponse login(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(

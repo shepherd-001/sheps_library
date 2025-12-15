@@ -39,7 +39,7 @@ public class LogoutService{
         }
     }
 
-    public void logoutAllDevices(User user){
+    public void logoutAllSessions(User user){
         int deletedToken = tokenRepository.revokeAllTokensForUser(user.getId(), TokenType.JWT);
         if(deletedToken > 0){
             log.info("==>> Deleted {} token(s) for user {}", deletedToken, user.getEmail());

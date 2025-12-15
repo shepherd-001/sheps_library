@@ -24,8 +24,6 @@ public class MailSenderServiceImpl implements MailSenderService {
     private String mailFromEmail;
     @Value("${mail_from_name}")
     private String mailFromName;
-//    @Value("${brevo_api_key}")
-//    private String brevoApiKey;
 
 
     @Override
@@ -46,7 +44,7 @@ public class MailSenderServiceImpl implements MailSenderService {
             log.info("::::: Email notification sent to {} :::::", to);
         } catch (UnsupportedEncodingException | MessagingException ex) {
             log.error("::::: Unable to send email to '{}'.  Error: '{}' :::::", to, ex.getMessage());
-            throw new MailSenderException(ex.getMessage());
+            throw new MailSenderException("Unable to send mail");
         }
     }
 }

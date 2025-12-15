@@ -13,7 +13,7 @@ public class ApiError {
     private final String message;
     private final Instant timestamp;
     private final boolean status;
-    private final Object errors;
+    private final Object error;
 
     public static ApiError buildResponse(String message){
         return ApiError.builder()
@@ -25,7 +25,7 @@ public class ApiError {
 
     public static ApiError buildResponse(Object error){
         return ApiError.builder()
-                .errors(error)
+                .error(error)
                 .timestamp(Instant.now())
                 .status(false)
                 .build();

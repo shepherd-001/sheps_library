@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
         newUser = userRepository.save(newUser);
         sendEmailConfirmation(newUser);
 
-        log.info("::::: User with the first name {} registered successfully :::::", newUser.getFirstName());
+//        log.info("::::: User with the first name {} registered successfully :::::", newUser.getFirstName());
         return userMapper.mapToRegisterResponse(newUser);
     }
 
@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
         log.info("::::: Fetching a user by id :::::");
         return userRepository.findById(userId)
                 .map(userMapper::mapToUserResponse)
-                .orElseThrow(()-> new ResourceNotFoundException("User with the provided Id not found"));
+                .orElseThrow(()-> new ResourceNotFoundException("User not found"));
     }
 
     @Override

@@ -47,6 +47,7 @@ public class AdminServiceImpl implements AdminService {
 
 
     @Override
+
     public void createAdminIfNotExists() {
         if(userRepository.existsByRoleName(ADMIN)){
             log.info("Admin already exists");

@@ -10,7 +10,7 @@ import java.util.Optional;
 public final class PageUtils {
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final int MAX_PAGE_SIZE = 100;
-    private static final int MAX_PAGE_NUMBER = 1_000_000;
+    private static final int MAX_PAGE_NUMBER = 200;
     public static final String SORT_BY_CREATED_AT = "createdAt";
 
 
@@ -50,6 +50,8 @@ public final class PageUtils {
         throw new UnsupportedOperationException(ErrorMessage.NON_INSTANTIABLE_UTILITY_CLASS);
     }
 }
+
+
 
 
 

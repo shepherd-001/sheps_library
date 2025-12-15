@@ -4,9 +4,11 @@ import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.model.Reservation;
 import com.shepherd.shepslibrary.data.model.Transaction;
 import com.shepherd.shepslibrary.data.model.User;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -15,28 +17,15 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class MailNotificationServiceImpl implements MailNotificationService {
-    private final MailSenderService mailSenderService;
+    private final MailAsyncExecutor mailAsyncExecutor;
     @Value("${client_url}")
     private String clientUrl;
-    private final SpringTemplateEngine templateEngine;
-    private final ExecutorService executorService;
 
-    private void sendEmail(String templateName, String subject, String email, Map<String, Object> variables) {
-        try {
-            Context context = new Context();
-            context.setVariables(variables);
-            String htmlContent = templateEngine.process(templateName, context);
-            executorService.submit(() -> mailSenderService.sendEmail(email, subject, htmlContent));
-        } catch (Exception e) {
-            log.error("==>> Failed to send email [{}] to {}: {}", templateName, email, e.getMessage());
-        }
-    }
 
     @Override
     public void sendVerificationMail(User user, String token) {
@@ -45,7 +34,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 "firstName", user.getFirstName(),
                 "confirmationLink", verificationLink
         );
-        sendEmail("email-confirmation", "Confirm Your Email Address", user.getEmail(), variables);
+        mailAsyncExecutor.sendEmailAsync("email-confirmation", "Confirm Your Email Address", user.getEmail(), variables);
     }
 
     @Override
@@ -55,7 +44,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 "firstName", user.getFirstName(),
                 "resetPasswordLink", resetPasswordLink
         );
-        sendEmail("reset-password", "Reset Your Password", user.getEmail(), variables);
+        mailAsyncExecutor.sendEmailAsync("reset-password", "Reset Your Password", user.getEmail(), variables);
     }
 
     @Override
@@ -65,7 +54,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 "invitationLink", invitationLink,
                 "firstName", user.getFirstName()
         );
-        sendEmail("librarian-invitation", "Librarian Invitation", user.getEmail(), variables);
+        mailAsyncExecutor.sendEmailAsync("librarian-invitation", "Librarian Invitation", user.getEmail(), variables);
     }
 
     @Override
@@ -89,7 +78,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 "borrowedDate", borrowDateTime,
                 "dueDate", dueDateTime
         );
-        sendEmail("overdue-book", "Overdue Book Notification", email, variables);
+        mailAsyncExecutor.sendEmailAsync("overdue-book", "Overdue Book Notification", email, variables);
     }
 
     @Override
@@ -106,6 +95,26 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 "bookTitle", title,
                 "bookAuthor", author
         );
-        sendEmail("available-reservation", "Available Book Notification", email, variables);
+        mailAsyncExecutor.sendEmailAsync("available-reservation", "Available Book Notification", email, variables);
+    }
+}
+
+@Service
+@AllArgsConstructor
+@Slf4j
+class MailAsyncExecutor{
+    private final MailSenderService mailSenderService;
+    private final SpringTemplateEngine templateEngine;
+
+    @Async("mailTaskExecutor")
+    public void sendEmailAsync(String templateName, String subject, String email, Map<String, Object> variables) {
+        try {
+            Context context = new Context();
+            context.setVariables(variables);
+            String htmlContent = templateEngine.process(templateName, context);
+            mailSenderService.sendEmail(email, subject, htmlContent);
+        } catch (Exception e) {
+            log.error("==>> Failed to send email [{}] to {}: {}", templateName, email, e.getMessage(), e);
+        }
     }
 }

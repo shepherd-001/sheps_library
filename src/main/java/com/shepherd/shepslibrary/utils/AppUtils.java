@@ -11,7 +11,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.SecureRandom;
-import java.time.Instant;
 
 @Slf4j
 public final class AppUtils {

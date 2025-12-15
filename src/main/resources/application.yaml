@@ -53,10 +53,12 @@ spring:
     resources:
       add-mappings: false
 #        debug: true
+
 executor:
-  corePoolSize: ${CORE_POOL_SIZE}
-  maxPoolSize: ${MAX_POOL_SIZE}
-  keepAliveTime: ${KEEP_ALIVE_TIME}
+  mail:
+    corePoolSize: ${CORE_POOL_SIZE}
+    maxPoolSize: ${MAX_POOL_SIZE}
+    queueCapacity: ${QUEUE_CAPACITY}
 
 cache:
   expiry: ${CACHE_EXPIRY}
@@ -90,3 +92,34 @@ app:
       - ADMIN
       - LIBRARIAN
       - MEMBER
+
+
+audit:
+  enabled: true
+  excluded-paths:
+    - "/actuator/"
+    - "/health"
+    - "/swagger"
+    - "/static/"
+    - "/css/"
+  max-body-bytes: 4096
+  max-response-bytes: 1024
+  capture-body-for-methods:
+    - POST
+    - PUT
+    - PATCH
+
+  queue-capacity: 10000
+  batch-size: 200
+  flush-interval-ms: 2000
+  drop-on-full: false
+  retention-days: 90
+  consumer-threads: 1
+  db-retry-backoff: 2s
+  enqueue-offer-timeout-ms: 200
+  enable-persistent-fallback: true
+  fallback-directory: audit-fallback
+  max-write-retries: 5
+  consumer-retry-initial-backoff: 1s
+  consumer-retry-max-backoff: 30s
+  enable-metrics: true

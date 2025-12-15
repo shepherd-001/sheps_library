@@ -67,6 +67,6 @@ public class AuthenticatedUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return (user.isEnabled() && user.isEmailVerified());
+        return user.isEnabled();
     }
 }
