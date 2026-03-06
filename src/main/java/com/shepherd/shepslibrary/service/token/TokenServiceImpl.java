@@ -6,7 +6,7 @@ import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.TokenRepository;
 import com.shepherd.shepslibrary.exceptions.ShepsTokenException;
-import com.shepherd.shepslibrary.security.JwtService;
+import com.shepherd.shepslibrary.security.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 public class TokenServiceImpl implements TokenService{
     private final TokenRepository tokenRepository;
-    private final JwtService jwtService;
+    private final JwtUtils jwtUtils;
     @Value("${jwt_access_expiration}")
     private long accessTokenExpiration;
     @Value("${jwt_refresh_expiration}")
@@ -50,7 +50,7 @@ public class TokenServiceImpl implements TokenService{
     public String generateToken(User user, TokenType tokenType) {
         long expirationTimeInSeconds = getExpirationTime(tokenType);
         log.info("Initiating the creation of a new {} token", tokenType);
-        String token = jwtService.generateAccessToken(user.getEmail(), expirationTimeInSeconds);
+        String token = jwtUtils.generateAccessToken(user.getEmail(), expirationTimeInSeconds);
         ShepsToken shepsToken = ShepsToken.builder()
                 .user(user)
                 .tokenType(tokenType)
@@ -68,8 +68,8 @@ public class TokenServiceImpl implements TokenService{
 
     @Override
     public AuthResponse generateJwtTokens(User user) {
-        String accessToken = jwtService.generateAccessToken(user.getEmail(), accessTokenExpiration);
-        String refreshToken = jwtService.generateRefreshToken(user.getEmail(), refreshTokenExpiration);
+        String accessToken = jwtUtils.generateAccessToken(user.getEmail(), accessTokenExpiration);
+        String refreshToken = jwtUtils.generateRefreshToken(user.getEmail(), refreshTokenExpiration);
         ShepsToken shepsToken = ShepsToken.builder()
                 .user(user)
                 .tokenType(TokenType.JWT)

@@ -92,7 +92,10 @@ app:
       - ADMIN
       - LIBRARIAN
       - MEMBER
-
+  security:
+    allowed-origins:
+      - http://localhost:3000
+      - https://shep-blog.app
 
 audit:
   enabled: true

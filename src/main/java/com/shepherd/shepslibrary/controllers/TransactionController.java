@@ -23,7 +23,7 @@ public class TransactionController {
     @PreAuthorize("hasAuthority('member.create')")
     public ResponseEntity<ApiResponse<?>> borrowBook(@Valid @RequestBody BorrowBookRequest borrowBookRequest){
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(transactionService.borrowBook(borrowBookRequest)));
+                .success(transactionService.borrowBook(borrowBookRequest)));
     }
 
     @PutMapping("/return-book")
@@ -32,7 +32,7 @@ public class TransactionController {
     public ResponseEntity<ApiResponse<?>> returnBook(@RequestParam @NotBlank(message = ValidationMessage.NULL_TRANSACTION_ID)
                                                          String transactionId){
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(transactionService.returnBook(transactionId)));
+                .success(transactionService.returnBook(transactionId)));
     }
 
     @GetMapping("/all/{userId}")
@@ -40,7 +40,7 @@ public class TransactionController {
     public ResponseEntity<ApiResponse<?>> getAllTransactions(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
                                                                  String userId, int pageNumber){
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(transactionService.getAllTransactionByUserId(userId, pageNumber)));
+                .success(transactionService.getAllTransactionByUserId(userId, pageNumber)));
     }
 
     @GetMapping("/all")
@@ -48,6 +48,6 @@ public class TransactionController {
     @PreAuthorize("hasAnyAuthority('librarian.read', 'admin.read')")
     public ResponseEntity<ApiResponse<?>> getAllTransactions(@RequestBody PaginationRequest paginationRequest){
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(transactionService.getAllTransactions(paginationRequest)));
+                .success(transactionService.getAllTransactions(paginationRequest)));
     }
 }

@@ -41,19 +41,19 @@ public class AuthController {
                                                       @Email(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
                                                       String email) {
         return ResponseEntity.ok(ApiResponse
-                .buildResponse("User verified successfully", authService.verifyEmail(token, email)));
+                .success("User verified successfully", authService.verifyEmail(token, email)));
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<?>> login(@Valid @RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(ApiResponse
-                .buildResponse("User logged in successfully", authService.login(loginRequest)));
+                .success("User logged in successfully", authService.login(loginRequest)));
     }
 
     @PutMapping("/change-password")
     public ResponseEntity<ApiResponse<?>> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
         return ResponseEntity.ok(ApiResponse
-                .buildResponse("Password changed successfully", authService.changePassword(changePasswordRequest)));
+                .success("Password changed successfully", authService.changePassword(changePasswordRequest)));
     }
 
     @PostMapping("/request-password-reset")
@@ -62,13 +62,13 @@ public class AuthController {
                                                                @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
                                                                String email) {
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(authService.requestPasswordReset(email)));
+                .success(authService.requestPasswordReset(email)));
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse<?>> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
         return ResponseEntity.ok(ApiResponse
-                .buildResponse("Password reset successful", authService.resetPassword(resetPasswordRequest)));
+                .success("Password reset successful", authService.resetPassword(resetPasswordRequest)));
     }
 
     @PostMapping("/logout")
@@ -78,7 +78,7 @@ public class AuthController {
                 authentication.getName());
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(ApiResponse
-                .buildResponse("User logged out successfully"));
+                .success("User logged out successfully"));
     }
 
     private void ensureAuthentication(Authentication authentication) {
@@ -97,6 +97,6 @@ public class AuthController {
         logoutService.logoutAllSessions(authenticatedUser.getUser());
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(ApiResponse
-                .buildResponse("User logged out from all sessions"));
+                .success("User logged out from all sessions"));
     }
 }

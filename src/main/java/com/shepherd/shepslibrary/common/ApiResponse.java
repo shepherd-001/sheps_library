@@ -1,6 +1,5 @@
 package com.shepherd.shepslibrary.common;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Builder;
@@ -17,7 +16,7 @@ public class ApiResponse<T> {
     private final Instant timeStamp;
     private final String path;
 
-    public static <T> ApiResponse<T> buildResponse(String message, T data) {
+    public static <T> ApiResponse<T> success(String message, T data) {
         return ApiResponse.<T>builder()
                 .message(message)
                 .data(data)
@@ -25,17 +24,42 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static <T> ApiResponse<T> buildResponse(String message){
+    public static <T> ApiResponse<T> success(String message){
         return ApiResponse.<T>builder()
                 .message(message)
                 .timeStamp(Instant.now())
                 .build();
     }
 
-    public static <T> ApiResponse<T> buildResponse(T data){
+    public static <T> ApiResponse<T> success(T data){
         return ApiResponse.<T>builder()
                 .data(data)
                 .timeStamp(Instant.now())
+                .build();
+    }
+
+    public static <T> ApiResponse<T> error(String message, T data, HttpServletRequest request) {
+        return ApiResponse.<T>builder()
+                .message(message)
+                .data(data)
+                .timeStamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+    }
+
+    public static <T> ApiResponse<T> error(String message, HttpServletRequest request) {
+        return ApiResponse.<T>builder()
+                .message(message)
+                .timeStamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+    }
+
+    public static <T> ApiResponse<T> error(T data, HttpServletRequest request) {
+        return ApiResponse.<T>builder()
+                .data(data)
+                .timeStamp(Instant.now())
+                .path(request.getRequestURI())
                 .build();
     }
 }

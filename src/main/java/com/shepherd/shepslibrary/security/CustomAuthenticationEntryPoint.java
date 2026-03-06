@@ -1,6 +1,7 @@
 package com.shepherd.shepslibrary.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shepherd.shepslibrary.common.ApiResponse;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +20,8 @@ import java.util.Map;
 @Component
 @Slf4j
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String ERROR_MESSAGE = "Authentication required. Please log in";
 
     @Override
     public void commence(
@@ -27,30 +29,29 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             @Nonnull HttpServletResponse response,
             @Nonnull AuthenticationException authException) throws IOException {
 
-        log.error("Unauthorized access attempt: {}", authException.getMessage());
+        String requestURI = request.getRequestURI();
 
+        if(response.isCommitted()){
+            log.warn("Response already commited for unauthorized request: {}", requestURI);
+            return;
+        }
 
-        if(!response.isCommitted())
-            prepareUnauthorizedResponse(response, authException);
-        else log.warn("Unauthorized request received, but response has already been committed.");
+        log.warn("Unauthorized access attempt: {} | Reason: {}", requestURI, authException.getMessage());
+
+        prepareUnauthorizedResponse(request, response);
     }
 
-    private void prepareUnauthorizedResponse(HttpServletResponse response, AuthenticationException authException) throws IOException {
+    private void prepareUnauthorizedResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
 
-        log.error("==>> Auth exception: {}", authException.getMessage());
-        String errorMessage = "Authentication required. Please log in";
-
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("error", "UNAUTHORIZED");
-        errorResponse.put("message", errorMessage);
-        errorResponse.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-        errorResponse.put("timestamp", Instant.now().toString());
+        ApiResponse<?> errorResponse = ApiResponse.error(ERROR_MESSAGE, request);
 
         try (PrintWriter writer = response.getWriter()) {
-            writer.write(mapper.writeValueAsString(errorResponse));
+            objectMapper.writeValue(writer, errorResponse);
+        } catch (Exception ex) {
+            log.error("Failed to write unauthorized response", ex);
         }
     }
 }

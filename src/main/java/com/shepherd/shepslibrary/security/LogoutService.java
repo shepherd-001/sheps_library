@@ -15,7 +15,7 @@ public class LogoutService{
     private final TokenRepository tokenRepository;
     private static final String BEARER_PREFIX = "Bearer ";
     private static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
-    private final JwtService jwtService;
+    private final JwtUtils jwtUtils;
 
 
     public void logoutCurrentSession(String authHeader, String userEmail){
@@ -26,7 +26,7 @@ public class LogoutService{
 
         String token = authHeader.substring(BEARER_PREFIX_LENGTH);
 
-        if(!jwtService.isValidToken(token, userEmail)){
+        if(!jwtUtils.isValidToken(token, userEmail)){
             log.warn("==>> Invalid JWT provided for user {}", userEmail);
             throw new ShepsTokenException("Invalid or expired token");
         }

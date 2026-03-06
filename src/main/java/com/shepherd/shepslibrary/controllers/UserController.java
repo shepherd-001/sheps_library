@@ -19,12 +19,12 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<?>> signup(@Valid @RequestBody RegisterUserRequest registerRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse
-                .buildResponse("User registered successfully", userService.registerUser(registerRequest)));
+                .success("User registered successfully", userService.registerUser(registerRequest)));
     }
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<?>> getUserById(@PathVariable String userId) {
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(userService.getUserById(userId)));
+                .success(userService.getUserById(userId)));
     }
 
     @GetMapping("/all/role")
@@ -32,7 +32,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('admin.read')")
     public ResponseEntity<ApiResponse<?>> getAllUsersByRole(@RequestParam String role, int pageNumber) {
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(userService.getAllUsersByRole(role, pageNumber)));
+                .success(userService.getAllUsersByRole(role, pageNumber)));
     }
 
     @GetMapping("/all/status")
@@ -40,6 +40,6 @@ public class UserController {
     @PreAuthorize("hasAuthority('admin.read')")
     public ResponseEntity<ApiResponse<?>> getAllUsersByStatus(@RequestParam boolean status, int pageNumber) {
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(userService.getAllUsersByStatus(status, pageNumber)));
+                .success(userService.getAllUsersByStatus(status, pageNumber)));
     }
 }
