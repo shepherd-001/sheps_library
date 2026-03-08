@@ -50,13 +50,13 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
         try{
             userEmail = jwtUtils.extractUsername(jwtToken);
             if(!StringUtils.hasText(userEmail)){
-                log.warn("Token validation failed: no subject found");
+                log.warn("==>> Token validation failed: no subject found");
                 filterChain.doFilter(request, response);
                 return;
             }
 
             if(!isTokenValid(jwtToken) || !jwtUtils.isValidToken(jwtToken, userEmail)){
-                log.warn("JWT token is invalid, revoked, or expired for user: {}", userEmail);
+                log.warn("==>> JWT token is invalid, revoked, or expired for user: {}", userEmail);
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -64,16 +64,16 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
             if(!isUserAccountValid(userDetails)){
-                log.warn("Account invalid for user: {}", userEmail);
+                log.warn("==>> Account invalid for user: {}", userEmail);
                 filterChain.doFilter(request, response);
                 return;
             }
 
             setSecurityContext(request, userDetails);
-            log.info("User authenticated: {}", userEmail);
+            log.info("==>> User authenticated: {}", userEmail);
 
         }catch (Exception ex){
-            log.error("Authorization error: {}", ex.getMessage());
+            log.error("==>> Authorization error: {}", ex.getMessage());
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, String.format("Unauthorized: %s", ex.getMessage()));
             return;
         }

@@ -13,9 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 @Slf4j

@@ -1,13 +1,17 @@
 package com.shepherd.shepslibrary.exceptions.handler;
 
+import com.shepherd.shepslibrary.common.ApiResponse;
 import com.shepherd.shepslibrary.exceptions.*;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -24,147 +28,104 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleException(Exception ex){
-        log.error("==>> Internal Server Error: {}", ex.getMessage());
-        return new ResponseEntity<>(ApiError.buildResponse("An unexpected error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ApiResponse<?>> handleException(Exception ex, HttpServletRequest request){
+        log.error("==>> Uncaught exception: {}", ex.getMessage());
+        String message = "An unexpected error occurred. Please try again later.";
+        return ResponseEntity.internalServerError().body(ApiResponse.error(message, request));
     }
 
-    @ExceptionHandler(ShepsLibraryException.class)
-    public ResponseEntity<ApiError> handleException(ShepsLibraryException ex){
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    @ExceptionHandler({
+            ShepsLibraryException.class,
+            IllegalStateException.class,
+            IllegalArgumentException.class,
+            EmailValidationException.class,
+            ShepsTokenException.class,
+            MailSenderException.class,
+            UserAlreadyEnabledException.class,
+            TransactionException.class,
+            ReservationException.class,
+
+    })
+    public ResponseEntity<ApiResponse<?>> handleBadRequest(Exception ex, HttpServletRequest request){
+        return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage(), request));
     }
 
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ApiError> handleException(UsernameNotFoundException ex){
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.UNAUTHORIZED);
+    @ExceptionHandler({
+            UsernameNotFoundException.class,
+            UnauthorizedException.class,
+            UserNotVerifiedException.class,
+            BadCredentialsException.class,
+            DisabledException.class,
+    })
+    public ResponseEntity<ApiResponse<?>> handleUnauthorized(Exception ex, HttpServletRequest request){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(ex.getMessage(), request));
     }
 
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ApiError> handleException(UnauthorizedException ex){
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiError> handleException(IllegalArgumentException ex){
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ApiError> handleException(IllegalStateException ex){
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(UserNotVerifiedException.class)
-    public ResponseEntity<ApiError> handleException(UserNotVerifiedException ex){
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ApiError> handleException(HttpRequestMethodNotSupportedException ex){
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.METHOD_NOT_ALLOWED);
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ApiError> handleException(BadCredentialsException ex){
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.UNAUTHORIZED);
+    @ExceptionHandler({
+            HttpRequestMethodNotSupportedException.class,
+            UnsupportedClassVersionError.class
+    })
+    public ResponseEntity<ApiResponse<?>> handleMethodNotAllowed(Exception ex, HttpServletRequest request){
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ApiResponse.error(ex.getMessage(), request));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiError> handleException(AccessDeniedException ex){
+    public ResponseEntity<ApiResponse<?>> handleException(AccessDeniedException ex, HttpServletRequest request){
         log.error("==>> Access Denied Exception: {}", ex.getMessage());
-        return new ResponseEntity<>(ApiError.buildResponse("You do not have permission to view this resource"),
-                HttpStatus.FORBIDDEN);
+        String message = "You do not have the permission to access this resource";
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(message, request));
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<ApiError> handleException(AuthorizationDeniedException ex){
+    public ResponseEntity<ApiResponse<?>> handleException(AuthorizationDeniedException ex, HttpServletRequest request){
         log.error("Authorization denied exception: {}", ex.getMessage());
-        String errorMessage = "You are not permitted to access this resource";
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiError.buildResponse(errorMessage));
+        String message = "You are not authorized to access this resource";
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(message, request));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponse<?>> handleException(MethodArgumentNotValidException ex, HttpServletRequest request) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage()));
-        return ResponseEntity.badRequest().body(ApiError.buildResponse(errors));
-//        String errorMessage = ex.getBindingResult().getFieldErrors()
-//                .stream()
-//                .findFirst()
-//                .map(FieldError::getDefaultMessage)
-//                .orElse("Field validation error");
-//
-//        log.error("::::: Method argument not valid exception: {} :::::", ex.getMessage());
-//        return new ResponseEntity<>(ApiError.buildErrorResponse(errorMessage), HttpStatus.BAD_REQUEST);
+        ex.getBindingResult()
+                .getFieldErrors()
+                .forEach(error ->
+                        errors.put(error.getField(), error.getDefaultMessage()));
+        return ResponseEntity.badRequest().body(ApiResponse.error(errors, request));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ApiError> handleEnumConversionError(MethodArgumentTypeMismatchException ex) {
+    public ResponseEntity<ApiResponse<?>> handleEnumConversionError(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
         String message = "Invalid value for parameter '%s': %s".formatted(ex.getName(), ex.getValue());
-        return ResponseEntity.badRequest().body(ApiError.buildResponse(message));
+        return ResponseEntity.badRequest().body(ApiResponse.error(message, request));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiError> handleException(ConstraintViolationException ex) {
-        String errorMessage = ex.getConstraintViolations()
-                .stream()
-                .findFirst()
-                .map(ConstraintViolation::getMessage)
-                .orElse("Field validation error");
-
+    public ResponseEntity<ApiResponse<?>> handleException(ConstraintViolationException ex, HttpServletRequest request) {
+        String errorMessage = ex.getConstraintViolations().stream().findFirst().map(ConstraintViolation::getMessage).orElse("Field validation error");
         log.error("Constraint violation exception: {}", ex.getMessage());
-        return new ResponseEntity<>(ApiError.buildResponse(errorMessage), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(UnsupportedOperationException.class)
-    public ResponseEntity<ApiError> handleException(UnsupportedOperationException ex){
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.METHOD_NOT_ALLOWED);
+        return ResponseEntity.badRequest().body(ApiResponse.error(errorMessage, request));
     }
 
     @ExceptionHandler(AlreadyExistsException.class)
-    public ResponseEntity<ApiError> handleException(AlreadyExistsException ex){
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(EmailValidationException.class)
-    public ResponseEntity<ApiError> handleException(EmailValidationException ex){
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ApiResponse<?>> handleException(AlreadyExistsException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage(), request));
     }
 
     @ExceptionHandler(PasswordValidationException.class)
-    public ResponseEntity<ApiError> handleException(PasswordValidationException ex) {
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.valueOf(ex.getStatusCode()));
+    public ResponseEntity<ApiResponse<?>> handleException(PasswordValidationException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode());
+        return ResponseEntity.status(status).body(ApiResponse.error(ex.getMessage(), request));
     }
 
-    @ExceptionHandler(MailSenderException.class)
-    public ResponseEntity<ApiError> handleException(MailSenderException ex) {
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(ShepsTokenException.class)
-    public ResponseEntity<ApiError> handleException(ShepsTokenException ex) {
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(UserAlreadyEnabledException.class)
-    public ResponseEntity<ApiError> handleException(UserAlreadyEnabledException ex) {
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<?>> handleJsonParseError(HttpMessageNotReadableException ex, HttpServletRequest request) {
+        log.error("==>> Http message not readable exception {}", ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error("Invalid value provided for one or more request fields", request));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiError> handleException(ResourceNotFoundException ex) {
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(TransactionException.class)
-    public ResponseEntity<ApiError> handleException(TransactionException ex) {
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(ReservationException.class)
-    public ResponseEntity<ApiError> handleException(ReservationException ex) {
-        return new ResponseEntity<>(ApiError.buildResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ApiResponse<?>> handleException(ResourceNotFoundException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage(), request));
     }
 }

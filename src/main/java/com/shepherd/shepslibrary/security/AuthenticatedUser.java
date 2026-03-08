@@ -2,6 +2,7 @@ package com.shepherd.shepslibrary.security;
 
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.model.UserRole;
+import com.shepherd.shepslibrary.exceptions.UserNotVerifiedException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +68,8 @@ public class AuthenticatedUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
+        if(!user.isEmailVerified())
+            throw new UserNotVerifiedException("Verify your email address before you proceed");
         return user.isEnabled();
     }
 }

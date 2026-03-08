@@ -22,13 +22,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmailEqualsIgnoreCaseWithRole(email.trim())
                 .orElseThrow(() -> {
                     log.info("Login attempt failed: User with email '{}' not found", email);
-                    return new UsernameNotFoundException("User with the provided email not found");
+                    return new UsernameNotFoundException("User not found");
                 });
-        if(!user.isEnabled())
-            throw new UserNotVerifiedException("Your account is currently disabled. Please contact your admin");
-        if(!user.isEmailVerified())
-            throw new UserNotVerifiedException("Verify your email address before you proceed");
-
         return AuthenticatedUser.builder()
                 .user(user)
                 .build();

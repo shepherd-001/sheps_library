@@ -22,8 +22,8 @@ public interface TokenRepository extends JpaRepository<ShepsToken, String> {
 
     @Modifying
     @Transactional
-    @Query("update ShepsToken t set t.isRevoked = true, t.isExpired = true where t.user.id = :id and t.tokenType = :tokenType")
-    int revokeAllTokensForUser(@Param("id") String id, @Param("tokenType") TokenType tokenType);
+    @Query("update ShepsToken t set t.isRevoked = true, t.isExpired = true where t.user.email = :email and t.tokenType = :tokenType")
+    int revokeAllTokensForUser(@Param("email") String email, @Param("tokenType") TokenType tokenType);
 
     @Modifying
     @Transactional
