@@ -5,11 +5,11 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class EmailConfirmationResponse {
+public class EmailVerificationResponse {
     private final String firstName;
     private final String lastName;
     private final String email;
-    private final boolean isEnabled;
+    private final boolean enabled;
     private String accessToken;
     private String refreshToken;
 }

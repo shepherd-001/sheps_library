@@ -9,11 +9,11 @@ import java.util.UUID;
 @Builder
 @Getter
 public class InviteLibrarianResponse {
-    private UUID librarianId;
-    private String librarianEmail;
+    private UUID id;
+    private String email;
     private String firstName;
     private String lastName;
     private Gender gender;
-    private boolean isEnabled;
-    private boolean isRevoked;
+    private boolean enabled;
+    private boolean revoked;
 }

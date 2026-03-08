@@ -14,6 +14,6 @@ public class RegisterUserResponse {
     private String lastName;
     private String email;
     private Gender gender;
-    private boolean isEnabled;
-    private boolean isRevoked;
+    private boolean enabled;
+    private boolean revoked;
 }

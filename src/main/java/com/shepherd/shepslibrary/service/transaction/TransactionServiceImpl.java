@@ -11,6 +11,7 @@ import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.TransactionRepository;
 import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.exceptions.TransactionException;
+import com.shepherd.shepslibrary.security.SecurityUtils;
 import com.shepherd.shepslibrary.service.book.BookService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.utils.AppUtils;
@@ -38,8 +39,7 @@ public class TransactionServiceImpl implements TransactionService{
     @Override
     @Transactional
     public TransactionResponse borrowBook(BorrowBookRequest request) {
-        log.info("::::: Initiating borrow book request :::::");
-        User user = AppUtils.getCurrentUser();
+        User user = SecurityUtils.getCurrentPrincipal().getUser();
         checkIfUserIsRevoked(user);
         Book book = bookService.fetchBookById(request.getBookId());
         checkIfBookIsAvailable(book);
@@ -54,7 +54,7 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.setBorrowDateTime(Instant.now());
         transaction.setReturnDateTime(request.getReturnDateTime());
         Transaction savedTransaction = transactionRepository.save(transaction);
-        log.info("::::: Book borrowed successfully :::::");
+        log.info("==>> Book borrowed successfully");
         return mapToTransactionResponse(savedTransaction);
     }
 
@@ -100,7 +100,6 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Override
     public TransactionResponse returnBook(String transactionId) {
-        log.info("::::: Initiating return book :::::");
         Transaction transaction = getTransactionById(transactionId);
         Book book = transaction.getBook();
         book.setAvailable(true);
@@ -109,6 +108,7 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.setTransactionType(TransactionType.RETURN_BOOK);
         transaction.setReturnDateTime(Instant.now());
         Transaction savedTransaction = transactionRepository.save(transaction);
+        log.info("Book returned successfully");
         return mapToTransactionResponse(savedTransaction);
     }
 
@@ -120,9 +120,9 @@ public class TransactionServiceImpl implements TransactionService{
     @Override
     @Cacheable(value = "transactionCache", key = "'user:' + #userId + ':page:' + #pageNumber")
     public PaginationResponse<TransactionResponse> getAllTransactionByUserId(String userId, int pageNumber) {
-        log.info("::::: Fetching all transactions by user id :::::");
         Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
         Page<Transaction> transactions = transactionRepository.findAllByUserId(userId, pageable);
+        log.info("Fetched all transactions by user id");
         return getTransactionPaginatedResponse(transactions);
     }
 
@@ -145,10 +145,10 @@ public class TransactionServiceImpl implements TransactionService{
             unless = "#result == null || #result.content.isEmpty()"
     )
     public PaginationResponse<TransactionResponse> getAllTransactions(PaginationRequest paginationRequest) {
-        log.info("::::: Fetching all transactions :::::");
         Pageable pageable = createPageRequest(paginationRequest.getPageNumber(), paginationRequest.getPageSize(),
                 paginationRequest.getSortBy(), paginationRequest.getSortDirection());
         Page<Transaction> transactions = transactionRepository.findAll(pageable);
+        log.info("==>> Fetched all transactions");
         return getTransactionPaginatedResponse(transactions);
     }
 

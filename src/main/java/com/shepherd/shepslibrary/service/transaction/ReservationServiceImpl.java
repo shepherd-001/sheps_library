@@ -11,6 +11,7 @@ import com.shepherd.shepslibrary.exceptions.ReservationException;
 import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.mapper.ReservationMapper;
+import com.shepherd.shepslibrary.security.SecurityUtils;
 import com.shepherd.shepslibrary.service.book.BookService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.utils.AppUtils;
@@ -41,8 +42,7 @@ public class ReservationServiceImpl implements ReservationService{
 
     @Override
     public ReservationResponse reserveBook(String bookId) {
-        log.info("::::: Initiating the reservation of book :::::");
-        User user = AppUtils.getCurrentUser();
+        User user = SecurityUtils.getCurrentPrincipal().getUser();
         checkIfUserIsRevoked(user);
         Book book = bookService.fetchBookById(bookId);
 
@@ -57,7 +57,7 @@ public class ReservationServiceImpl implements ReservationService{
         reservation.setReservationDateTime(Instant.now());
 
         Reservation savedReservation = reservationRepository.save(reservation);
-        log.info("::::: Book reserved successfully :::::");
+        log.info("==>> Book reserved successfully");
         return reservationMapper.mapToReservationResponse(savedReservation);
     }
 
@@ -87,7 +87,7 @@ public class ReservationServiceImpl implements ReservationService{
     public PaginationResponse<ReservationResponse> getAllReservationByUserId(String userId, int pageNumber) {
         Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
         Page<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageable);
-        log.info("::::: Fetched all reservations for a user :::::");
+        log.info("==>> Fetched all user reservations");
         return paginatedReservationResponse(reservations);
     }
 
@@ -113,7 +113,7 @@ public class ReservationServiceImpl implements ReservationService{
         Pageable pageable = AppUtils.createPageRequest(paginationRequest.getPageNumber(), paginationRequest.getPageSize(),
                 paginationRequest.getSortBy(), paginationRequest.getSortDirection());
         Page<Reservation> reservations = reservationRepository.findAll(pageable);
-        log.info("::::: Fetched all reservations :::::");
+        log.info("==>> Fetched all reservations");
         return paginatedReservationResponse(reservations);
     }
 
@@ -123,7 +123,7 @@ public class ReservationServiceImpl implements ReservationService{
     public String deleteReservation(String reservationId, String userId) {
         int deletedCount = reservationRepository.deleteByReservationIdAndUserId(reservationId, userId);
         if(deletedCount > 0){
-            log.info("Reservation deleted successfully");
+            log.info("==>> Reservation deleted successfully");
             return "Reservation deleted successfully";
         }
         if(!reservationRepository.existsById(reservationId))
@@ -136,7 +136,7 @@ public class ReservationServiceImpl implements ReservationService{
     @CacheEvict(value = "reservationCache", key = "'user:' + #userId")
     public String deleteAllReservation(String userId) {
         reservationRepository.deleteAllByUserId(userId);
-        log.info("::::: Deleted all user reservations :::::");
+        log.info("==>> Deleted all users reservations");
         return "Successfully deleted all reservations";
     }
 
@@ -148,12 +148,12 @@ public class ReservationServiceImpl implements ReservationService{
             while (true){
             Page<Reservation> availableReservationsPage = reservationRepository.findAllAvailableReservations(pageable);
             if(availableReservationsPage.isEmpty()){
-                log.info("::::: No reservations found :::::");
+                log.info("==>> No reservations found");
                 break;
             }
             availableReservationsPage
                     .getContent().forEach(mailNotificationService::sendAvailableReservationMail);
-                log.info("::::: Processing transaction page number {} :::::", availableReservationsPage.getNumber());
+                log.info("==>> Processing transaction page number {}", availableReservationsPage.getNumber());
                 pageable = pageable.next();
             }
         }catch (Exception exception){

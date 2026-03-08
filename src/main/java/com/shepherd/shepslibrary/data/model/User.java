@@ -28,8 +28,8 @@ public class User extends BaseEntity {
     private UserRole role;
 
     @Column(name = "enabled")
-    private boolean isEnabled;
-    private boolean isEmailVerified;
+    private boolean enabled;
+    private boolean emailVerified;
     @Column(name = "revoked")
-    private boolean isRevoked;
+    private boolean revoked;
 }

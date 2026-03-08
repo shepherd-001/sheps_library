@@ -41,9 +41,9 @@ public class MailSenderServiceImpl implements MailSenderService {
             helper.setText(htmlContent, true);
             mailSender.send(mimeMessage);
 
-            log.info("::::: Email notification sent to {} :::::", to);
+            log.info("==>> Email notification sent to {}", to);
         } catch (UnsupportedEncodingException | MessagingException ex) {
-            log.error("::::: Unable to send email to '{}'.  Error: '{}' :::::", to, ex.getMessage());
+            log.error("==>> Unable to send email to '{}'.  Error: '{}'", to, ex.getMessage());
             throw new MailSenderException("Unable to send mail");
         }
     }

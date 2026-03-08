@@ -13,6 +13,6 @@ public class UserResponse {
     private String email;
     private Gender gender;
     private String role;
-    private boolean isEnabled;
-    private boolean isRevoked;
+    private boolean enabled;
+    private boolean revoked;
 }

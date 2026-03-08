@@ -61,8 +61,8 @@ public class AdminServiceImpl implements AdminService {
                 .email(adminEmail.toLowerCase())
                 .password(passwordEncoder.encode(adminPassword))
                 .role(role)
-                .isEnabled(true)
-                .isRevoked(false)
+                .enabled(true)
+                .revoked(false)
                 .build();
 
         userRepository.save(admin);

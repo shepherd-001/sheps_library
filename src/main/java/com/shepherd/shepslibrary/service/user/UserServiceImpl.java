@@ -15,7 +15,7 @@ import com.shepherd.shepslibrary.service.emailValidator.EmailValidationService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
-import com.shepherd.shepslibrary.service.userRoleAndPermission.role.RoleServiceImpl;
+import com.shepherd.shepslibrary.service.userRoleAndPermission.role.RoleService;
 import com.shepherd.shepslibrary.utils.AppUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
     private final EmailValidationService emailValidationService;
     private final PasswordValidationService passwordValidationService;
     private final UserMapper userMapper;
-    private final RoleServiceImpl roleService;
+    private final RoleService roleService;
 
     @Override
     @Transactional
@@ -52,14 +52,14 @@ public class UserServiceImpl implements UserService {
 
         UserRole role = roleService.getRole(MEMBER);
 
-        User newUser = userMapper.mapToUser(registerUserRequest, passwordEncoder);
-        newUser.setRole(role);
+        User user = userMapper.mapToUser(registerUserRequest);
+        user.setPassword(passwordEncoder.encode(registerUserRequest.getPassword()));
+        user.setRole(role);
 
-        newUser = userRepository.save(newUser);
-        sendEmailConfirmation(newUser);
+        user = userRepository.save(user);
+        sendEmailConfirmation(user);
 
-//        log.info("::::: User with the first name {} registered successfully :::::", newUser.getFirstName());
-        return userMapper.mapToRegisterResponse(newUser);
+        return userMapper.mapToRegisterResponse(user);
     }
 
     private void validateRegisterRequest(RegisterUserRequest registerUserRequest) {

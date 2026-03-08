@@ -4,6 +4,7 @@ import com.shepherd.shepslibrary.common.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
+import com.shepherd.shepslibrary.data.dto.request.VerifyEmailRequest;
 import com.shepherd.shepslibrary.security.LogoutService;
 import com.shepherd.shepslibrary.service.auth.AuthService;
 import com.shepherd.shepslibrary.utils.RegexPattern;
@@ -27,15 +28,9 @@ public class AuthController {
 
 
     @PostMapping("/verify")
-    public ResponseEntity<ApiResponse<?>> verifyEmail(@RequestParam
-                                                      @NotBlank(message = ValidationMessage.BLANK_TOKEN)
-                                                      String token,
-                                                      @RequestParam
-                                                      @NotBlank(message = ValidationMessage.BLANK_EMAIL)
-                                                      @Email(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
-                                                      String email) {
+    public ResponseEntity<ApiResponse<?>> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
         return ResponseEntity.ok(ApiResponse
-                .success("User verified successfully", authService.verifyEmail(token, email)));
+                .success("Email verified successfully", authService.verifyEmail(request)));
     }
 
     @PostMapping("/login")

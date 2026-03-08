@@ -1,14 +1,9 @@
 package com.shepherd.shepslibrary.utils;
 
-import com.shepherd.shepslibrary.data.model.User;
-import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
-import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.SecureRandom;
 
@@ -21,19 +16,6 @@ public final class AppUtils {
     public static final int MAX_ISBN_ATTEMPTS = 5;
     public static final int MAX_BORROW_MONTHS = 2;
 
-
-    public static User getCurrentUser() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !(authentication.getPrincipal() instanceof AuthenticatedUser)) {
-                throw new ShepsLibraryException("No authenticated user found");
-            }
-            return ((AuthenticatedUser) authentication.getPrincipal()).getUser();
-        } catch (Exception e) {
-            log.error("Error fetching authenticated user: {}", e.getMessage());
-            throw new ShepsLibraryException("Failed to fetch authenticated user");
-        }
-    }
 
     public static Pageable createPageRequest(int pageNumber, Integer pageSize, String sortBy, String sortDirection) {
         final int MAX_PAGE_SIZE = 100;

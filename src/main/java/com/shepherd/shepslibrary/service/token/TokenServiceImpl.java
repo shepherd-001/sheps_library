@@ -50,7 +50,7 @@ public class TokenServiceImpl implements TokenService{
     public String generateToken(User user, TokenType tokenType) {
         long expirationTimeInSeconds = getExpirationTime(tokenType);
         log.info("Initiating the creation of a new {} token", tokenType);
-        String token = jwtUtils.generateAccessToken(user.getEmail(), expirationTimeInSeconds);
+        String token = jwtUtils.generateAccessToken(user, expirationTimeInSeconds);
         ShepsToken shepsToken = ShepsToken.builder()
                 .user(user)
                 .tokenType(tokenType)
@@ -68,8 +68,8 @@ public class TokenServiceImpl implements TokenService{
 
     @Override
     public AuthResponse generateJwtTokens(User user) {
-        String accessToken = jwtUtils.generateAccessToken(user.getEmail(), accessTokenExpiration);
-        String refreshToken = jwtUtils.generateRefreshToken(user.getEmail(), refreshTokenExpiration);
+        String accessToken = jwtUtils.generateAccessToken(user, accessTokenExpiration);
+        String refreshToken = jwtUtils.generateRefreshToken(user, refreshTokenExpiration);
         ShepsToken shepsToken = ShepsToken.builder()
                 .user(user)
                 .tokenType(TokenType.JWT)

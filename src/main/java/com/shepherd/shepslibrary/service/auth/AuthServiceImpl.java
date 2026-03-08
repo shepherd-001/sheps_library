@@ -3,8 +3,9 @@ package com.shepherd.shepslibrary.service.auth;
 import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
+import com.shepherd.shepslibrary.data.dto.request.VerifyEmailRequest;
 import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
-import com.shepherd.shepslibrary.data.dto.response.EmailConfirmationResponse;
+import com.shepherd.shepslibrary.data.dto.response.EmailVerificationResponse;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
@@ -12,6 +13,7 @@ import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
 import com.shepherd.shepslibrary.security.AuthenticatedUser;
+import com.shepherd.shepslibrary.security.SecurityUtils;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
@@ -25,7 +27,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import static com.shepherd.shepslibrary.utils.AppUtils.getCurrentUser;
 import static com.shepherd.shepslibrary.utils.ErrorMessage.*;
 
 @Service
@@ -43,19 +44,21 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     @Transactional
-    public EmailConfirmationResponse verifyEmail(String token, String email) {
-        ShepsToken shepsToken = tokenService.validateToken(token, TokenType.EMAIL_CONFIRMATION, email);
+    public EmailVerificationResponse verifyEmail(VerifyEmailRequest request) {
+        ShepsToken shepsToken = tokenService.validateToken(request.getToken(), TokenType.EMAIL_CONFIRMATION, request.getEmail());
         User user = shepsToken.getUser();
 
-        if(user.isEnabled() || user.isEmailVerified())
+        if(user.isEmailVerified())
             throw new UserAlreadyEnabledException("User is already verified");
+        if(user.isEnabled())
+            throw new UserAlreadyEnabledException("User is already enabled");
 
         user.setEnabled(true);
         user.setEmailVerified(true);
         userRepository.save(user);
         tokenService.deleteToken(shepsToken);
 
-        return userMapper.mapToEmailConfirmationResponse(user, tokenService.generateJwtTokens(user));
+        return userMapper.mapToVerifyEmailResponse(user, tokenService.generateJwtTokens(user));
     }
 
     @Override
@@ -71,13 +74,13 @@ public class AuthServiceImpl implements AuthService{
     @Override
     @Transactional
     public AuthResponse changePassword(ChangePasswordRequest changePasswordRequest) {
-        log.info("Change password request initiated for user");
-        User user = getCurrentUser();
+        User user = SecurityUtils.getCurrentPrincipal().getUser();
         //passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
 
         validatePasswordChange(user.getPassword(), changePasswordRequest);
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         userRepository.save(user);
+        log.info("==>> Password changed successfully");
         return tokenService.generateJwtTokens(user);
     }
 
@@ -105,13 +108,12 @@ public class AuthServiceImpl implements AuthService{
     private void sendPasswordResetToken(User user) {
         String token = tokenService.generateToken(user, TokenType.RESET_PASSWORD);
         notificationService.sendResetPasswordMail(user, token);
-        log.info("Password reset token sent to: {}", user.getEmail());
+        log.info("==>> Password reset email sent to: {}", user.getEmail());
     }
 
     @Override
     @Transactional
     public AuthResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
-        log.info("::::: Initiating password reset :::::");
         ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.getToken(),
                 TokenType.RESET_PASSWORD, resetPasswordRequest.getEmail());
 //        passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
@@ -119,6 +121,7 @@ public class AuthServiceImpl implements AuthService{
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
         tokenService.deleteToken(shepsToken);
         userRepository.save(user);
+        log.info("==>> Password reset successful for user {}", user.getEmail());
         return tokenService.generateJwtTokens(user);
     }
 }
