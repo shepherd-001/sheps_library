@@ -131,10 +131,14 @@ public class TransactionServiceImpl implements TransactionService{
                 .content(transactions.stream()
                         .map(this::mapToTransactionResponse)
                         .toList())
+                .page(transactions.getNumber())
+                .size(transactions.getSize())
                 .numberOfElements(transactions.getNumberOfElements())
-                .totalPages(transactions.getTotalPages())
                 .totalElements(transactions.getTotalElements())
-                .isLast(transactions.isLast())
+                .totalPages(transactions.getTotalPages())
+                .hasNext(transactions.hasNext())
+                .hasPrevious(transactions.hasPrevious())
+                .last(transactions.isLast())
                 .build();
     }
 
@@ -145,8 +149,8 @@ public class TransactionServiceImpl implements TransactionService{
             unless = "#result == null || #result.content.isEmpty()"
     )
     public PaginationResponse<TransactionResponse> getAllTransactions(PaginationRequest paginationRequest) {
-        Pageable pageable = createPageRequest(paginationRequest.getPageNumber(), paginationRequest.getPageSize(),
-                paginationRequest.getSortBy(), paginationRequest.getSortDirection());
+        Pageable pageable = createPageRequest(paginationRequest.getPage(), paginationRequest.getSize(),
+                paginationRequest.getSort(), paginationRequest.getDirection());
         Page<Transaction> transactions = transactionRepository.findAll(pageable);
         log.info("==>> Fetched all transactions");
         return getTransactionPaginatedResponse(transactions);

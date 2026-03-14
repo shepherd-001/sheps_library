@@ -9,8 +9,12 @@ import java.util.List;
 @Getter
 public class PaginationResponse<T> {
     private List<T> content;
+    private int page;
+    private int size;
     private int numberOfElements;
-    private int totalPages;
     private long totalElements;
-    private boolean isLast;
+    private int totalPages;
+    private boolean hasNext;
+    private boolean hasPrevious;
+    private boolean last;
 }

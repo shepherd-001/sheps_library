@@ -109,8 +109,8 @@ public class BookServiceImpl implements BookService {
     )
     public PaginationResponse<BookResponse> getAllBooks(PaginationRequest paginationRequest) {
         log.info("::::: Fetching all books :::::");
-        Pageable pageable = createPageRequest(paginationRequest.getPageNumber(), paginationRequest.getPageSize(),
-                paginationRequest.getSortBy(), paginationRequest.getSortDirection());
+        Pageable pageable = createPageRequest(paginationRequest.getPage(), paginationRequest.getSize(),
+                paginationRequest.getSort(), paginationRequest.getDirection());
         Page<Book> books = bookRepository.findAll(pageable);
         return mapToPaginatedBookResponse(books);
     }
@@ -120,10 +120,14 @@ public class BookServiceImpl implements BookService {
                 books.stream().map(bookMapper::mapToBookResponse).toList();
         return PaginationResponse.<BookResponse>builder()
                 .content(content)
+                .page(books.getNumber())
+                .size(books.getSize())
                 .numberOfElements(books.getNumberOfElements())
-                .totalPages(books.getTotalPages())
                 .totalElements(books.getTotalElements())
-                .isLast(books.isLast())
+                .totalPages(books.getTotalPages())
+                .hasNext(books.hasNext())
+                .hasPrevious(books.hasPrevious())
+                .last(books.isLast())
                 .build();
     }
 

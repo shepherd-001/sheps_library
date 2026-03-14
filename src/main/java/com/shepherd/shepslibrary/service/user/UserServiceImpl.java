@@ -40,8 +40,8 @@ public class UserServiceImpl implements UserService {
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
     private final MailNotificationService mailNotificationService;
-    private final EmailValidationService emailValidationService;
-    private final PasswordValidationService passwordValidationService;
+//    private final EmailValidationService emailValidationService;
+//    private final PasswordValidationService passwordValidationService;
     private final UserMapper userMapper;
     private final RoleService roleService;
 
@@ -98,10 +98,14 @@ public class UserServiceImpl implements UserService {
 
         return PaginationResponse.<UserResponse>builder()
                 .content(content)
+                .page(users.getNumber())
+                .size(users.getSize())
                 .numberOfElements(users.getNumberOfElements())
-                .totalPages(users.getTotalPages())
                 .totalElements(users.getTotalElements())
-                .isLast(users.isLast())
+                .totalPages(users.getTotalPages())
+                .hasNext(users.hasNext())
+                .hasPrevious(users.hasPrevious())
+                .last(users.isLast())
                 .build();
     }
 
@@ -110,7 +114,7 @@ public class UserServiceImpl implements UserService {
     public PaginationResponse<UserResponse> getAllUsersByStatus(boolean status, int pageNumber) {
         log.info("::::: Fetching all users by status {} :::::", status);
         Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
-        Page<User> users = userRepository.findAllByIsEnabled(status, pageable);
+        Page<User> users = userRepository.findAllByEnabled(status, pageable);
         return mapToPaginatedUserResponse(users);
     }
 }

@@ -8,8 +8,13 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
@@ -107,14 +112,34 @@ class MailAsyncExecutor{
     private final SpringTemplateEngine templateEngine;
 
     @Async("mailTaskExecutor")
+    @Retryable(retryFor = {MailException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000, multiplier = 2)
+    )
     public void sendEmailAsync(String templateName, String subject, String email, Map<String, Object> variables) {
         try {
             Context context = new Context();
             context.setVariables(variables);
             String htmlContent = templateEngine.process(templateName, context);
+            Assert.hasText(htmlContent, "Template rendering failed");
             mailSenderService.sendEmail(email, subject, htmlContent);
         } catch (Exception e) {
             log.error("==>> Failed to send email [{}] to {}: {}", templateName, email, e.getMessage(), e);
+            throw e;
         }
+    }
+    @Recover
+    public void recover(MailException ex, String templateName, String subject,
+                        String email, Map<String, Object> variables){
+        log.error("Email sending permanently failed after retires. Template: {}, Email: {}",
+                templateName,
+                email,
+                ex);
+
+        // Optional strategies:
+        // 1. Save to DB for retry later
+        // 2. Send to dead-letter queue
+        // 3. Alert monitoring system
+
     }
 }

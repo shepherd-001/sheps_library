@@ -24,8 +24,7 @@ public class EmailValidationServiceImpl implements EmailValidationService{
     private String apiKey;
     @Value("${zero_bounce_url}")
     private String validationUrl;
-    private final WebClient webClient;
-
+    private final WebClient.Builder webClientBuilder;
 
     private static final Set<String> DISPOSABLE_EMAIL_DOMAINS = Set.of(
             "10minutemail.com", "guerrillamail.com", "mailinator.com",
@@ -53,9 +52,9 @@ public class EmailValidationServiceImpl implements EmailValidationService{
 
     private boolean isValidEmail(String email) {
         String url = buildValidationUrl(email);
-
         try {
-            EmailValidationResponse response = webClient.get()
+            EmailValidationResponse response = webClientBuilder.build()
+                    .get()
                     .uri(url)
                     .retrieve()
                     .bodyToMono(EmailValidationResponse.class)

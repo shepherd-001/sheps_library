@@ -96,10 +96,14 @@ public class ReservationServiceImpl implements ReservationService{
                 .content(reservations.stream()
                         .map(reservationMapper::mapToReservationResponse)
                         .toList())
+                .page(reservations.getNumber())
+                .size(reservations.getSize())
                 .numberOfElements(reservations.getNumberOfElements())
                 .totalElements(reservations.getTotalElements())
                 .totalPages(reservations.getTotalPages())
-                .isLast(reservations.isLast())
+                .hasNext(reservations.hasNext())
+                .hasPrevious(reservations.hasPrevious())
+                .last(reservations.isLast())
                 .build();
     }
 
@@ -110,8 +114,8 @@ public class ReservationServiceImpl implements ReservationService{
             unless = "#result == null || #result.content.isEmpty()"
     )
     public PaginationResponse<ReservationResponse> getAllReservations(PaginationRequest paginationRequest) {
-        Pageable pageable = AppUtils.createPageRequest(paginationRequest.getPageNumber(), paginationRequest.getPageSize(),
-                paginationRequest.getSortBy(), paginationRequest.getSortDirection());
+        Pageable pageable = AppUtils.createPageRequest(paginationRequest.getPage(), paginationRequest.getSize(),
+                paginationRequest.getSort(), paginationRequest.getDirection());
         Page<Reservation> reservations = reservationRepository.findAll(pageable);
         log.info("==>> Fetched all reservations");
         return paginatedReservationResponse(reservations);

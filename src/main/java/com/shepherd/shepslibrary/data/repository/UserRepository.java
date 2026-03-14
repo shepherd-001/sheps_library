@@ -18,5 +18,5 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     Optional<User> findByEmailEqualsIgnoreCase(String email);
     Page<User> findAllByRoleName(String roleName, Pageable pageable);
-    Page<User> findAllByIsEnabled(boolean enabled, Pageable pageable);
+    Page<User> findAllByEnabled(boolean enabled, Pageable pageable);
 }

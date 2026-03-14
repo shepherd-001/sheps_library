@@ -11,20 +11,20 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PaginationRequest {
-    private int pageNumber;
-    private Integer pageSize;
-    private String sortBy;
-    private String sortDirection;
+    private int page;
+    private Integer size;
+    private String sort;
+    private String direction;
 
 
     public String toCacheKey(String prefix) {
         return String.format(
                 "%s:page:%d:size:%s:sortBy:%s:direction:%s",
                 prefix,
-                pageNumber,
-                pageSize != null ? pageSize : AppUtils.DEFAULT_PAGE_SIZE,
-                sortBy != null ? sortBy.toLowerCase() : AppUtils.SORT_BY_CREATED_AT,
-                sortDirection != null ? sortDirection.toUpperCase() : AppUtils.SORT_DIRECTION_ASC
+                page,
+                size != null ? size : AppUtils.DEFAULT_PAGE_SIZE,
+                sort != null ? sort.toLowerCase() : AppUtils.SORT_BY_CREATED_AT,
+                direction != null ? direction.toUpperCase() : AppUtils.SORT_DIRECTION_ASC
         );
     }
 }

@@ -8,8 +8,6 @@ logging:
 spring:
   application:
     name: ShepsLibrary
-  profiles:
-    active: ${ACTIVE_PROFILE:local}
 
   datasource:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?createDatabaseIfNotExist=true
@@ -68,7 +66,7 @@ admin_email: ${ADMIN_EMAIL}
 admin_password: ${ADMIN_PASSWORD}
 
 
-client_url: ${CLIENT_URL:http://localhost:3000}
+client_url: ${CLIENT_URL}
 mail_from_email: ${MAIL_FROM_EMAIL}
 mail_from_name: ${MAIL_FROM_NAME}
 
