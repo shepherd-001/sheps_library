@@ -8,7 +8,7 @@ import com.shepherd.shepslibrary.data.dto.response.TransactionResponse;
 public interface TransactionService {
     TransactionResponse borrowBook(BorrowBookRequest request);
     TransactionResponse returnBook(String transactionId);
-    PaginationResponse<TransactionResponse> getAllTransactionByUserId(String userId, int pageNumber);
+    PaginationResponse<TransactionResponse> getAllTransactionByUserId(String userId, PaginationRequest paginationRequest);
     PaginationResponse<TransactionResponse> getAllTransactions(PaginationRequest paginationRequest);
 //    void sendBookOverdueNotifications();
 }

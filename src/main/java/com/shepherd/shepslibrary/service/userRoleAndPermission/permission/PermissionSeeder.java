@@ -14,7 +14,7 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Order(1) // Seed permissions before roles
+@Order(1)
 public class PermissionSeeder implements CommandLineRunner {
     private final PermissionRepository permissionRepository;
     private final PermissionService permissionService;

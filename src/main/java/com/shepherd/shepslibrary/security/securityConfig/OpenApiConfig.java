@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import io.swagger.v3.oas.annotations.servers.Server;
 
 @OpenAPIDefinition(
         info = @Info(
@@ -25,20 +24,20 @@ import io.swagger.v3.oas.annotations.servers.Server;
                         url = "https://www.apache.org/licenses/LICENSE-2.0"
                 )
         ),
-        servers = {
-                @Server(
-                        description = "Local",
-                        url = "http://localhost:9092"
-                ),
-                @Server(
-                        description = "Development",
-                        url = "https://dev.shepslibrary.com"
-                ),
-                @Server(
-                        description = "Production",
-                        url = "https://api.shepslibrary.com"
-                )
-        },
+//        servers = {
+//                @Server(
+//                        description = "Local",
+//                        url = "http://localhost:9092"
+//                ),
+//                @Server(
+//                        description = "Development",
+//                        url = "https://dev.shepslibrary.com"
+//                ),
+//                @Server(
+//                        description = "Production",
+//                        url = "https://api.shepslibrary.com"
+//                )
+//        },
         security = {
                 @SecurityRequirement(name = "bearerAuth")
         }

@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.service.user;
 
+import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.response.RegisterUserResponse;
@@ -11,9 +12,7 @@ import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
 import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
-import com.shepherd.shepslibrary.service.emailValidator.EmailValidationService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
-import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
 import com.shepherd.shepslibrary.service.userRoleAndPermission.role.RoleService;
 import com.shepherd.shepslibrary.utils.AppUtils;
@@ -29,7 +28,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 
-import static com.shepherd.shepslibrary.utils.AppUtils.*;
 import static com.shepherd.shepslibrary.utils.RoleUtils.MEMBER;
 
 @Service
@@ -84,10 +82,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "userCache", key = "'role:' + #role + ':page:' + #pageNumber")
-    public PaginationResponse<UserResponse> getAllUsersByRole(String role, int pageNumber) {
+    @Cacheable(
+            value = "userCache",
+            key = "#paginationRequest.toCacheKey('role:'+role)",
+            unless = "#result == null || #result.content.isEmpty()"
+    )
+    public PaginationResponse<UserResponse> getAllUsersByRole(String role, PaginationRequest paginationRequest) {
         log.info("::::: Fetching all users by role {} :::::", role);
-        Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
+        Pageable pageable = AppUtils.createPageRequest(paginationRequest);
         Page<User> users = userRepository.findAllByRoleName(role, pageable);
         return mapToPaginatedUserResponse(users);
     }
@@ -110,10 +112,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "userCache", key = "'status:' + #status + ':page:' + #pageNumber")
-    public PaginationResponse<UserResponse> getAllUsersByStatus(boolean status, int pageNumber) {
+    @Cacheable(
+            value = "userCache",
+            key = "#paginationRequest.toCacheKey('status:'+status)",
+            unless = "#result == null || #result.content.isEmpty()"
+    )
+    public PaginationResponse<UserResponse> getAllUsersByStatus(boolean status, PaginationRequest paginationRequest) {
         log.info("::::: Fetching all users by status {} :::::", status);
-        Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
+        Pageable pageable = AppUtils.createPageRequest(paginationRequest);
         Page<User> users = userRepository.findAllByEnabled(status, pageable);
         return mapToPaginatedUserResponse(users);
     }

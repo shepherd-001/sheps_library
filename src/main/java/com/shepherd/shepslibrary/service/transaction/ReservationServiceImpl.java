@@ -29,8 +29,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
-import static com.shepherd.shepslibrary.utils.AppUtils.*;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -82,10 +80,11 @@ public class ReservationServiceImpl implements ReservationService{
     }
 
     @Override
-    @Cacheable(value = "reservationCache", key = "'user:' + #userId + ':page:' + #pageNumber",
-                unless = "#result == null || #result.content.isEmpty()")
-    public PaginationResponse<ReservationResponse> getAllReservationByUserId(String userId, int pageNumber) {
-        Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
+    @Cacheable(value = "reservationCache",
+            key = "#paginationRequest.toCacheKey('user:'+userId)",
+            unless = "#result == null || #result.content.isEmpty()")
+    public PaginationResponse<ReservationResponse> getAllReservationByUserId(String userId, PaginationRequest paginationRequest) {
+        Pageable pageable = AppUtils.createPageRequest(paginationRequest);
         Page<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageable);
         log.info("==>> Fetched all user reservations");
         return paginatedReservationResponse(reservations);
@@ -114,8 +113,7 @@ public class ReservationServiceImpl implements ReservationService{
             unless = "#result == null || #result.content.isEmpty()"
     )
     public PaginationResponse<ReservationResponse> getAllReservations(PaginationRequest paginationRequest) {
-        Pageable pageable = AppUtils.createPageRequest(paginationRequest.getPage(), paginationRequest.getSize(),
-                paginationRequest.getSort(), paginationRequest.getDirection());
+        Pageable pageable = AppUtils.createPageRequest(paginationRequest);
         Page<Reservation> reservations = reservationRepository.findAll(pageable);
         log.info("==>> Fetched all reservations");
         return paginatedReservationResponse(reservations);

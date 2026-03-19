@@ -26,7 +26,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.ZoneId;
 
-import static com.shepherd.shepslibrary.utils.AppUtils.*;
+import static com.shepherd.shepslibrary.utils.AppUtils.MAX_BORROW_MONTHS;
+import static com.shepherd.shepslibrary.utils.AppUtils.createPageRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -118,9 +119,11 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
-    @Cacheable(value = "transactionCache", key = "'user:' + #userId + ':page:' + #pageNumber")
-    public PaginationResponse<TransactionResponse> getAllTransactionByUserId(String userId, int pageNumber) {
-        Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
+    @Cacheable(value = "transactionCache",
+            key = "#paginationRequest.toCacheKey('user:'+userId)",
+            unless = "#result == null || #result.content.isEmpty()")
+    public PaginationResponse<TransactionResponse> getAllTransactionByUserId(String userId, PaginationRequest paginationRequest) {
+        Pageable pageable = AppUtils.createPageRequest(paginationRequest);
         Page<Transaction> transactions = transactionRepository.findAllByUserId(userId, pageable);
         log.info("Fetched all transactions by user id");
         return getTransactionPaginatedResponse(transactions);
@@ -149,8 +152,7 @@ public class TransactionServiceImpl implements TransactionService{
             unless = "#result == null || #result.content.isEmpty()"
     )
     public PaginationResponse<TransactionResponse> getAllTransactions(PaginationRequest paginationRequest) {
-        Pageable pageable = createPageRequest(paginationRequest.getPage(), paginationRequest.getSize(),
-                paginationRequest.getSort(), paginationRequest.getDirection());
+        Pageable pageable = createPageRequest(paginationRequest);
         Page<Transaction> transactions = transactionRepository.findAll(pageable);
         log.info("==>> Fetched all transactions");
         return getTransactionPaginatedResponse(transactions);

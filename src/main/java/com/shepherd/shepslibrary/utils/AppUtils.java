@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.utils;
 
+import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,22 +12,41 @@ import java.security.SecureRandom;
 public final class AppUtils {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     public static final int DEFAULT_PAGE_SIZE = 10;
+    public static final int MAX_PAGE_SIZE = 100;
     public static final String SORT_BY_CREATED_AT = "createdAt";
     public static final String SORT_DIRECTION_ASC = "ASC";
     public static final int MAX_ISBN_ATTEMPTS = 5;
     public static final int MAX_BORROW_MONTHS = 2;
 
 
-    public static Pageable createPageRequest(int pageNumber, Integer pageSize, String sortBy, String sortDirection) {
-        final int MAX_PAGE_SIZE = 100;
-        pageNumber = Math.max(pageNumber - 1, 0);
-        int resolvedPageSize = (pageSize != null && pageSize > 0)
+    public static Pageable createPageRequest(PaginationRequest paginationRequest) {
+
+        return PageRequest.of(resolvedPageNumber(paginationRequest.getPage()),
+                resolvedPageSize(paginationRequest.getSize()),
+                Sort.by(resolvedSortDirection(paginationRequest.getDirection()),
+                        resolvedSortBy(paginationRequest.getSort())));
+    }
+
+    public static int resolvedPageNumber(int pageNumber){
+        return Math.max(pageNumber -1, 0);
+    }
+
+    public static int resolvedPageSize(int pageSize){
+        return (pageSize > 0)
                 ? Math.min(pageSize, MAX_PAGE_SIZE)
                 : DEFAULT_PAGE_SIZE;
+    }
 
-        String resolvedSortBy = (sortBy != null && !sortBy.isBlank()) ? sortBy : SORT_BY_CREATED_AT;
-        Sort.Direction resolvedDirection = SORT_DIRECTION_ASC.equalsIgnoreCase(sortDirection) ? Sort.Direction.ASC : Sort.Direction.DESC;
-        return PageRequest.of(pageNumber, resolvedPageSize, Sort.by(resolvedDirection, resolvedSortBy));
+    public static String resolvedSortBy(String sortBy){
+        return (sortBy != null && !sortBy.isBlank())
+                ? sortBy
+                : SORT_BY_CREATED_AT;
+    }
+
+    public static Sort.Direction resolvedSortDirection(String sortDirection){
+        return SORT_DIRECTION_ASC.equalsIgnoreCase(sortDirection)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
     }
 
     public static String generateISBN() {

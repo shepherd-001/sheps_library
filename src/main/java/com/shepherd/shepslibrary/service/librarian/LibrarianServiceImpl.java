@@ -7,7 +7,6 @@ import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
-import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,7 @@ public class LibrarianServiceImpl implements LibrarianService{
     private final UserRepository userRepository;
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
-    private final PasswordValidationService passwordValidationService;
+//    private final PasswordValidationService passwordValidationService;
 
     @Override
     public AuthResponse createPassword(CreatePasswordRequest request) {

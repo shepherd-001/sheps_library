@@ -128,6 +128,7 @@ class MailAsyncExecutor{
             throw e;
         }
     }
+
     @Recover
     public void recover(MailException ex, String templateName, String subject,
                         String email, Map<String, Object> variables){

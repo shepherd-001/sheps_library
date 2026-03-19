@@ -45,8 +45,8 @@ public class BookController {
 //    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     @PreAuthorize("hasAnyAuthority('admin.read', 'librarian.read')")
     public ResponseEntity<ApiResponse<?>> getBookByIsbn(@PathVariable
-                                                    @Pattern(message= ValidationMessage.INVALID_ISBN, regexp = RegexPattern.ISBN)
-                                                    String isbn){
+                                                        @Pattern(message= ValidationMessage.INVALID_ISBN, regexp = RegexPattern.ISBN)
+                                                        String isbn){
         if(isbn.isBlank())
             throw new ShepsLibraryException(ValidationMessage.BLANK_ISBN);
         return ResponseEntity.ok(ApiResponse.success(bookService.getBookByIsbn(isbn)));
@@ -56,7 +56,7 @@ public class BookController {
 //    @PreAuthorize("hasRole('ADMIN')")
     @PreAuthorize("hasAuthority('admin.update')")
     public ResponseEntity<ApiResponse<?>> updateBook(@Valid @RequestBody UpdateBookRequest updateBookRequest,
-                                             @PathVariable String bookId){
+                                                     @PathVariable String bookId){
         return ResponseEntity.ok(ApiResponse
                 .success("Book updated successfully", bookService.updateBook(updateBookRequest, bookId)));
     }
@@ -67,16 +67,25 @@ public class BookController {
         return ResponseEntity.ok(ApiResponse.success(bookService.getAllBooks(paginationRequest)));
     }
 
-    @GetMapping("/search")
+    @GetMapping("")
     @PreAuthorize("hasAnyAuthority('admin.read', 'librarian.read', 'member.read')")
-    public ResponseEntity<ApiResponse<?>> filterBook(@Valid @RequestBody FilterBookRequest filterBookRequest){
-        return ResponseEntity.ok(ApiResponse.success(bookService.filterBook(filterBookRequest)));
-    }
 
-    @DeleteMapping("/{bookId}")
+    public ResponseEntity<ApiResponse<?>> filterBook(@RequestParam(required = false) String title,
+                                                     @RequestParam(required = false) String author,
+                                                     @RequestParam(required = false) String genre,
+                                                     @RequestParam(required = false, defaultValue = "1") int page,
+                                                     @RequestParam(required = false, defaultValue = "10") int size,
+                                                     @RequestParam(required = false) String sort,
+                                                     @RequestParam(required = false) String direction){
+        FilterBookRequest filterBookRequest = new FilterBookRequest(title, author, genre);
+        PaginationRequest paginationRequest = new PaginationRequest(page, size, sort, direction);
+            return ResponseEntity.ok(ApiResponse.success(bookService.filterBook(filterBookRequest, paginationRequest)));
+        }
+
+        @DeleteMapping("/{bookId}")
 //    @PreAuthorize("hasRole('ADMIN')")
-    @PreAuthorize("hasAuthority('admin.delete')")
-    public ResponseEntity<ApiResponse<?>> deleteBook(@PathVariable String bookId){
-        return ResponseEntity.ok(ApiResponse.success(bookService.deleteBook(bookId)));
+        @PreAuthorize("hasAuthority('admin.delete')")
+        public ResponseEntity<ApiResponse<?>> deleteBook(@PathVariable String bookId){
+            return ResponseEntity.ok(ApiResponse.success(bookService.deleteBook(bookId)));
+        }
     }
-}

@@ -47,8 +47,7 @@ public class BookServiceImpl implements BookService {
 
         Book book = bookMapper.mapToBook(request);
         Book savedBook = saveBookWithUniqueIsbn(book);
-        log.info("::::: Book added with title='{}' :::::", savedBook.getTitle());
-
+        log.info("==>> Book with title='{}' added successfully", savedBook.getTitle());
         return bookMapper.mapToAddBookResponse(savedBook);
     }
 
@@ -59,7 +58,7 @@ public class BookServiceImpl implements BookService {
             try {
                 return bookRepository.save(book);
             } catch (DataIntegrityViolationException ex) {
-                log.warn("ISBN conflict on attempt {} with isbn='{}'. Retrying... Root cause: {}",
+                log.warn("==>> ISBN conflict on attempt {} with isbn='{}'. Retrying... Root cause: {}",
                         attempt, book.getIsbn(), ex.getMostSpecificCause().getMessage());
             }
         }
@@ -70,8 +69,8 @@ public class BookServiceImpl implements BookService {
     @Override
     @Cacheable(value = "bookCache", key = "#bookId", unless = "#result == null")
     public BookResponse getBookById(String bookId) {
-        log.info("::::: Fetching book by id :::::");
         Book book = fetchBookById(bookId);
+        log.info("==>> Fetched book by id");
         return bookMapper.mapToBookResponse(book);
     }
 
@@ -84,7 +83,7 @@ public class BookServiceImpl implements BookService {
     @Override
     @Cacheable(value = "bookCache", key = "#isbn", unless = "#result == null")
     public BookResponse getBookByIsbn(String isbn) {
-        log.info("::::: Fetching book by isbn :::::");
+        log.info("==>> Fetching book by isbn");
         return bookRepository.findByIsbn(isbn)
                 .map(bookMapper::mapToBookResponse)
                 .orElseThrow(()-> new ResourceNotFoundException("Book with the provided ISBN not found"));
@@ -97,7 +96,7 @@ public class BookServiceImpl implements BookService {
         Book book = fetchBookById(bookId);
         bookMapper.updateBookFromRequest(updateBookRequest, book);
         Book savedBook = bookRepository.save(book);
-        log.info("::::: Updated book with title '{}' :::::", book.getTitle());
+        log.info("==>> Updated book with title '{}'", book.getTitle());
         return bookMapper.mapToBookResponse(savedBook);
     }
 
@@ -108,10 +107,9 @@ public class BookServiceImpl implements BookService {
             unless = "#result == null || #result.content.isEmpty()"
     )
     public PaginationResponse<BookResponse> getAllBooks(PaginationRequest paginationRequest) {
-        log.info("::::: Fetching all books :::::");
-        Pageable pageable = createPageRequest(paginationRequest.getPage(), paginationRequest.getSize(),
-                paginationRequest.getSort(), paginationRequest.getDirection());
+        Pageable pageable = createPageRequest(paginationRequest);
         Page<Book> books = bookRepository.findAll(pageable);
+        log.info("==>> All books fetched");
         return mapToPaginatedBookResponse(books);
     }
 
@@ -132,17 +130,20 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    @Cacheable(value = "bookCache", key = "#request.toCacheKey()",
+    @Cacheable(value = "bookCache",
+            key = "#paginationRequest.toCacheKey('filter:title:'+#request.title+':author:'+#request.author+':genre:'+#request.genre)",
             unless = "#result == null || #result.content.isEmpty()")
-    public PaginationResponse<BookResponse> filterBook(FilterBookRequest request) {
-        log.info(":::::  Filtering book :::::");
-        Pageable pageable = createPageRequest(request.getPageNumber(), request.getPageSize(),
-                request.getSortBy(), request.getSortDirection());
+    public PaginationResponse<BookResponse> filterBook(FilterBookRequest request, PaginationRequest paginationRequest) {
+        Pageable pageable = createPageRequest(paginationRequest);
         Specification<Book> bookSpecification = Specification.where(
                 BookSpecification.hasTitle(request.getTitle()))
                 .and(BookSpecification.hasAuthor(request.getAuthor()))
                 .and(BookSpecification.hasGenre(request.getGenre()));
         Page<Book> books = bookRepository.findAll(bookSpecification, pageable);
+        log.info("Books filtered successfully with title={}, author={}, genre={}",
+                request.getTitle(),
+                request.getAuthor(),
+                request.getGenre());
         return mapToPaginatedBookResponse(books);
     }
 
@@ -153,7 +154,7 @@ public class BookServiceImpl implements BookService {
         if(!bookRepository.existsById(bookId))
             throw new ResourceNotFoundException("Book with the provided ID not found");
         bookRepository.deleteById(bookId);
-        log.info("::::: Deleted a book by id :::::");
+        log.info("==>> Book deleted by id");
         return "Book deleted successfully";
     }
 

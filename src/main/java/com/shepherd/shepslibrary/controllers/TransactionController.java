@@ -37,10 +37,14 @@ public class TransactionController {
 
     @GetMapping("/all/{userId}")
     @PreAuthorize("hasAnyAuthority('member.read', 'librarian.read', 'admin.read')")
-    public ResponseEntity<ApiResponse<?>> getAllTransactions(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
-                                                                 String userId, int pageNumber){
+    public ResponseEntity<ApiResponse<?>> getAllTransactions(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID) String userId,
+                                                                     @RequestParam(required = false, defaultValue = "1") int page,
+                                                                     @RequestParam(required = false, defaultValue = "10") int size,
+                                                                     @RequestParam(required = false) String sort,
+                                                                     @RequestParam(required = false) String direction){
+        PaginationRequest paginationRequest = new PaginationRequest(page, size, sort, direction);
         return ResponseEntity.ok(ApiResponse
-                .success(transactionService.getAllTransactionByUserId(userId, pageNumber)));
+                .success(transactionService.getAllTransactionByUserId(userId, paginationRequest)));
     }
 
     @GetMapping("/all")

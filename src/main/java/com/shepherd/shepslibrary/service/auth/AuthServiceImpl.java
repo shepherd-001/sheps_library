@@ -15,7 +15,6 @@ import com.shepherd.shepslibrary.mapper.UserMapper;
 import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.security.SecurityUtils;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
-import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +33,7 @@ import static com.shepherd.shepslibrary.utils.ErrorMessage.*;
 @Slf4j
 public class AuthServiceImpl implements AuthService{
     private final UserRepository userRepository;
-    private final PasswordValidationService passwordValidationService;
+//    private final PasswordValidationService passwordValidationService;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
@@ -75,8 +74,6 @@ public class AuthServiceImpl implements AuthService{
     @Transactional
     public AuthResponse changePassword(ChangePasswordRequest changePasswordRequest) {
         User user = SecurityUtils.getCurrentPrincipal().getUser();
-        //passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
-
         validatePasswordChange(user.getPassword(), changePasswordRequest);
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         userRepository.save(user);
@@ -94,7 +91,7 @@ public class AuthServiceImpl implements AuthService{
         if (!request.getNewPassword().equals(request.getConfirmPassword()))
             throw new BadCredentialsException(MISMATCH_PASSWORD);
 
-        passwordValidationService.validatePasswordNotBreached(request.getNewPassword());
+//        passwordValidationService.validatePasswordNotBreached(request.getNewPassword());
     }
 
     @Override

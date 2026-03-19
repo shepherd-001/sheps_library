@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@Order(3) // Run after the Role seer which has @Order(2)
+@Order(3)
 public class AdminSeeder implements CommandLineRunner {
     private final AdminService  adminService;
 

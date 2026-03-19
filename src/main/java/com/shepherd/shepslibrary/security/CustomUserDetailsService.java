@@ -2,7 +2,6 @@ package com.shepherd.shepslibrary.security;
 
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
-import com.shepherd.shepslibrary.exceptions.UserNotVerifiedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -30,12 +30,17 @@ public class ReservationController {
                 .success(reservationService.getReservationById(id)));
     }
 
-    @GetMapping("/all/{userId}/{page}")
+    @GetMapping("/all/{userId}")
 //    @PreAuthorize("hasRole('MEMBER')")
     @PreAuthorize("hasAnyAuthority('member.read', 'librarian.read', 'admin.read')")
-    public ResponseEntity<ApiResponse<?>> getAllReservationsByUserId(@PathVariable String userId, @PathVariable  int page){
+    public ResponseEntity<ApiResponse<?>> getAllReservationsByUserId(@PathVariable String userId,
+                                                                     @RequestParam(required = false, defaultValue = "1") int page,
+                                                                     @RequestParam(required = false, defaultValue = "10") int size,
+                                                                     @RequestParam(required = false) String sort,
+                                                                     @RequestParam(required = false) String direction){
+        PaginationRequest paginationRequest = new PaginationRequest(page, size, sort, direction);
         return ResponseEntity.ok(ApiResponse
-                .success(reservationService.getAllReservationByUserId(userId, page)));
+                .success(reservationService.getAllReservationByUserId(userId, paginationRequest)));
     }
 
     @GetMapping("/all")
