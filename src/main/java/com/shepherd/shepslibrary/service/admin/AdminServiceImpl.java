@@ -88,13 +88,13 @@ public class AdminServiceImpl implements AdminService {
     private void sendLibrarianInvite(User user) {
         String token = tokenService.generateToken(user, TokenType.LIBRARIAN_INVITATION);
         mailNotificationService.sendLibrarianInvitation(user, token);
-        log.info("Librarian invited successfully to {}", user.getEmail());
+        log.info("==>> Invited librarian {} successfully", user.getEmail());
     }
 
     @Override
 //    @Transactional
     public String resendInvite(String inviteeEmail) {
-        log.info("Initiating resend invitation for email: {}", inviteeEmail);
+        log.info("==>> Initiating resend invitation for email: {}", inviteeEmail);
         return userRepository.findByEmailIgnoreCase(inviteeEmail.trim())
                 .map(this::handleResendInvite)
                 .orElseThrow(

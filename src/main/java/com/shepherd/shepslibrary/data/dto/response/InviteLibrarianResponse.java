@@ -15,5 +15,5 @@ public class InviteLibrarianResponse {
     private String lastName;
     private Gender gender;
     private boolean enabled;
-    private boolean revoked;
+    private boolean emailVerified;
 }

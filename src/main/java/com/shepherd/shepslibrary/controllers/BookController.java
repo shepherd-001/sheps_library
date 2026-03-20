@@ -79,13 +79,14 @@ public class BookController {
                                                      @RequestParam(required = false) String direction){
         FilterBookRequest filterBookRequest = new FilterBookRequest(title, author, genre);
         PaginationRequest paginationRequest = new PaginationRequest(page, size, sort, direction);
-            return ResponseEntity.ok(ApiResponse.success(bookService.filterBook(filterBookRequest, paginationRequest)));
-        }
-
-        @DeleteMapping("/{bookId}")
-//    @PreAuthorize("hasRole('ADMIN')")
-        @PreAuthorize("hasAuthority('admin.delete')")
-        public ResponseEntity<ApiResponse<?>> deleteBook(@PathVariable String bookId){
-            return ResponseEntity.ok(ApiResponse.success(bookService.deleteBook(bookId)));
-        }
+        return ResponseEntity.ok(ApiResponse.success(bookService.filterBook(filterBookRequest, paginationRequest)));
     }
+
+    @DeleteMapping("/{bookId}")
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('admin.delete')")
+    public ResponseEntity<ApiResponse<?>> deleteBook(@PathVariable String bookId){
+        bookService.deleteBook(bookId);
+        return ResponseEntity.noContent().build();
+    }
+}

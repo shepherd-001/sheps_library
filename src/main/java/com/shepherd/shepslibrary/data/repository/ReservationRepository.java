@@ -26,6 +26,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, String
 
     @Modifying
     @Query("DELETE FROM Reservation r WHERE r.user.id = :userId")
-    void deleteAllByUserId(@Param("userId") String userId);
-
+    int deleteAllByUserIdReturningCount(@Param("userId") String userId);
 }

@@ -91,17 +91,15 @@ public class TokenServiceImpl implements TokenService{
             log.error("==>> Not a valid JWT token.");
             throw new ShepsTokenException("Token is invalid");
         }
-        ShepsToken shepsToken = fetchToken(token, tokenType);
+
+        ShepsToken shepsToken = tokenRepository.findShepsTokenByTokenAndTokenType(token, tokenType)
+                .orElseThrow(() -> new ShepsTokenException("Token is invalid"));
+
         validateTokenExpiration(shepsToken);
         String expectedEmail = jwtUtils.extractUsername(token);
         validateUserEmail(shepsToken.getUser().getEmail(), expectedEmail);
         log.info("==>> Token validation successful");
         return shepsToken;
-    }
-
-    private ShepsToken fetchToken(String token, TokenType tokenType) {
-        return tokenRepository.findByTokenAndTokenType(token, tokenType)
-                .orElseThrow(() -> new ShepsTokenException("Token is invalid"));
     }
 
     private void validateTokenExpiration(ShepsToken shepsToken) {

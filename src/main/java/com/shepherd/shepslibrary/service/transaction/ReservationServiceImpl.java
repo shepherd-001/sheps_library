@@ -30,6 +30,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Set;
 
+import static com.shepherd.shepslibrary.utils.ErrorMessage.RESERVATION_NOT_FOUND;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -124,24 +126,24 @@ public class ReservationServiceImpl implements ReservationService{
     @Override
     @Transactional
     @CacheEvict(value = "reservationCache", key = "#reservationId")
-    public String deleteReservation(String reservationId, String userId) {
-        int deletedCount = reservationRepository.deleteByReservationIdAndUserId(reservationId, userId);
+    public String deleteReservation(String reservationId) {
+        User user = SecurityUtils.getCurrentPrincipal().getUser();
+        int deletedCount = reservationRepository.deleteByReservationIdAndUserId(reservationId, user.getId());
         if(deletedCount > 0){
             log.info("==>> Reservation deleted successfully");
             return "Reservation deleted successfully";
         }
-        if(!reservationRepository.existsById(reservationId))
-            throw new ResourceNotFoundException(ErrorMessage.RESERVATION_NOT_FOUND);
-        throw new AuthorizationDeniedException(ErrorMessage.ACCESS_DENIED);
+        throw new ResourceNotFoundException(RESERVATION_NOT_FOUND);
     }
 
     @Override
     @Transactional
     @CacheEvict(value = "reservationCache", key = "'user:' + #userId")
-    public String deleteAllReservation(String userId) {
-        reservationRepository.deleteAllByUserId(userId);
-        log.info("==>> Deleted all users reservations");
-        return "Successfully deleted all reservations";
+    public void deleteAllReservation(String userId) {
+        int deleted = reservationRepository.deleteAllByUserIdReturningCount(userId);
+        if(deleted == 0)
+            log.warn("==>> Attempted to delete a non-existing reservation");
+        else log.info("==>> Reservation deleted successfully");
     }
 
 //    @Override

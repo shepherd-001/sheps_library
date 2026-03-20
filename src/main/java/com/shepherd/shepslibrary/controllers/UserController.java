@@ -22,16 +22,11 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse
                 .success("User registered successfully", userService.registerUser(registerRequest)));
     }
-    @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<?>> getUserById(@PathVariable String userId) {
-        return ResponseEntity.ok(ApiResponse
-                .success(userService.getUserById(userId)));
-    }
 
     @GetMapping("/all/role")
 //    @PreAuthorize("hasRole('ADMIN')")
     @PreAuthorize("hasAuthority('admin.read')")
-    public ResponseEntity<ApiResponse<?>> getAllTransactions(@RequestParam String role,
+    public ResponseEntity<ApiResponse<?>> getAllUsersByRole(@RequestParam String role,
                                                              @RequestParam(required = false, defaultValue = "1") int page,
                                                              @RequestParam(required = false, defaultValue = "10") int size,
                                                              @RequestParam(required = false) String sort,

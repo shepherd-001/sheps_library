@@ -9,7 +9,6 @@ import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 
 public interface UserService {
     RegisterUserResponse registerUser(RegisterUserRequest registerUserRequest);
-    UserResponse getUserById(String userId);
     PaginationResponse<UserResponse> getAllUsersByRole(String roleName, PaginationRequest paginationRequest);
     PaginationResponse<UserResponse> getAllUsersByStatus(boolean status, PaginationRequest paginationRequest);
 }

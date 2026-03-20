@@ -13,7 +13,9 @@ import java.util.Optional;
 
 public interface TokenRepository extends JpaRepository<ShepsToken, String> {
     @Query("select t from ShepsToken t where t.token = :token or t.refreshToken = :token and t.tokenType = :tokenType")
-    Optional<ShepsToken> findByTokenAndTokenType(String token, TokenType tokenType);
+    Optional<ShepsToken> findByTokenAndTokenType(String token, @Param("tokenType")TokenType tokenType);
+
+    Optional<ShepsToken> findShepsTokenByTokenAndTokenType(String token, TokenType tokenType);
 
     @Modifying
     @Transactional

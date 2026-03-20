@@ -9,7 +9,7 @@ public interface ReservationService {
     ReservationResponse getReservationById(String reservationId);
     PaginationResponse<ReservationResponse> getAllReservationByUserId(String userId, PaginationRequest paginationRequest);
     PaginationResponse<ReservationResponse> getAllReservations(PaginationRequest paginationRequest);
-    String deleteReservation(String reservationId, String userId);
-    String deleteAllReservation(String userId);
+    String deleteReservation(String reservationId);
+    void deleteAllReservation(String userId);
 //    void sendAvailableBooksNotification();
 }

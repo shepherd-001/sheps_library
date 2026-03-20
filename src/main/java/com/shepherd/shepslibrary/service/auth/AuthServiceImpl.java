@@ -6,6 +6,7 @@ import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.VerifyEmailRequest;
 import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
 import com.shepherd.shepslibrary.data.dto.response.EmailVerificationResponse;
+import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
@@ -68,6 +69,11 @@ public class AuthServiceImpl implements AuthService{
         User user = authenticatedUser.getUser();
         log.info("User {} authenticated successfully", user.getEmail());
         return tokenService.generateJwtTokens(user);
+    }
+
+    @Override
+    public UserResponse getAuthenticatedUser() {
+        return userMapper.mapToUserResponse(SecurityUtils.getCurrentPrincipal().getUser());
     }
 
     @Override

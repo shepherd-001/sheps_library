@@ -152,12 +152,11 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     @CacheEvict(value = "bookCache", key = "#bookId")
-    public String deleteBook(String bookId) {
-        if(!bookRepository.existsById(bookId))
-            throw new ResourceNotFoundException("Book with the provided ID not found");
-        bookRepository.deleteById(bookId);
-        log.info("==>> Book deleted by id");
-        return "Book deleted successfully";
+    public void deleteBook(String bookId) {
+        int deleted = bookRepository.deleteByIdReturningCount(bookId);
+        if(deleted == 0)
+            log.warn("==>> Attempted to delete a non-existing book");
+        else log.info("==>> Book deleted successfully");
     }
 
     @Override

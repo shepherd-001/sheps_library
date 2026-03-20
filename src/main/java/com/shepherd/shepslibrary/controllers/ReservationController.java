@@ -51,19 +51,19 @@ public class ReservationController {
                 .success(reservationService.getAllReservations(request)));
     }
 
-    @DeleteMapping("/{reservationId}/{userId}")
+    @DeleteMapping("/{reservationId}")
 //    @PreAuthorize("hasRole('MEMBER')")
     @PreAuthorize("hasAuthority('member.read')")
-    public ResponseEntity<ApiResponse<?>> deleteReservation(@PathVariable String reservationId, @PathVariable String userId){
+    public ResponseEntity<ApiResponse<?>> deleteReservation(@PathVariable String reservationId){
         return ResponseEntity.ok(ApiResponse
-                .success(reservationService.deleteReservation(reservationId, userId)));
+                .success(reservationService.deleteReservation(reservationId)));
     }
 
     @DeleteMapping("/all/{userId}")
 //    @PreAuthorize("hasRole('MEMBER')")
     @PreAuthorize("hasAuthority('member.delete')")
     public ResponseEntity<ApiResponse<?>> deleteAllReservations(@PathVariable String userId){
-        return ResponseEntity.ok(ApiResponse
-                .success(reservationService.deleteAllReservation(userId)));
+        reservationService.deleteAllReservation(userId);
+        return ResponseEntity.noContent().build();
     }
 }
