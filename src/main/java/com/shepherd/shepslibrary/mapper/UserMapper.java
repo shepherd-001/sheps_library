@@ -24,7 +24,7 @@ public interface UserMapper {
 
     EmailVerificationResponse mapToEmailVerificationResponse(User user, AuthResponse authResponse);
 
-    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "role", source = "role.name")
     UserResponse mapToUserResponse(User user);
 
 

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Set;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.MAX_BORROW_MONTHS;
 import static com.shepherd.shepslibrary.utils.AppUtils.createPageRequest;
@@ -36,6 +37,7 @@ public class TransactionServiceImpl implements TransactionService{
     private final TransactionRepository transactionRepository;
     private final BookService bookService;
     private final MailNotificationService mailNotificationService;
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "borrowDateTime", "returnDateTime");
 
     @Override
     @Transactional
@@ -123,18 +125,18 @@ public class TransactionServiceImpl implements TransactionService{
             key = "#paginationRequest.toCacheKey('user:'+userId)",
             unless = "#result == null || #result.content.isEmpty()")
     public PaginationResponse<TransactionResponse> getAllTransactionByUserId(String userId, PaginationRequest paginationRequest) {
-        Pageable pageable = AppUtils.createPageRequest(paginationRequest);
+        Pageable pageable = AppUtils.createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
         Page<Transaction> transactions = transactionRepository.findAllByUserId(userId, pageable);
         log.info("Fetched all transactions by user id");
-        return getTransactionPaginatedResponse(transactions);
+        return mapToTransactionPaginatedResponse(transactions);
     }
 
-    private PaginationResponse<TransactionResponse> getTransactionPaginatedResponse(Page<Transaction> transactions){
+    private PaginationResponse<TransactionResponse> mapToTransactionPaginatedResponse(Page<Transaction> transactions){
         return PaginationResponse.<TransactionResponse>builder()
                 .content(transactions.stream()
                         .map(this::mapToTransactionResponse)
                         .toList())
-                .page(transactions.getNumber())
+                .page(transactions.getNumber() + 1)
                 .size(transactions.getSize())
                 .numberOfElements(transactions.getNumberOfElements())
                 .totalElements(transactions.getTotalElements())
@@ -152,10 +154,10 @@ public class TransactionServiceImpl implements TransactionService{
             unless = "#result == null || #result.content.isEmpty()"
     )
     public PaginationResponse<TransactionResponse> getAllTransactions(PaginationRequest paginationRequest) {
-        Pageable pageable = createPageRequest(paginationRequest);
+        Pageable pageable = createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
         Page<Transaction> transactions = transactionRepository.findAll(pageable);
         log.info("==>> Fetched all transactions");
-        return getTransactionPaginatedResponse(transactions);
+        return mapToTransactionPaginatedResponse(transactions);
     }
 
 //    @Override

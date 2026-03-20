@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.security.SecureRandom;
+import java.util.Set;
 
 @Slf4j
 public final class AppUtils {
@@ -19,12 +20,12 @@ public final class AppUtils {
     public static final int MAX_BORROW_MONTHS = 2;
 
 
-    public static Pageable createPageRequest(PaginationRequest paginationRequest) {
+    public static Pageable createPageRequest(PaginationRequest paginationRequest, Set<String> allowedSortFields) {
 
+        String sortBy = resolvedSortBy(paginationRequest.getSort(), allowedSortFields);
         return PageRequest.of(resolvedPageNumber(paginationRequest.getPage()),
                 resolvedPageSize(paginationRequest.getSize()),
-                Sort.by(resolvedSortDirection(paginationRequest.getDirection()),
-                        resolvedSortBy(paginationRequest.getSort())));
+                Sort.by(resolvedSortDirection(paginationRequest.getDirection()), sortBy));
     }
 
     public static int resolvedPageNumber(int pageNumber){
@@ -37,10 +38,28 @@ public final class AppUtils {
                 : DEFAULT_PAGE_SIZE;
     }
 
-    public static String resolvedSortBy(String sortBy){
-        return (sortBy != null && !sortBy.isBlank())
-                ? sortBy
-                : SORT_BY_CREATED_AT;
+//    public static String resolvedSortBy(String sortBy, Set<String> allowedSortFields){
+//        if(sortBy == null || sortBy.isBlank() || allowedSortFields == null
+//                || allowedSortFields.isEmpty())
+//            return SORT_BY_CREATED_AT;
+//        String trimmed = sortBy.trim();
+//        return allowedSortFields.contains(trimmed)
+//                ? trimmed
+//                : SORT_BY_CREATED_AT;
+//    }
+
+    public static String resolvedSortBy(String sortBy, Set<String> allowedSortFields){
+        if(sortBy == null || sortBy.isBlank() || allowedSortFields == null
+                || allowedSortFields.isEmpty())
+            return SORT_BY_CREATED_AT;
+        String trimmed = sortBy.trim();
+        return allowedSortFields.stream()
+                .filter(field -> field.equalsIgnoreCase(trimmed))
+                .findFirst()
+                .orElseGet(()-> {
+                    log.warn("==>> Invalid sortBy '{}' received. Falling back to '{}'", trimmed, SORT_BY_CREATED_AT);
+                    return SORT_BY_CREATED_AT;
+                });
     }
 
     public static Sort.Direction resolvedSortDirection(String sortDirection){

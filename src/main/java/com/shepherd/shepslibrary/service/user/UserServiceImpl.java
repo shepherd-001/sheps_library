@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static com.shepherd.shepslibrary.utils.RoleUtils.MEMBER;
 
@@ -42,6 +43,7 @@ public class UserServiceImpl implements UserService {
 //    private final PasswordValidationService passwordValidationService;
     private final UserMapper userMapper;
     private final RoleService roleService;
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "firstName", "lastName", "email");
 
     @Override
     @Transactional
@@ -61,7 +63,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateRegisterRequest(RegisterUserRequest registerUserRequest) {
-        if(userRepository.existsByEmailEqualsIgnoreCase(registerUserRequest.getEmail().trim()))
+        if(userRepository.existsByEmailIgnoreCase(registerUserRequest.getEmail().trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
 //        emailValidationService.checkAndValidateEmail(registerUserRequest.getEmail());
 //        passwordValidationService.validatePasswordNotBreached(registerUserRequest.getPassword());
@@ -75,7 +77,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Cacheable(value = "userCache", key = "#userId")
     public UserResponse getUserById(String userId) {
-        log.info("::::: Fetching a user by id :::::");
+        log.info("==>> Fetching user by id");
         return userRepository.findById(userId)
                 .map(userMapper::mapToUserResponse)
                 .orElseThrow(()-> new ResourceNotFoundException("User not found"));
@@ -84,12 +86,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Cacheable(
             value = "userCache",
-            key = "#paginationRequest.toCacheKey('role:'+role)",
+            key = "#paginationRequest.toCacheKey('role:'+#role)",
             unless = "#result == null || #result.content.isEmpty()"
     )
     public PaginationResponse<UserResponse> getAllUsersByRole(String role, PaginationRequest paginationRequest) {
-        log.info("::::: Fetching all users by role {} :::::", role);
-        Pageable pageable = AppUtils.createPageRequest(paginationRequest);
+        log.info("==>> Fetching all users by role {}", role);
+        Pageable pageable = AppUtils.createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
         Page<User> users = userRepository.findAllByRoleName(role, pageable);
         return mapToPaginatedUserResponse(users);
     }
@@ -100,7 +102,7 @@ public class UserServiceImpl implements UserService {
 
         return PaginationResponse.<UserResponse>builder()
                 .content(content)
-                .page(users.getNumber())
+                .page(users.getNumber() + 1)
                 .size(users.getSize())
                 .numberOfElements(users.getNumberOfElements())
                 .totalElements(users.getTotalElements())
@@ -114,12 +116,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Cacheable(
             value = "userCache",
-            key = "#paginationRequest.toCacheKey('status:'+status)",
+            key = "#paginationRequest.toCacheKey('status:'+#status)",
             unless = "#result == null || #result.content.isEmpty()"
     )
     public PaginationResponse<UserResponse> getAllUsersByStatus(boolean status, PaginationRequest paginationRequest) {
-        log.info("::::: Fetching all users by status {} :::::", status);
-        Pageable pageable = AppUtils.createPageRequest(paginationRequest);
+        log.info("==>> Fetching all users by status {}", status);
+        Pageable pageable = AppUtils.createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
         Page<User> users = userRepository.findAllByEnabled(status, pageable);
         return mapToPaginatedUserResponse(users);
     }

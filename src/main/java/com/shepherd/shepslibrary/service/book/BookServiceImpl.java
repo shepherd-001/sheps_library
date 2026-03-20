@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.createPageRequest;
 
@@ -38,6 +39,7 @@ import static com.shepherd.shepslibrary.utils.AppUtils.createPageRequest;
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "title", "author", "genre");
 
     @Override
     public AddBookResponse addBook(AddBookRequest request) {
@@ -107,7 +109,7 @@ public class BookServiceImpl implements BookService {
             unless = "#result == null || #result.content.isEmpty()"
     )
     public PaginationResponse<BookResponse> getAllBooks(PaginationRequest paginationRequest) {
-        Pageable pageable = createPageRequest(paginationRequest);
+        Pageable pageable = createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
         Page<Book> books = bookRepository.findAll(pageable);
         log.info("==>> All books fetched");
         return mapToPaginatedBookResponse(books);
@@ -118,7 +120,7 @@ public class BookServiceImpl implements BookService {
                 books.stream().map(bookMapper::mapToBookResponse).toList();
         return PaginationResponse.<BookResponse>builder()
                 .content(content)
-                .page(books.getNumber())
+                .page(books.getNumber() + 1)
                 .size(books.getSize())
                 .numberOfElements(books.getNumberOfElements())
                 .totalElements(books.getTotalElements())
@@ -134,7 +136,7 @@ public class BookServiceImpl implements BookService {
             key = "#paginationRequest.toCacheKey('filter:title:'+#request.title+':author:'+#request.author+':genre:'+#request.genre)",
             unless = "#result == null || #result.content.isEmpty()")
     public PaginationResponse<BookResponse> filterBook(FilterBookRequest request, PaginationRequest paginationRequest) {
-        Pageable pageable = createPageRequest(paginationRequest);
+        Pageable pageable = createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
         Specification<Book> bookSpecification = Specification.where(
                 BookSpecification.hasTitle(request.getTitle()))
                 .and(BookSpecification.hasAuthor(request.getAuthor()))

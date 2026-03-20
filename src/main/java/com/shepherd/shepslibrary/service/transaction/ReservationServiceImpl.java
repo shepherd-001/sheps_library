@@ -28,6 +28,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,7 @@ public class ReservationServiceImpl implements ReservationService{
     private final ReservationRepository reservationRepository;
     private final MailNotificationService mailNotificationService;
     private final ReservationMapper reservationMapper;
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "reservationDateTime");
 
     @Override
     public ReservationResponse reserveBook(String bookId) {
@@ -84,7 +86,7 @@ public class ReservationServiceImpl implements ReservationService{
             key = "#paginationRequest.toCacheKey('user:'+userId)",
             unless = "#result == null || #result.content.isEmpty()")
     public PaginationResponse<ReservationResponse> getAllReservationByUserId(String userId, PaginationRequest paginationRequest) {
-        Pageable pageable = AppUtils.createPageRequest(paginationRequest);
+        Pageable pageable = AppUtils.createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
         Page<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageable);
         log.info("==>> Fetched all user reservations");
         return paginatedReservationResponse(reservations);
@@ -95,7 +97,7 @@ public class ReservationServiceImpl implements ReservationService{
                 .content(reservations.stream()
                         .map(reservationMapper::mapToReservationResponse)
                         .toList())
-                .page(reservations.getNumber())
+                .page(reservations.getNumber() + 1)
                 .size(reservations.getSize())
                 .numberOfElements(reservations.getNumberOfElements())
                 .totalElements(reservations.getTotalElements())
@@ -113,7 +115,7 @@ public class ReservationServiceImpl implements ReservationService{
             unless = "#result == null || #result.content.isEmpty()"
     )
     public PaginationResponse<ReservationResponse> getAllReservations(PaginationRequest paginationRequest) {
-        Pageable pageable = AppUtils.createPageRequest(paginationRequest);
+        Pageable pageable = AppUtils.createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
         Page<Reservation> reservations = reservationRepository.findAll(pageable);
         log.info("==>> Fetched all reservations");
         return paginatedReservationResponse(reservations);

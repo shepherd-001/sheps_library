@@ -14,5 +14,5 @@ public class UserResponse {
     private Gender gender;
     private String role;
     private boolean enabled;
-    private boolean revoked;
+    private boolean emailVerified;
 }

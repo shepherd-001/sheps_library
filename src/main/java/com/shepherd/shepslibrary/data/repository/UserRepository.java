@@ -10,14 +10,14 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, String> {
-    boolean existsByEmailEqualsIgnoreCase(String email);
+    boolean existsByEmailIgnoreCase(String email);
     boolean existsByRoleName(String roleName);
 
     // this is to fetch the user role eagerly only during authentication
     @Query("SELECT u FROM User u JOIN FETCH u.role WHERE u.email = :email")
-    Optional<User> findByEmailEqualsIgnoreCaseWithRole(@Param("email") String email);
+    Optional<User> findByEmailIgnoreCaseWithRole(@Param("email") String email);
 
-    Optional<User> findByEmailEqualsIgnoreCase(String email);
+    Optional<User> findByEmailIgnoreCase(String email);
     Page<User> findAllByRoleName(String roleName, Pageable pageable);
     Page<User> findAllByEnabled(boolean enabled, Pageable pageable);
 }

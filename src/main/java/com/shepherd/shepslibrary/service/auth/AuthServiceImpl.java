@@ -96,7 +96,7 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public String requestPasswordReset(String email) {
-        userRepository.findByEmailEqualsIgnoreCase(email.trim())
+        userRepository.findByEmailIgnoreCase(email.trim())
                 .filter(User::isEnabled)
                 .ifPresent(this::sendPasswordResetToken);
         return "If the email exists, a reset password link has been sent to your email address";

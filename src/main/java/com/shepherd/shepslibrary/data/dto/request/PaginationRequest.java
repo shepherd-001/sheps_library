@@ -19,12 +19,15 @@ public class PaginationRequest {
 
 
     public String toCacheKey(String prefix) {
+        String sortField = (sort == null || sort.isBlank())
+                ? SORT_BY_CREATED_AT
+                : sort.trim();
         return String.format(
                 "%s:page:%d:size:%s:sort:%s:%s",
                 prefix,
                 resolvedPageNumber(page),
                 resolvedPageSize(size),
-                resolvedSortBy(sort),
+                sortField,
                 resolvedSortDirection(direction)
         );
     }

@@ -71,7 +71,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public InviteLibrarianResponse inviteLibrarian(InviteLibrarianRequest request) {
-        if(userRepository.existsByEmailEqualsIgnoreCase(request.getEmail().trim()))
+        if(userRepository.existsByEmailIgnoreCase(request.getEmail().trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
 //        emailValidationService.checkAndValidateEmail(request.getEmail());
 
@@ -95,7 +95,7 @@ public class AdminServiceImpl implements AdminService {
 //    @Transactional
     public String resendInvite(String inviteeEmail) {
         log.info("Initiating resend invitation for email: {}", inviteeEmail);
-        return userRepository.findByEmailEqualsIgnoreCase(inviteeEmail.trim())
+        return userRepository.findByEmailIgnoreCase(inviteeEmail.trim())
                 .map(this::handleResendInvite)
                 .orElseThrow(
                         ()-> new ResourceNotFoundException("User not found. Invitation not resent"));
