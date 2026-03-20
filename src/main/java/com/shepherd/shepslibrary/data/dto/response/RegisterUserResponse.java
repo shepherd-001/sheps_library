@@ -15,5 +15,5 @@ public class RegisterUserResponse {
     private String email;
     private Gender gender;
     private boolean enabled;
-    private boolean revoked;
+    private boolean emailVerified;
 }

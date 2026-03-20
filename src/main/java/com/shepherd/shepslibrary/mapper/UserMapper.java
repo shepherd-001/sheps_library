@@ -22,7 +22,7 @@ public interface UserMapper {
     @Mapping(target = "userId", source = "user.id")
     RegisterUserResponse mapToRegisterResponse(User user);
 
-    EmailVerificationResponse mapToVerifyEmailResponse(User user, AuthResponse authResponse);
+    EmailVerificationResponse mapToEmailVerificationResponse(User user, AuthResponse authResponse);
 
     @Mapping(target = "role", ignore = true)
     UserResponse mapToUserResponse(User user);

@@ -67,7 +67,7 @@ public class BookController {
         return ResponseEntity.ok(ApiResponse.success(bookService.getAllBooks(paginationRequest)));
     }
 
-    @GetMapping("")
+    @GetMapping("/filter")
     @PreAuthorize("hasAnyAuthority('admin.read', 'librarian.read', 'member.read')")
 
     public ResponseEntity<ApiResponse<?>> filterBook(@RequestParam(required = false) String title,

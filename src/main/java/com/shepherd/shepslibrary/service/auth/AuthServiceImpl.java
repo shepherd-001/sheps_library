@@ -57,7 +57,7 @@ public class AuthServiceImpl implements AuthService{
         userRepository.save(user);
         tokenService.deleteToken(shepsToken);
 
-        return userMapper.mapToVerifyEmailResponse(user, tokenService.generateJwtTokens(user));
+        return userMapper.mapToEmailVerificationResponse(user, tokenService.generateJwtTokens(user));
     }
 
     @Override

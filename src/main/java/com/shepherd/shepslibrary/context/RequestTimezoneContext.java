@@ -5,42 +5,63 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
 import java.time.ZoneId;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+//
+//@Component
+//@RequestScope
+//@Slf4j
+//public class RequestTimezoneContext {
+//    private static final ZoneId DEFAULT_ZONE = ZoneId.of("UTC");
+//    private static final ThreadLocal<ZoneId> ZONE = new ThreadLocal<>();
+//
+//
+//    public ZoneId getZoneId(){
+//        ZoneId zone = ZONE.get();
+//        return zone != null ? zone : DEFAULT_ZONE;
+//    }
+//
+//    public void setZoneId(String zoneIdStr){
+//        if(zoneIdStr == null || zoneIdStr.isBlank()){
+//            ZONE.set(DEFAULT_ZONE);
+//            return;
+//        }
+//        try{
+//            ZONE.set(ZoneId.of(zoneIdStr));
+//        }catch (Exception exception){
+//            ZONE.set(DEFAULT_ZONE);
+//        }
+//    }
+//
+//    public void clear(){
+//        ZONE.remove();
+//    }
+//}
+
 
 @Component
 @RequestScope
-@Slf4j
 public class RequestTimezoneContext {
+
     private static final ZoneId DEFAULT_ZONE = ZoneId.of("UTC");
-//    Global cache of valid ZoneIds to reduce parsing overhead
-    private static final Map<String, ZoneId> ZONE_CACHE = new ConcurrentHashMap<>();
+
     private ZoneId zoneId = DEFAULT_ZONE;
 
-
-//    Get the current request's ZoneId (defaults to UTC)
     public ZoneId getZoneId() {
         return zoneId;
     }
 
-//    Set ZoneId directly
-    public void setZoneId(ZoneId zoneId) {
-        this.zoneId = (zoneId != null) ? zoneId  : DEFAULT_ZONE;
-    }
-
-//    Parse and set ZoneId from a String, using global cache
-    public void setZoneId(String  zoneIdStr) {
-        if(zoneIdStr == null || zoneIdStr.isBlank()) {
+    public void setZoneId(String zoneIdStr) {
+        if (zoneIdStr == null || zoneIdStr.isBlank()) {
             this.zoneId = DEFAULT_ZONE;
             return;
         }
-        this.zoneId = ZONE_CACHE.computeIfAbsent(zoneIdStr, id ->{
-            try{
-                return ZoneId.of(id);
-            }catch(Exception e){
-                log.warn("Invalid time zone '{}', defaulting to UTC", id);
-                return DEFAULT_ZONE;
-            }
-        });
+        try {
+            this.zoneId = ZoneId.of(zoneIdStr);
+        } catch (Exception e) {
+            this.zoneId = DEFAULT_ZONE;
+        }
+    }
+
+    public void clear() {
+        this.zoneId = DEFAULT_ZONE;
     }
 }
