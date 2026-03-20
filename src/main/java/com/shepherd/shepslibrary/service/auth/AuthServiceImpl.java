@@ -44,7 +44,7 @@ public class AuthServiceImpl implements AuthService{
     @Override
     @Transactional
     public EmailVerificationResponse verifyEmail(VerifyEmailRequest request) {
-        ShepsToken shepsToken = tokenService.validateToken(request.getToken(), TokenType.EMAIL_CONFIRMATION, request.getEmail());
+        ShepsToken shepsToken = tokenService.validateToken(request.getToken(), TokenType.EMAIL_CONFIRMATION);
         User user = shepsToken.getUser();
 
         if(user.isEmailVerified())
@@ -112,7 +112,7 @@ public class AuthServiceImpl implements AuthService{
     @Transactional
     public AuthResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
         ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.getToken(),
-                TokenType.RESET_PASSWORD, resetPasswordRequest.getEmail());
+                TokenType.RESET_PASSWORD);
 //        passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
         User user = shepsToken.getUser();
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));

@@ -14,9 +14,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CreatePasswordRequest {
-    @NotBlank(message = ValidationMessage.BLANK_EMAIL)
-    @Pattern(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
-    private String email;
+//    @NotBlank(message = ValidationMessage.BLANK_EMAIL)
+//    @Pattern(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
+//    private String email;
 
     @NotBlank(message = ValidationMessage.BLANK_TOKEN)
     private String token;

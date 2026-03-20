@@ -5,6 +5,12 @@ logging:
   level:
     org.springframework.web: INFO
 
+springdoc:
+  api-docs:
+    enabled: ${ENABLE_SPRING_DOC}
+  swagger-ui:
+    enabled: ${ENABLE_SWAGGER_UI}
+
 spring:
   application:
     name: ShepsLibrary
@@ -44,9 +50,9 @@ spring:
             enable: true
             required: true
           from: ${MAIL_FROM_EMAIL}
-          connectiontimeout: 10000
-          timeout: 10000
-          writetimeout: 10000
+          connectiontimeout: 20000
+          timeout: 20000
+          writetimeout: 20000
   web:
     resources:
       add-mappings: false

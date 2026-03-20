@@ -49,7 +49,6 @@ public class TokenServiceImpl implements TokenService{
     @Transactional
     public String generateToken(User user, TokenType tokenType) {
         long expirationTimeInSeconds = getExpirationTime(tokenType);
-        log.info("Initiating the creation of a new {} token", tokenType);
         String token = jwtUtils.generateAccessToken(user, expirationTimeInSeconds);
         ShepsToken shepsToken = ShepsToken.builder()
                 .user(user)
@@ -62,7 +61,7 @@ public class TokenServiceImpl implements TokenService{
 
          revokeAllUserTokens(user.getId(), tokenType);
         tokenRepository.save(shepsToken);
-        log.info("Created a new {} token", tokenType);
+        log.info("==>> Created a new {} token for user {}", tokenType, user.getEmail());
         return token;
     }
 
@@ -87,11 +86,16 @@ public class TokenServiceImpl implements TokenService{
     }
 
     @Override
-    public ShepsToken validateToken(String token, TokenType tokenType, String expectedEmail) {
+    public ShepsToken validateToken(String token, TokenType tokenType) {
+        if (!jwtUtils.isValidToken(token)){
+            log.error("==>> Not a valid JWT token.");
+            throw new ShepsTokenException("Token is invalid");
+        }
         ShepsToken shepsToken = fetchToken(token, tokenType);
         validateTokenExpiration(shepsToken);
+        String expectedEmail = jwtUtils.extractUsername(token);
         validateUserEmail(shepsToken.getUser().getEmail(), expectedEmail);
-        log.info("Token validation successful");
+        log.info("==>> Token validation successful");
         return shepsToken;
     }
 
@@ -101,20 +105,16 @@ public class TokenServiceImpl implements TokenService{
     }
 
     private void validateTokenExpiration(ShepsToken shepsToken) {
-        if (shepsToken.getExpirationTime() == null) {
-            log.error("Token expiration time is null");
-            throw new ShepsTokenException("Invalid token");
-        }
-        if (shepsToken.getExpirationTime().isBefore(Instant.now())) {
-            log.info("Token is expired");
+        if(shepsToken.getExpirationTime() != null &&
+                shepsToken.getExpirationTime().isBefore(Instant.now())){
             throw new ShepsTokenException("Token is expired");
         }
     }
 
-    private void validateUserEmail(String userEmail, String expectedEmail) {
-        if (!userEmail.trim().equals(expectedEmail.trim())){
-            log.error("User email '{}' doesn't match the expected email '{}'",  userEmail, expectedEmail);
-            throw new ShepsTokenException("Error validation token");
+    private void validateUserEmail(String actualEmail, String expectedEmail) {
+        if (!actualEmail.equalsIgnoreCase(expectedEmail)) {
+            log.error("==>> Token validation failed: email mismatch");
+            throw new ShepsTokenException("Token is invalid");
         }
     }
 
@@ -128,7 +128,7 @@ public class TokenServiceImpl implements TokenService{
     @Override
     public void revokeAllUserTokens(String userId, TokenType tokenType) {
         int revoked = tokenRepository.revokeAllTokensForUser(userId, tokenType);
-        log.info("Revoked {} tokens", revoked);
+        log.info("==>> Revoked {} tokens", revoked);
     }
 
     @Scheduled(cron = "0 0 9 * * ?")

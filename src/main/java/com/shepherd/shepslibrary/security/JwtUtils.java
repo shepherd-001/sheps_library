@@ -95,6 +95,11 @@ public class JwtUtils {
                 && expiration.isAfter(now);
     }
 
+    public boolean isValidToken(String token){
+        Claims claims = extractAllClaims(token);
+        return claims.getExpiration().toInstant().isAfter(Instant.now());
+    }
+
     public void validateRefreshToken(String refreshToken){
         Claims claims = extractAllClaims(refreshToken);
 

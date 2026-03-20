@@ -30,7 +30,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Cacheable(value = "roles", key = "#name.toUpperCase()")
     public UserRole getRole(String name){
-        log.info("Loading role '{}' from DB", name);
+        log.info("==>> Loading role '{}' from DB", name);
         return userRoleRepository.findByNameEqualsIgnoreCase(name).orElseThrow(
                 ()-> new ResourceNotFoundException("Role not found"));
     }
@@ -41,7 +41,7 @@ public class RoleServiceImpl implements RoleService {
         if(userRoleRepository.existsByNameEqualsIgnoreCase(name))
             throw new AlreadyExistsException(String.format("Role '%s' already exists", name));
 
-        log.info("Added role '{}'", name);
+        log.info("==>> Added role '{}'", name);
         return userRoleRepository.save(UserRole.builder()
                         .name(name.toUpperCase())
                 .build());
@@ -52,7 +52,7 @@ public class RoleServiceImpl implements RoleService {
     public void deleteRole(String name){
         UserRole role = getRole(name);
         userRoleRepository.delete(role);
-        log.info("Deleted role '{}'", name);
+        log.info("==>> Deleted role '{}'", name);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class RoleServiceImpl implements RoleService {
 
         role.setPermissions(permissions);
         UserRole updatedRole = userRoleRepository.save(role);
-        log.info("Assigned {} permissions to role '{}'", permissions.size(), role.getName());
+        log.info("==>> Assigned {} permissions to role '{}'", permissions.size(), role.getName());
         return updatedRole;
     }
 

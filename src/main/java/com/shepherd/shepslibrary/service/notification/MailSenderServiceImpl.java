@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
@@ -27,11 +26,8 @@ public class MailSenderServiceImpl implements MailSenderService {
 
 
     @Override
-    @Async
     public void sendEmail(String to, String subject, String htmlContent) {
         try {
-            log.info("::::: Initiating send email notification to {} :::::", to);
-
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 
@@ -48,4 +44,3 @@ public class MailSenderServiceImpl implements MailSenderService {
         }
     }
 }
-
