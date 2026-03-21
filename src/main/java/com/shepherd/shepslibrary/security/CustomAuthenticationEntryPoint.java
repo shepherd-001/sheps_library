@@ -31,11 +31,11 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         String requestURI = request.getRequestURI();
 
         if(response.isCommitted()){
-            log.warn("Response already commited for unauthorized request: {}", requestURI);
+            log.warn("==>> Response already commited for unauthorized request: {}", requestURI);
             return;
         }
 
-        log.warn("Unauthorized access attempt: {} | Reason: {}", requestURI, authException.getMessage());
+        log.warn("==>> Unauthorized access attempt: {} | Reason: {}", requestURI, authException.getMessage());
 
         prepareUnauthorizedResponse(request, response);
     }
@@ -50,7 +50,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         try (PrintWriter writer = response.getWriter()) {
             objectMapper.writeValue(writer, errorResponse);
         } catch (Exception ex) {
-            log.error("Failed to write unauthorized response", ex);
+            log.error("==>> Failed to write unauthorized response", ex);
         }
     }
 }

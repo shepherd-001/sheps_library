@@ -7,6 +7,7 @@ import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomize
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import tools.jackson.databind.module.SimpleModule;
+
 import java.time.Instant;
 
 
@@ -16,8 +17,6 @@ public class JacksonConfig {
     @Bean
     public JsonMapperBuilderCustomizer timezoneCustomizer() {
         return builder -> {
-            System.out.println("==>> Applying timezone customizers to JsonMapper");
-
             SimpleModule module = new SimpleModule("timezone-module");
             module.addSerializer(Instant.class, new InstantToUserZoneSerializer());
             module.addDeserializer(Instant.class, new InstantDeserializerWithTimezone());
