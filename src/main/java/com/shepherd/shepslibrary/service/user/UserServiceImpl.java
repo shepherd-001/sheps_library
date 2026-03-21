@@ -11,7 +11,6 @@ import com.shepherd.shepslibrary.data.model.UserRole;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
-import com.shepherd.shepslibrary.security.SecurityUtils;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
 import com.shepherd.shepslibrary.service.userRoleAndPermission.role.RoleService;

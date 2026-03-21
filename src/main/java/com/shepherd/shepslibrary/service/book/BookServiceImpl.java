@@ -106,7 +106,7 @@ public class BookServiceImpl implements BookService {
     @Cacheable(
             value = "bookCache",
             key = "#paginationRequest.toCacheKey('books')",
-            unless = "#result == null || #result.content.isEmpty()"
+            unless = "#result == null || #result.content.isEmpty() ||  #paginationRequest.page > 5"
     )
     public PaginationResponse<BookResponse> getAllBooks(PaginationRequest paginationRequest) {
         Pageable pageable = createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
@@ -133,19 +133,20 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Cacheable(value = "bookCache",
-            key = "#paginationRequest.toCacheKey('filter:title:'+#request.title+':author:'+#request.author+':genre:'+#request.genre)",
-            unless = "#result == null || #result.content.isEmpty()")
-    public PaginationResponse<BookResponse> filterBook(FilterBookRequest request, PaginationRequest paginationRequest) {
+            key = "#paginationRequest.toCacheKey('filter:title:'+#filterBookRequest.title+" +
+                    "':author:'+#filterBookRequest.author+':genre:'+#filterBookRequest.genre)",
+            unless = "#result == null || #result.content.isEmpty() || #paginationRequest.page > 5")
+    public PaginationResponse<BookResponse> filterBook(FilterBookRequest filterBookRequest, PaginationRequest paginationRequest) {
         Pageable pageable = createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
         Specification<Book> bookSpecification = Specification.where(
-                BookSpecification.hasTitle(request.getTitle()))
-                .and(BookSpecification.hasAuthor(request.getAuthor()))
-                .and(BookSpecification.hasGenre(request.getGenre()));
+                BookSpecification.hasTitle(filterBookRequest.getTitle()))
+                .and(BookSpecification.hasAuthor(filterBookRequest.getAuthor()))
+                .and(BookSpecification.hasGenre(filterBookRequest.getGenre()));
         Page<Book> books = bookRepository.findAll(bookSpecification, pageable);
         log.info("Books filtered successfully with title={}, author={}, genre={}",
-                request.getTitle(),
-                request.getAuthor(),
-                request.getGenre());
+                filterBookRequest.getTitle(),
+                filterBookRequest.getAuthor(),
+                filterBookRequest.getGenre());
         return mapToPaginatedBookResponse(books);
     }
 

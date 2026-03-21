@@ -44,7 +44,6 @@ public class GlobalExceptionHandler {
             UserAlreadyEnabledException.class,
             TransactionException.class,
             ReservationException.class,
-
     })
     public ResponseEntity<ApiResponse<?>> handleBadRequest(Exception ex, HttpServletRequest request){
         return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage(), request));

@@ -1,7 +1,9 @@
 package com.shepherd.shepslibrary.utils;
 
 public final class RegexPattern {
-    public static final String EMAIL = "^\\s*(?=.{1,254}$)(?!.*\\.\\.)(?!.*@.*@)(?!.*[_%+\\-]{2,})([a-zA-Z0-9](?:[a-zA-Z0-9._%+\\-]*[a-zA-Z0-9])?)@([a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)\\.([a-zA-Z]{2,24})\\s*$";
+    public static final String EMAIL = "^\\s*(?=.{1,254}$)(?!.*\\.\\.)(?!.*@.*@)(?!.*[_%+\\-]{2,})([a-zA-Z0-9](?:[a-zA-Z0-9._%+\\-]*[a-zA-Z0-9])?)@" +
+            "([a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)(\\.[a-zA-Z0-9-]+)*\\.([a-zA-Z]{2,24})\\s*$";
+    //    public static final String EMAIL = "^\\s*(?=.{1,254}$)(?!.*\\.\\.)(?!.*@.*@)(?!.*[_%+\\-]{2,})([a-zA-Z0-9](?:[a-zA-Z0-9._%+\\-]*[a-zA-Z0-9])?)@([a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)\\.([a-zA-Z]{2,24})\\s*$";
 //    public static final String PASSWORD = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*().?]).{8,20}$";
     public static final String PASSWORD = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,20}$";
 
