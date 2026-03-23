@@ -119,7 +119,7 @@ public class TokenServiceImpl implements TokenService{
     @Override
     public void deleteToken(ShepsToken shepsToken) {
         tokenRepository.delete(shepsToken);
-        log.info("Deleted a token");
+        log.info("==>> Deleted a token");
     }
 
 
@@ -134,6 +134,6 @@ public class TokenServiceImpl implements TokenService{
     public void deleteExpiredAndRevokedTokens() {
         Instant cutoff = Instant.now().minus(1, ChronoUnit.DAYS);
         int deleted = tokenRepository.deleteAllRevokedOrExpiredTokensOlderThan(cutoff);
-        log.info("Deleted {} revoked/expired tokens older than 1 day(s)", deleted);
+        log.info("==>> Deleted {} revoked/expired tokens older than 1 day(s)", deleted);
     }
 }

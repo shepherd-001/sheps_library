@@ -53,9 +53,9 @@ spring:
           connectiontimeout: 20000
           timeout: 20000
           writetimeout: 20000
-  web:
-    resources:
-      add-mappings: false
+#  web:
+#    resources:
+#      add-mappings: false
 #        debug: true
 
 executor:
@@ -101,32 +101,32 @@ app:
       - http://localhost:3000
       - https://shep-blog.app
 
-audit:
-  enabled: true
-  excluded-paths:
-    - "/actuator/"
-    - "/health"
-    - "/swagger"
-    - "/static/"
-    - "/css/"
-  max-body-bytes: 4096
-  max-response-bytes: 1024
-  capture-body-for-methods:
-    - POST
-    - PUT
-    - PATCH
-
-  queue-capacity: 10000
-  batch-size: 200
-  flush-interval-ms: 2000
-  drop-on-full: false
-  retention-days: 90
-  consumer-threads: 1
-  db-retry-backoff: 2s
-  enqueue-offer-timeout-ms: 200
-  enable-persistent-fallback: true
-  fallback-directory: audit-fallback
-  max-write-retries: 5
-  consumer-retry-initial-backoff: 1s
-  consumer-retry-max-backoff: 30s
-  enable-metrics: true
+#audit:
+#  enabled: true
+#  excluded-paths:
+#    - "/actuator/"
+#    - "/health"
+#    - "/swagger"
+#    - "/static/"
+#    - "/css/"
+#  max-body-bytes: 4096
+#  max-response-bytes: 1024
+#  capture-body-for-methods:
+#    - POST
+#    - PUT
+#    - PATCH
+#
+#  queue-capacity: 10000
+#  batch-size: 200
+#  flush-interval-ms: 2000
+#  drop-on-full: false
+#  retention-days: 90
+#  consumer-threads: 1
+#  db-retry-backoff: 2s
+#  enqueue-offer-timeout-ms: 200
+#  enable-persistent-fallback: true
+#  fallback-directory: audit-fallback
+#  max-write-retries: 5
+#  consumer-retry-initial-backoff: 1s
+#  consumer-retry-max-backoff: 30s
+#  enable-metrics: true

@@ -132,7 +132,7 @@ class MailAsyncExecutor{
     @Recover
     public void recover(MailException ex, String templateName, String subject,
                         String email, Map<String, Object> variables){
-        log.error("Email sending permanently failed after retires. Template: {}, Email: {}",
+        log.error("==>> Email sending permanently failed after retires. Template: {}, Email: {}",
                 templateName,
                 email,
                 ex);
