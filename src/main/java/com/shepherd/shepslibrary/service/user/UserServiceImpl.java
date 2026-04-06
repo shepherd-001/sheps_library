@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
         UserRole role = roleService.getRole(MEMBER);
 
         User user = userMapper.mapToUser(registerUserRequest);
-        user.setPassword(passwordEncoder.encode(registerUserRequest.getPassword()));
+        user.setPassword(passwordEncoder.encode(registerUserRequest.password()));
         user.setRole(role);
 
         user = userRepository.save(user);
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateRegisterRequest(RegisterUserRequest registerUserRequest) {
-        if(userRepository.existsByEmailIgnoreCase(registerUserRequest.getEmail().trim()))
+        if(userRepository.existsByEmailIgnoreCase(registerUserRequest.email().trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
 //        emailValidationService.checkAndValidateEmail(registerUserRequest.getEmail());
 //        passwordValidationService.validatePasswordNotBreached(registerUserRequest.getPassword());

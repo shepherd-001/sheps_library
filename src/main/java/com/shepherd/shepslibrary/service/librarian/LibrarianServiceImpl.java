@@ -25,13 +25,13 @@ public class LibrarianServiceImpl implements LibrarianService{
 
     @Override
     public AuthResponse createPassword(CreatePasswordRequest request) {
-        ShepsToken shepsToken = tokenService.validateToken(request.getToken(), TokenType.LIBRARIAN_INVITATION);
+        ShepsToken shepsToken = tokenService.validateToken(request.token(), TokenType.LIBRARIAN_INVITATION);
 //        passwordValidationService.validatePasswordNotBreached(request.getPassword());
         User user = shepsToken.getUser();
         if(!user.isEnabled() && user.getPassword() != null)
             throw new UserAlreadyEnabledException("User already created a password");
         user.setEnabled(true);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(passwordEncoder.encode(request.token()));
         userRepository.save(user);
         tokenService.deleteToken(shepsToken);
         return tokenService.generateJwtTokens(user);

@@ -3,21 +3,11 @@ package com.shepherd.shepslibrary.data.dto.request;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.constraints.NotBlank;
 
-//@AllArgsConstructor
-//@NoArgsConstructor
-//@Getter
-//@Setter
-//public class VerifyEmailRequest {
-////    @Pattern(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
-////    @NotBlank(message = ValidationMessage.BLANK_EMAIL)
-////    private String email;
-//
-//    @NotBlank(message = ValidationMessage.BLANK_TOKEN)
-//    private String token;
-//}
-
-
 public record VerifyEmailRequest(
+//    @Pattern(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
+//    @NotBlank(message = ValidationMessage.BLANK_EMAIL)
+//    String email,
+
     @NotBlank(message = ValidationMessage.BLANK_TOKEN)
     String token
 ){}

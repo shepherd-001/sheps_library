@@ -45,9 +45,9 @@ public class TransactionServiceImpl implements TransactionService{
     @Transactional
     public TransactionResponse borrowBook(BorrowBookRequest request, AuthenticatedUser authenticatedUser) {
         User user = authenticatedUser.getUser();
-        Book book = bookService.fetchBookById(request.getBookId());
+        Book book = bookService.fetchBookById(request.bookId());
         checkIfBookIsAvailable(book);
-        validateReturnDateTime(request.getReturnDateTime());
+        validateReturnDateTime(request.returnDateTime());
         book.setAvailable(false);
         Book savedBook = bookService.saveBook(book);
 
@@ -56,7 +56,7 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.setUser(user);
         transaction.setBook(savedBook);
         transaction.setBorrowDateTime(Instant.now());
-        transaction.setReturnDateTime(request.getReturnDateTime());
+        transaction.setReturnDateTime(request.returnDateTime());
         Transaction savedTransaction = transactionRepository.save(transaction);
         log.info("==>> Book borrowed successfully");
         return transactionMapper.mapToResponse(savedTransaction);

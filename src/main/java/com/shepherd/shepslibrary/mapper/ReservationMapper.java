@@ -8,9 +8,8 @@ import org.mapstruct.Mapping;
 @Mapper(config = CentralConfig.class)
 public interface ReservationMapper {
 
-    @Mapping(target = "userId", source = "reservation.user.id")
-    @Mapping(target = "reservationId", source = "reservation.id")
-    @Mapping(target = "bookId", source = "reservation.book.id")
-    @Mapping(target = "reservationDate", source = "reservation.reservationDateTime")
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "bookId", source = "book.id")
+    @Mapping(target = "reservationDate", source = "reservationDateTime")
     ReservationResponse mapToReservationResponse(Reservation reservation);
 }

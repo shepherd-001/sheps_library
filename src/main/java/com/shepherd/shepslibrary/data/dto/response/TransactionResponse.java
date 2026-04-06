@@ -1,21 +1,17 @@
 package com.shepherd.shepslibrary.data.dto.response;
 
 import com.shepherd.shepslibrary.data.model.TransactionType;
-import lombok.Builder;
-import lombok.Getter;
 
 import java.time.Instant;
 
-@Builder
-@Getter
-public class TransactionResponse {
-    private String id;
-    private TransactionType type;
-    private String firstName;
-    private String lastName;
-    private String title;
-    private String author;
-    private String genre;
-    private Instant borrowedDateTime;
-    private Instant returnDateTime;
-}
+public record TransactionResponse(
+        String id,
+        TransactionType type,
+        String firstName,
+        String lastName,
+        String title,
+        String author,
+        String genre,
+        Instant borrowedDateTime,
+        Instant returnDateTime
+) {}

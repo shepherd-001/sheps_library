@@ -76,7 +76,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public InviteLibrarianResponse inviteLibrarian(InviteLibrarianRequest request) {
-        if(userRepository.existsByEmailIgnoreCase(request.getEmail().trim()))
+        if(userRepository.existsByEmailIgnoreCase(request.email().trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
 //        emailValidationService.checkAndValidateEmail(request.getEmail());
 
@@ -107,7 +107,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public String addRole(AddRoleRequest request) {
-        roleService.addRole(request.getName());
+        roleService.addRole(request.name());
         return "Role added successfully";
     }
 
@@ -119,7 +119,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public UserRole assignPermissionsToRole(AssignPermissionRequest request) {
-        return roleService.assignPermissionsToRole(request.getRoleName(), request.getPermissionNames());
+        return roleService.assignPermissionsToRole(request.roleName(), request.permissionNames());
     }
 
     private String handleResendInvite(User user) {

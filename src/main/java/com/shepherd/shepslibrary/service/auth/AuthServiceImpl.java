@@ -80,7 +80,7 @@ public class AuthServiceImpl implements AuthService{
     public AuthResponse changePassword(ChangePasswordRequest changePasswordRequest, AuthenticatedUser authenticatedUser) {
         User user = authenticatedUser.getUser();
         validatePasswordChange(user.getPassword(), changePasswordRequest);
-        user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.newPassword()));
         user.setTokenVersion(user.getTokenVersion() +1); // this invalidates all existing tokens
         userRepository.save(user);
         log.info("==>> Password changed successfully");
@@ -89,13 +89,13 @@ public class AuthServiceImpl implements AuthService{
 //
 
     private void validatePasswordChange(String currentEncodedPassword, ChangePasswordRequest request) {
-        if (!passwordEncoder.matches(request.getCurrentPassword(), currentEncodedPassword))
+        if (!passwordEncoder.matches(request.newPassword(), currentEncodedPassword))
             throw new BadCredentialsException(INVALID_CURRENT_PASSWORD);
 
-        if (request.getCurrentPassword().equals(request.getNewPassword()))
+        if (request.currentPassword().equals(request.newPassword()))
             throw new BadCredentialsException(SAME_OLD_AND_NEW_PASSWORD);
 
-        if (!request.getNewPassword().equals(request.getConfirmPassword()))
+        if (!request.newPassword().equals(request.confirmPassword()))
             throw new BadCredentialsException(MISMATCH_PASSWORD);
 
 //        passwordValidationService.validatePasswordNotBreached(request.getNewPassword());
@@ -118,11 +118,11 @@ public class AuthServiceImpl implements AuthService{
     @Override
     @Transactional
     public AuthResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
-        ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.getToken(),
+        ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.token(),
                 TokenType.RESET_PASSWORD);
 //        passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
         User user = shepsToken.getUser();
-        user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
+        user.setPassword(passwordEncoder.encode(resetPasswordRequest.token()));
         tokenService.deleteToken(shepsToken);
         user.setTokenVersion(user.getTokenVersion() + 1);
         userRepository.save(user);

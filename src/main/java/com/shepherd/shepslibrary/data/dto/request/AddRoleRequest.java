@@ -5,20 +5,12 @@ import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-public class AddRoleRequest {
+public record AddRoleRequest(
     @NotBlank(message = ValidationMessage.BLANK_ROLE)
     @Pattern(message = ValidationMessage.INVALID_ROLE, regexp = RegexPattern.ROLE)
     @Size(max = 100, message = ValidationMessage.ROLE_NAME_TOO_LONG)
-    private String name;
+    String name
 
 //    permissions
-}
+){}

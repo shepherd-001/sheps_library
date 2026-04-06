@@ -1,17 +1,9 @@
 package com.shepherd.shepslibrary.data.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-public class AssignPermissionRequest {
-    private String roleName;
-    private List<String> permissionNames;
-}
+public record AssignPermissionRequest(
+        String roleName,
+
+        List<String> permissionNames
+){}

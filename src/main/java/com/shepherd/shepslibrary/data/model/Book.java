@@ -26,5 +26,5 @@ public class Book extends BaseEntity {
     private String genre;
     @Column(unique = true)
     private String isbn;
-    private boolean isAvailable;
+    private boolean available;
 }

@@ -43,11 +43,12 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public AddBookResponse addBook(AddBookRequest request) {
-        if (bookRepository.existsByTitle(request.getTitle().trim())) {
-            throw new AlreadyExistsException("Book with title '%s' already exists".formatted(request.getTitle()));
+        if (bookRepository.existsByTitle(request.title().trim())) {
+            throw new AlreadyExistsException("Book with title '%s' already exists".formatted(request.title()));
         }
 
         Book book = bookMapper.mapToBook(request);
+        book.setAvailable(true);
         Book savedBook = saveBookWithUniqueIsbn(book);
         log.info("==>> Book with title='{}' added successfully", savedBook.getTitle());
         return bookMapper.mapToAddBookResponse(savedBook);
@@ -139,14 +140,14 @@ public class BookServiceImpl implements BookService {
     public PaginationResponse<BookResponse> filterBook(FilterBookRequest filterBookRequest, PaginationRequest paginationRequest) {
         Pageable pageable = createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
         Specification<Book> bookSpecification = Specification.where(
-                BookSpecification.hasTitle(filterBookRequest.getTitle()))
-                .and(BookSpecification.hasAuthor(filterBookRequest.getAuthor()))
-                .and(BookSpecification.hasGenre(filterBookRequest.getGenre()));
+                BookSpecification.hasTitle(filterBookRequest.title()))
+                .and(BookSpecification.hasAuthor(filterBookRequest.title()))
+                .and(BookSpecification.hasGenre(filterBookRequest.genre()));
         Page<Book> books = bookRepository.findAll(bookSpecification, pageable);
         log.info("Books filtered successfully with title={}, author={}, genre={}",
-                filterBookRequest.getTitle(),
-                filterBookRequest.getAuthor(),
-                filterBookRequest.getGenre());
+                filterBookRequest.title(),
+                filterBookRequest.author(),
+                filterBookRequest.genre());
         return mapToPaginatedBookResponse(books);
     }
 

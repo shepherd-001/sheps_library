@@ -1,19 +1,15 @@
 package com.shepherd.shepslibrary.data.dto.response;
 
 import com.shepherd.shepslibrary.data.model.Gender;
-import lombok.Builder;
-import lombok.Getter;
 
 import java.util.UUID;
 
-@Builder
-@Getter
-public class InviteLibrarianResponse {
-    private UUID id;
-    private String email;
-    private String firstName;
-    private String lastName;
-    private Gender gender;
-    private boolean enabled;
-    private boolean emailVerified;
-}
+public record InviteLibrarianResponse(
+        UUID id,
+        String email,
+        String firstName,
+        String lastName,
+        Gender gender,
+        boolean enabled,
+        boolean emailVerified
+) {}

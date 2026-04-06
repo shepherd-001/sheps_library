@@ -79,10 +79,8 @@ public class TokenServiceImpl implements TokenService{
                 .build();
 
         tokenRepository.save(shepsToken);
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        return new AuthResponse(accessToken, refreshToken);
+
     }
 
     @Override

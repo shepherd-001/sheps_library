@@ -4,25 +4,18 @@ import com.shepherd.shepslibrary.utils.RegexPattern;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-public class UpdateBookRequest {
-    @NotBlank(message = ValidationMessage.BLANK_TITLE)
-    @Pattern(regexp = RegexPattern.BOOK_TITLE, message = ValidationMessage.INVALID_TITLE)
-    private String title;
 
-    @NotBlank(message = ValidationMessage.BLANK_AUTHOR)
-    @Pattern(regexp = RegexPattern.BOOK_AUTHOR, message = ValidationMessage.INVALID_AUTHOR)
-    private String author;
+public record UpdateBookRequest(
+        @NotBlank(message = ValidationMessage.BLANK_TITLE)
+        @Pattern(regexp = RegexPattern.BOOK_TITLE, message = ValidationMessage.INVALID_TITLE)
+        String title,
 
-    @NotBlank(message = ValidationMessage.BLANK_GENRE)
-    @Pattern(regexp = RegexPattern.BOOK_GENRE, message = ValidationMessage.INVALID_GENRE)
-    private String genre;
-}
+        @NotBlank(message = ValidationMessage.BLANK_AUTHOR)
+        @Pattern(regexp = RegexPattern.BOOK_AUTHOR, message = ValidationMessage.INVALID_AUTHOR)
+        String author,
+
+        @NotBlank(message = ValidationMessage.BLANK_GENRE)
+        @Pattern(regexp = RegexPattern.BOOK_GENRE, message = ValidationMessage.INVALID_GENRE)
+        String genre
+) {}

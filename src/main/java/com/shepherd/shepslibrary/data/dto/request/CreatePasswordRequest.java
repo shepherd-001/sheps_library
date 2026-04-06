@@ -4,24 +4,12 @@ import com.shepherd.shepslibrary.utils.RegexPattern;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-public class CreatePasswordRequest {
-//    @NotBlank(message = ValidationMessage.BLANK_EMAIL)
-//    @Pattern(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
-//    private String email;
-
+public record CreatePasswordRequest(
     @NotBlank(message = ValidationMessage.BLANK_TOKEN)
-    private String token;
+    String token,
 
     @NotBlank(message = ValidationMessage.BLANK_PASSWORD)
     @Pattern(message = ValidationMessage.INVALID_PASSWORD, regexp = RegexPattern.PASSWORD)
-    private String password;
-}
+    String password
+){}
