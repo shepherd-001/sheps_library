@@ -31,4 +31,7 @@ public interface TokenRepository extends JpaRepository<ShepsToken, String> {
     @Transactional
     @Query("delete from ShepsToken t where (t.isRevoked = true or t.isExpired = true) and t.createdAt < :cutoff")
     int deleteAllRevokedOrExpiredTokensOlderThan(@Param("cutoff") Instant cutoff);
+
+    @Query("select u.tokenVersion from User u where u.email = :email")
+    Integer findTokenVersionByEmail(String email);
 }

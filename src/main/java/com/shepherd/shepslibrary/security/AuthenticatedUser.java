@@ -69,7 +69,7 @@ public class AuthenticatedUser implements UserDetails {
     @Override
     public boolean isEnabled() {
         if(!user.isEmailVerified())
-            throw new UserNotVerifiedException("Verify your email address before you proceed");
+            throw new UserNotVerifiedException("Your email address has not been verified. Please check your inbox for a verification link or request a new one");
         return user.isEnabled();
     }
 }

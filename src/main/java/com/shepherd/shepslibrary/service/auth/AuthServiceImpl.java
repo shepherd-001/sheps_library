@@ -14,7 +14,6 @@ import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
 import com.shepherd.shepslibrary.security.AuthenticatedUser;
-import com.shepherd.shepslibrary.security.SecurityUtils;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
 import jakarta.transaction.Transactional;
@@ -45,7 +44,7 @@ public class AuthServiceImpl implements AuthService{
     @Override
     @Transactional
     public EmailVerificationResponse verifyEmail(VerifyEmailRequest request) {
-        ShepsToken shepsToken = tokenService.validateToken(request.getToken(), TokenType.EMAIL_CONFIRMATION);
+        ShepsToken shepsToken = tokenService.validateToken(request.token(), TokenType.EMAIL_CONFIRMATION);
         User user = shepsToken.getUser();
 
         if(user.isEmailVerified())
@@ -64,7 +63,7 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public AuthResponse login(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
         AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
         User user = authenticatedUser.getUser();
         log.info("User {} authenticated successfully", user.getEmail());
@@ -72,20 +71,22 @@ public class AuthServiceImpl implements AuthService{
     }
 
     @Override
-    public UserResponse getAuthenticatedUser() {
-        return userMapper.mapToUserResponse(SecurityUtils.getCurrentPrincipal().getUser());
+    public UserResponse getAuthenticatedUser(AuthenticatedUser authenticatedUser) {
+        return userMapper.mapToUserResponse(authenticatedUser.getUser());
     }
 
     @Override
     @Transactional
-    public AuthResponse changePassword(ChangePasswordRequest changePasswordRequest) {
-        User user = SecurityUtils.getCurrentPrincipal().getUser();
+    public AuthResponse changePassword(ChangePasswordRequest changePasswordRequest, AuthenticatedUser authenticatedUser) {
+        User user = authenticatedUser.getUser();
         validatePasswordChange(user.getPassword(), changePasswordRequest);
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        user.setTokenVersion(user.getTokenVersion() +1); // this invalidates all existing tokens
         userRepository.save(user);
         log.info("==>> Password changed successfully");
         return tokenService.generateJwtTokens(user);
     }
+//
 
     private void validatePasswordChange(String currentEncodedPassword, ChangePasswordRequest request) {
         if (!passwordEncoder.matches(request.getCurrentPassword(), currentEncodedPassword))
@@ -123,6 +124,7 @@ public class AuthServiceImpl implements AuthService{
         User user = shepsToken.getUser();
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
         tokenService.deleteToken(shepsToken);
+        user.setTokenVersion(user.getTokenVersion() + 1);
         userRepository.save(user);
         log.info("==>> Password reset successful for user {}", user.getEmail());
         return tokenService.generateJwtTokens(user);

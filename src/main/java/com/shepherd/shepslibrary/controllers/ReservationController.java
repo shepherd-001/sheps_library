@@ -2,11 +2,13 @@ package com.shepherd.shepslibrary.controllers;
 
 import com.shepherd.shepslibrary.common.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
+import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.transaction.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,9 +20,10 @@ public class ReservationController {
     @PostMapping("/create/{bookId}")
 //    @PreAuthorize("hasRole('MEMBER')")
     @PreAuthorize("hasAuthority('member.create')")
-    public ResponseEntity<ApiResponse<?>> reserveBook(@PathVariable String bookId){
+    public ResponseEntity<ApiResponse<?>> reserveBook(@PathVariable String bookId,
+                                                      @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse
-                .success("Book reserved successfully", reservationService.reserveBook(bookId)));
+                .success("Book reserved successfully", reservationService.reserveBook(bookId, authenticatedUser)));
     }
     @GetMapping("/{id}")
 //    @PreAuthorize("hasRole('MEMBER')")
@@ -54,9 +57,10 @@ public class ReservationController {
     @DeleteMapping("/{reservationId}")
 //    @PreAuthorize("hasRole('MEMBER')")
     @PreAuthorize("hasAuthority('member.read')")
-    public ResponseEntity<ApiResponse<?>> deleteReservation(@PathVariable String reservationId){
+    public ResponseEntity<ApiResponse<?>> deleteReservation(@PathVariable String reservationId,
+                                                            @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
         return ResponseEntity.ok(ApiResponse
-                .success(reservationService.deleteReservation(reservationId)));
+                .success(reservationService.deleteReservation(reservationId, authenticatedUser)));
     }
 
     @DeleteMapping("/all/{userId}")

@@ -33,10 +33,21 @@ public class MailNotificationServiceImpl implements MailNotificationService {
 
 
     @Override
+    public void sendSuperAdminInvite(User user, String token) {
+        String verificationLink = "%s/verify?token=%s".formatted(clientUrl, token);
+        Map<String, Object> variables = Map.of(
+                "displayName", user.getFirstName(),
+                "invitationLink", verificationLink
+        );
+        mailAsyncExecutor.sendEmailAsync("superadmin-invite", "You're Shep library's Very First User!",
+                user.getEmail(), variables);
+    }
+
+    @Override
     public void sendVerificationMail(User user, String token) {
         String verificationLink = "%s/verify?token=%s".formatted(clientUrl, token);
         Map<String, Object> variables = Map.of(
-                "firstName", user.getFirstName(),
+                "displayName", user.getFirstName(),
                 "confirmationLink", verificationLink
         );
         mailAsyncExecutor.sendEmailAsync("email-confirmation", "Confirm Your Email Address", user.getEmail(), variables);
@@ -107,7 +118,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
 @Service
 @AllArgsConstructor
 @Slf4j
-class MailAsyncExecutor{
+class MailAsyncExecutor {
     private final MailSenderService mailSenderService;
     private final SpringTemplateEngine templateEngine;
 
@@ -131,7 +142,7 @@ class MailAsyncExecutor{
 
     @Recover
     public void recover(MailException ex, String templateName, String subject,
-                        String email, Map<String, Object> variables){
+                        String email, Map<String, Object> variables) {
         log.error("==>> Email sending permanently failed after retires. Template: {}, Email: {}",
                 templateName,
                 email,

@@ -12,7 +12,8 @@ import lombok.*;
 @Setter
 @Table(indexes = {
         @Index(name = "idx_email", columnList = "email"),
-        @Index(name = "idx_createdAt", columnList = "createdAt")
+        @Index(name = "idx_createdAt", columnList = "createdAt"),
+        @Index(name = "idx_tokenVersion", columnList = "tokenVersion")
 })
 public class User extends BaseEntity {
     private String firstName;
@@ -27,9 +28,8 @@ public class User extends BaseEntity {
     @JoinColumn(name = "role_id", nullable = false)
     private UserRole role;
 
-    @Column(name = "enabled")
     private boolean enabled;
     private boolean emailVerified;
-    @Column(name = "revoked")
-    private boolean revoked;
+
+    private int tokenVersion = 0; // key for revoking user tokens
 }

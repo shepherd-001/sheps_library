@@ -60,7 +60,6 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
-
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
             if(!isUserAccountValid(userDetails)){

@@ -11,7 +11,7 @@ import com.shepherd.shepslibrary.exceptions.ReservationException;
 import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.mapper.ReservationMapper;
-import com.shepherd.shepslibrary.security.SecurityUtils;
+import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.book.BookService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.utils.AppUtils;
@@ -41,9 +41,8 @@ public class ReservationServiceImpl implements ReservationService{
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "reservationDateTime");
 
     @Override
-    public ReservationResponse reserveBook(String bookId) {
-        User user = SecurityUtils.getCurrentPrincipal().getUser();
-        checkIfUserIsRevoked(user);
+    public ReservationResponse reserveBook(String bookId, AuthenticatedUser authenticatedUser) {
+        User user = authenticatedUser.getUser();
         Book book = bookService.fetchBookById(bookId);
 
         checkIfBookIsAvailable(book);
@@ -61,11 +60,6 @@ public class ReservationServiceImpl implements ReservationService{
         return reservationMapper.mapToReservationResponse(savedReservation);
     }
 
-    private void checkIfUserIsRevoked(User user){
-        if(user.isRevoked())
-            throw new ShepsLibraryException("Your access to perform this action has been revoked. " +
-                    "Please settle your overdue payment or contact our support team for assistance");
-    }
 
     private void checkIfBookIsAvailable(Book book){
         if(book.isAvailable())
@@ -124,8 +118,8 @@ public class ReservationServiceImpl implements ReservationService{
     @Override
     @Transactional
     @CacheEvict(value = "reservationCache", key = "#reservationId")
-    public String deleteReservation(String reservationId) {
-        User user = SecurityUtils.getCurrentPrincipal().getUser();
+    public String deleteReservation(String reservationId, AuthenticatedUser authenticatedUser) {
+        User user = authenticatedUser.getUser();
         int deletedCount = reservationRepository.deleteByReservationIdAndUserId(reservationId, user.getId());
         if(deletedCount > 0){
             log.info("==>> Reservation deleted successfully");
@@ -141,7 +135,7 @@ public class ReservationServiceImpl implements ReservationService{
         int deleted = reservationRepository.deleteAllByUserIdReturningCount(userId);
         if(deleted == 0)
             log.warn("==>> Attempted to delete a non-existing reservation");
-        else log.info("==>> Reservation deleted successfully");
+        else log.info("==>> Reservations deleted successfully");
     }
 
 //    @Override

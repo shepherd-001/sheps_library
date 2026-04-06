@@ -3,9 +3,6 @@ package com.shepherd.shepslibrary.security;
 import com.shepherd.shepslibrary.exceptions.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import static com.shepherd.shepslibrary.utils.ErrorMessage.NON_INSTANTIABLE_UTILITY_CLASS;
 
@@ -23,22 +20,22 @@ public final class SecurityUtils {
         return header.substring(BEARER_PREFIX_LENGTH);
     }
 
-    public static AuthenticatedUser getCurrentPrincipal(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication == null ||
-        !authentication.isAuthenticated() ||
-        authentication instanceof AnonymousAuthenticationToken){
-            throw new UnauthorizedException("User is not authenticated");
-        }
-        if(!(authentication.getPrincipal() instanceof AuthenticatedUser principal)){
-            throw new UnauthorizedException("Invalid user principal");
-        }
-        return principal;
-    }
-
-    public static String getAuthenticationName(){
-        return getCurrentPrincipal().getUsername();
-    }
+//    public static AuthenticatedUser getCurrentPrincipal(){
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if(authentication == null ||
+//        !authentication.isAuthenticated() ||
+//        authentication instanceof AnonymousAuthenticationToken){
+//            throw new UnauthorizedException("User is not authenticated");
+//        }
+//        if(!(authentication.getPrincipal() instanceof AuthenticatedUser principal)){
+//            throw new UnauthorizedException("Invalid user principal");
+//        }
+//        return principal;
+//    }
+//
+//    public static String getAuthenticationName(){
+//        return getCurrentPrincipal().getUsername();
+//    }
 
     private SecurityUtils() {
         throw new UnsupportedOperationException(NON_INSTANTIABLE_UTILITY_CLASS);

@@ -11,7 +11,8 @@ import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.TransactionRepository;
 import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.exceptions.TransactionException;
-import com.shepherd.shepslibrary.security.SecurityUtils;
+import com.shepherd.shepslibrary.mapper.TransactionMapper;
+import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.book.BookService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.utils.AppUtils;
@@ -37,13 +38,13 @@ public class TransactionServiceImpl implements TransactionService{
     private final TransactionRepository transactionRepository;
     private final BookService bookService;
     private final MailNotificationService mailNotificationService;
+    private final TransactionMapper transactionMapper;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "borrowDateTime", "returnDateTime");
 
     @Override
     @Transactional
-    public TransactionResponse borrowBook(BorrowBookRequest request) {
-        User user = SecurityUtils.getCurrentPrincipal().getUser();
-        checkIfUserIsRevoked(user);
+    public TransactionResponse borrowBook(BorrowBookRequest request, AuthenticatedUser authenticatedUser) {
+        User user = authenticatedUser.getUser();
         Book book = bookService.fetchBookById(request.getBookId());
         checkIfBookIsAvailable(book);
         validateReturnDateTime(request.getReturnDateTime());
@@ -58,13 +59,7 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.setReturnDateTime(request.getReturnDateTime());
         Transaction savedTransaction = transactionRepository.save(transaction);
         log.info("==>> Book borrowed successfully");
-        return mapToTransactionResponse(savedTransaction);
-    }
-
-    private void checkIfUserIsRevoked(User user){
-        if(user.isRevoked())
-            throw new ShepsLibraryException("Your access to perform this action has been revoked. " +
-                    "Please settle your overdue payment or contact our support team for assistance");
+        return transactionMapper.mapToResponse(savedTransaction);
     }
 
     private void checkIfBookIsAvailable(Book book){
@@ -87,20 +82,6 @@ public class TransactionServiceImpl implements TransactionService{
         }
     }
 
-    private TransactionResponse mapToTransactionResponse(Transaction transaction){
-        return TransactionResponse.builder()
-                .transactionId(transaction.getId())
-                .transactionType(transaction.getTransactionType())
-                .firstName(transaction.getUser().getFirstName())
-                .lastName(transaction.getUser().getLastName())
-                .title(transaction.getBook().getTitle())
-                .author(transaction.getBook().getAuthor())
-                .genre(transaction.getBook().getGenre())
-                .borrowedDateTime(transaction.getBorrowDateTime())
-                .returnDateTime(transaction.getReturnDateTime())
-                .build();
-    }
-
     @Override
     public TransactionResponse returnBook(String transactionId) {
         Transaction transaction = getTransactionById(transactionId);
@@ -112,7 +93,7 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.setReturnDateTime(Instant.now());
         Transaction savedTransaction = transactionRepository.save(transaction);
         log.info("Book returned successfully");
-        return mapToTransactionResponse(savedTransaction);
+        return transactionMapper.mapToResponse(savedTransaction);
     }
 
     private Transaction getTransactionById(String transactionId) {
@@ -134,7 +115,7 @@ public class TransactionServiceImpl implements TransactionService{
     private PaginationResponse<TransactionResponse> mapToTransactionPaginatedResponse(Page<Transaction> transactions){
         return PaginationResponse.<TransactionResponse>builder()
                 .content(transactions.stream()
-                        .map(this::mapToTransactionResponse)
+                        .map(transactionMapper::mapToResponse)
                         .toList())
                 .page(transactions.getNumber() + 1)
                 .size(transactions.getSize())

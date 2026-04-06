@@ -7,6 +7,7 @@ import com.shepherd.shepslibrary.data.model.User;
 
 
 public interface MailNotificationService {
+    void sendSuperAdminInvite(User user, String token);
     void sendVerificationMail(User user, String token);
     void sendResetPasswordMail(User user, String token);
     void sendLibrarianInvitation(User user, String token);

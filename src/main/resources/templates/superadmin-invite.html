@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>You're Our First User — Welcome to Shep Library</title>
+
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0a0f1c;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .wrapper {
+            max-width: 560px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: #121a2e;
+            border: 1px solid #1f2a45;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .hero {
+            background: linear-gradient(135deg, #1e2a5e, #2a1b4d);
+            padding: 50px 30px 35px;
+            text-align: center;
+            position: relative;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(103, 232, 249, 0.15);
+            border: 1px solid rgba(103, 232, 249, 0.4);
+            border-radius: 30px;
+            padding: 7px 20px;
+            margin-bottom: 20px;
+        }
+        .main-content {
+            padding: 45px 35px 35px;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #67e8f9, #a855f7);
+            color: #ffffff !important;
+            font-size: 17px;
+            font-weight: 700;
+            text-decoration: none;
+            padding: 17px 48px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(103, 232, 249, 0.35);
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(103, 232, 249, 0.45);
+        }
+        .footer {
+            background: #121a2e;
+            border-top: 1px solid #1f2a45;
+            padding: 28px 35px;
+            text-align: center;
+        }
+        p {
+            font-size: 15.5px;
+            line-height: 1.75;
+            color: #9ba8c2;
+            margin: 0 0 20px;
+        }
+        .highlight {
+            color: #67e8f9;
+            font-weight: 600;
+        }
+        .security-box {
+            background: rgba(103, 232, 249, 0.08);
+            border: 1px solid rgba(103, 232, 249, 0.25);
+            border-radius: 12px;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body style="margin:0; padding:30px 10px; background-color:#0a0f1c;">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="center">
+            <div class="wrapper">
+
+                <!-- Logo -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:25px;">
+                    <tr>
+                        <td align="center">
+                            <table role="presentation" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td style="background:linear-gradient(135deg, #67e8f9, #a855f7); border-radius:10px; width:42px; height:42px; text-align:center; box-shadow:0 4px 15px rgba(103,232,249,0.4);">
+                                        <span style="color:#fff; font-size:26px; line-height:42px;">✦</span>
+                                    </td>
+                                    <td style="padding-left:12px;">
+                                        <span style="font-family:Georgia, serif; font-size:26px; color:#e0e7ff; font-weight:700;">Shep Library</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Main Card -->
+                <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0">
+
+                    <!-- Hero -->
+                    <tr>
+                        <td class="hero">
+                            <div class="badge">
+                                <span style="color:#67e8f9; font-size:13.5px; font-weight:700; letter-spacing:1.5px;">EXCLUSIVE INVITATION</span>
+                            </div>
+                            <h1 style="font-family:Georgia, serif; font-size:32px; line-height:1.2; color:#e0e7ff; margin:0 0 14px;">
+                                You are our<br><span style="color:#67e8f9;">very first user</span>
+                            </h1>
+                            <p style="color:#b0c0e0; font-size:17px; margin:0; max-width:380px; margin-left:auto; margin-right:auto;">
+                                Welcome to the beginning of something extraordinary.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td class="main-content">
+                            <p>Dear <strong th:text="${displayName}" style="color:#e0e7ff;">[User]</strong>,</p>
+
+                            <p>We're absolutely thrilled to personally invite you as <span class="highlight">Shep library's first user</span>. While thousands will join later, you get to experience the app from day one — with early access, special rewards, and the chance to help shape its future.</p>
+
+                            <p>This is more than just an invitation. It's your golden ticket into a vibrant new space designed for creativity, connection, and discovery.</p>
+
+                            <!-- CTA Button -->
+                            <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:35px 0 40px;">
+                                <tr>
+                                    <td align="center">
+                                        <a th:href="${invitationLink}" href="#" target="_blank" class="btn">
+                                            Claim Your First-User Access
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Security Note -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="security-box">
+                                <tr>
+                                    <td style="vertical-align:top; padding-right:14px; font-size:24px;">🌟</td>
+                                    <td style="font-size:13.5px; color:#7a8eb8; line-height:1.65;">
+                                        Didn't expect this invitation? No worries — just ignore this email. Someone probably entered your address by mistake.
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td class="footer">
+                            <p style="margin:0; font-size:13.5px; color:#5e6f9a;">
+                                Questions? We're always here for our first users.<br>
+                                <a href="mailto:support@shepslibrary.com" style="color:#6fcf97;">support@shepslibrary.com</a>
+                            </p>
+                            <p style="margin:18px 0 0; font-size:13px; color:#4c5f85; font-weight:500;">
+                                With excitement,<br>
+                                <strong>The Sheps Library Team</strong>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.shepherd.shepslibrary.security;
 
 import com.shepherd.shepslibrary.data.model.User;
+import com.shepherd.shepslibrary.data.repository.TokenRepository;
 import com.shepherd.shepslibrary.exceptions.InvalidJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -24,11 +25,13 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class JwtUtils {
     private final SecretKey signingKey;
+    private final TokenRepository tokenRepository;
     private JwtParser jwtParser;
     private static final String ISSUER = "shep_library";
-    private static final String TOKEN_TYPE = "token_type";
+    private static final String TOKEN_TYPE = "type";
     private static final String ACCESS = "access";
     private static final String REFRESH = "refresh";
+    private static final String TOKEN_VERSION = "version";
 
     @PostConstruct
     void init() {
@@ -68,12 +71,13 @@ public class JwtUtils {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TOKEN_TYPE, tokenType);
         claims.put("authority", user.getRole().getName());
+        claims.put(TOKEN_VERSION, user.getTokenVersion()); // critical for revocation
         Instant now = Instant.now();
         return Jwts.builder()
+                .claims(claims)
                 .issuer(ISSUER)
                 .id(UUID.randomUUID().toString())
                 .subject(user.getEmail())
-                .claims(claims)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(tokenExpiration)))
                 .signWith(signingKey)
@@ -90,9 +94,13 @@ public class JwtUtils {
         Instant now = Instant.now();
 
         String subject = claims.getSubject();
+        Integer tokenVersion = claims.get(TOKEN_VERSION, Integer.class);
+        Integer fetchedTokenVersion = tokenRepository.findTokenVersionByEmail(email);
         return subject != null
                 && subject.equalsIgnoreCase(email)
-                && expiration.isAfter(now);
+                && expiration.isAfter(now)
+                && tokenVersion != null
+                && tokenVersion.equals(fetchedTokenVersion);
     }
 
     public boolean isValidToken(String token){

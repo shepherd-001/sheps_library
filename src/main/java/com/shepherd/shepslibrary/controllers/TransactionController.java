@@ -3,6 +3,7 @@ package com.shepherd.shepslibrary.controllers;
 import com.shepherd.shepslibrary.common.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
+import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.transaction.TransactionService;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,9 +23,10 @@ public class TransactionController {
     @PostMapping("/borrow-book")
 //    @PreAuthorize("hasRole('MEMBER')")
     @PreAuthorize("hasAuthority('member.create')")
-    public ResponseEntity<ApiResponse<?>> borrowBook(@Valid @RequestBody BorrowBookRequest borrowBookRequest){
+    public ResponseEntity<ApiResponse<?>> borrowBook(@Valid @RequestBody BorrowBookRequest borrowBookRequest,
+                                                     @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
         return ResponseEntity.ok(ApiResponse
-                .success(transactionService.borrowBook(borrowBookRequest)));
+                .success(transactionService.borrowBook(borrowBookRequest, authenticatedUser)));
     }
 
     @PutMapping("/return-book")

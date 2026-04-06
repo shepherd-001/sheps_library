@@ -52,20 +52,25 @@ public class AdminServiceImpl implements AdminService {
             return;
         }
         UserRole role = roleService.getRole(ADMIN);
-        User admin = User.builder()
+        User user = User.builder()
                 .firstName("ShepLibrary")
                 .lastName("Admin")
                 .gender(Gender.MALE)
                 .email(adminEmail.toLowerCase())
                 .password(passwordEncoder.encode(adminPassword))
                 .role(role)
-                .enabled(true)
-                .emailVerified(true)
-                .revoked(false)
+                .enabled(false)
+                .emailVerified(false)
                 .build();
 
-        userRepository.save(admin);
-        log.info("Admin created successfully");
+        userRepository.save(user);
+        sendAdminInvite(user);
+        log.info("==>> Admin invite sent successfully");
+    }
+
+    private void sendAdminInvite(User user) {
+        mailNotificationService.sendSuperAdminInvite(user,
+                tokenService.generateToken(user, TokenType.EMAIL_CONFIRMATION));
     }
 
     @Override
@@ -92,7 +97,6 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-//    @Transactional
     public String resendInvite(String inviteeEmail) {
         log.info("==>> Initiating resend invitation for email: {}", inviteeEmail);
         return userRepository.findByEmailIgnoreCase(inviteeEmail.trim())

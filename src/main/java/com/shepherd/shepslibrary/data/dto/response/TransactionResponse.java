@@ -9,8 +9,8 @@ import java.time.Instant;
 @Builder
 @Getter
 public class TransactionResponse {
-    private String transactionId;
-    private TransactionType transactionType;
+    private String id;
+    private TransactionType type;
     private String firstName;
     private String lastName;
     private String title;

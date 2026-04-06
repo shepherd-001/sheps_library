@@ -5,6 +5,7 @@ import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.VerifyEmailRequest;
+import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.security.LogoutService;
 import com.shepherd.shepslibrary.service.auth.AuthService;
 import com.shepherd.shepslibrary.utils.RegexPattern;
@@ -15,6 +16,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,15 +43,16 @@ public class AuthController {
 
 
     @GetMapping("/user-detail")
-    public ResponseEntity<ApiResponse<?>> getUserDetails() {
+    public ResponseEntity<ApiResponse<?>> getUserDetails(@AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
         return ResponseEntity.ok(ApiResponse
-                .success(authService.getAuthenticatedUser()));
+                .success(authService.getAuthenticatedUser(authenticatedUser)));
     }
 
     @PutMapping("/change-password")
-    public ResponseEntity<ApiResponse<?>> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
+    public ResponseEntity<ApiResponse<?>> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
+                                                         @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
         return ResponseEntity.ok(ApiResponse
-                .success("Password changed successfully", authService.changePassword(changePasswordRequest)));
+                .success("Password changed successfully", authService.changePassword(changePasswordRequest, authenticatedUser)));
     }
 
     @PostMapping("/request-password-reset")
@@ -68,15 +71,16 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<?>> logoutCurrentSession(HttpServletRequest request) {
-        logoutService.logoutCurrentSession(request);
+    public ResponseEntity<ApiResponse<?>> logoutCurrentSession(HttpServletRequest request,
+                                                               @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+        logoutService.logoutCurrentSession(request, authenticatedUser.getUsername());
         return ResponseEntity.ok(ApiResponse
                 .success("User logged out successfully"));
     }
 
     @PostMapping("/logout-all")
-    public ResponseEntity<ApiResponse<?>> logoutAllSessions() {
-        logoutService.logoutAllSessions();
+    public ResponseEntity<ApiResponse<?>> logoutAllSessions(@AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+        logoutService.logoutAllSessions(authenticatedUser.getUsername());
         return ResponseEntity.ok(ApiResponse
                 .success("User logged out from all sessions"));
     }

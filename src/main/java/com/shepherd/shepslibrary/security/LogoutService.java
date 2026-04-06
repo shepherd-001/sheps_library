@@ -16,9 +16,8 @@ public class LogoutService{
     private final JwtUtils jwtUtils;
 
 
-    public void logoutCurrentSession(HttpServletRequest request){
+    public void logoutCurrentSession(HttpServletRequest request, String userEmail){
         String token = SecurityUtils.extractJwtToken(request);
-        String userEmail = SecurityUtils.getAuthenticationName();
 
         if(!jwtUtils.isValidToken(token, userEmail)){
             log.warn("==>> Invalid JWT provided for user {}", userEmail);
@@ -33,8 +32,7 @@ public class LogoutService{
         }
     }
 
-    public void logoutAllSessions(){
-        String userEmail = SecurityUtils.getAuthenticationName();
+    public void logoutAllSessions(String userEmail){
         int deletedToken = tokenRepository.revokeAllTokensForUser(userEmail, TokenType.JWT);
         if(deletedToken > 0){
             log.info("==>> Deleted {} token(s) for user {}", deletedToken, userEmail);
