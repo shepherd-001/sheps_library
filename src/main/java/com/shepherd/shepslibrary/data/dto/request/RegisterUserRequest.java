@@ -10,12 +10,12 @@ import jakarta.validation.constraints.Size;
 
 public record RegisterUserRequest(
         @NotBlank(message = ValidationMessage.BLANK_FIRST_NAME)
-        @Pattern(message = ValidationMessage.INVALID_FIRST_NAME, regexp = RegexPattern.USER_NAME)
+        @Pattern(message = ValidationMessage.INVALID_FIRST_NAME, regexp = RegexPattern.PERSON_NAME)
         @Size(max = 50, message = ValidationMessage.FIRST_NAME_TOO_LONG)
         String firstName,
 
         @NotBlank(message = ValidationMessage.BLANK_LAST_NAME)
-        @Pattern(message = ValidationMessage.INVALID_LAST_NAME, regexp = RegexPattern.USER_NAME)
+        @Pattern(message = ValidationMessage.INVALID_LAST_NAME, regexp = RegexPattern.PERSON_NAME)
         @Size(max = 50, message = ValidationMessage.LAST_NAME_TOO_LONG)
         String lastName,
 

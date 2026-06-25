@@ -7,11 +7,11 @@ public final class ValidationMessage {
     public static final String BLANK_PASSWORD = "Password is required";
     public static final String BLANK_TOKEN = "Token is required";
     public static final String BLANK_GENDER = "Gender is required";
-
-//    public static final String INVALID_FIRST_NAME = "First name can only contain letters, apostrophes, and hyphens. It cannot start or end with apostrophes or hyphens";
-//    public static final String INVALID_LAST_NAME = "Last name can only contain letters, apostrophes, and hyphens. It cannot start or end with apostrophes or hyphens";
-    public static final String INVALID_FIRST_NAME = "Invalid first name";
-    public static final String INVALID_LAST_NAME = "Invalid last name";
+//Username may only contain alphanumeric characters or single hyphens, and cannot begin or end with a hyphen.
+    public static final String INVALID_FIRST_NAME = "First name can only contain letters, a single apostrophe, or hyphen, and cannot start or end with apostrophes or hyphens";
+    public static final String INVALID_LAST_NAME = "Last name can only contain letters, a single apostrophe, or hyphen, and cannot start or end with apostrophes or hyphens";
+//    public static final String INVALID_FIRST_NAME = "Invalid first name";
+//    public static final String INVALID_LAST_NAME = "Invalid last name";
     public static final String INVALID_PASSWORD = "Password must be 8–20 characters with at least one uppercase, one lowercase, one digit, and one special character";
     public static final String INVALID_EMAIL = "Invalid email address";
     public static final String INVALID_GENDER = "Invalid gender. Allowed values: MALE, FEMALE";

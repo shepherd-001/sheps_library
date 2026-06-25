@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.common.ApiResponse;
+import com.shepherd.shepslibrary.common.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.AddRoleRequest;
 import com.shepherd.shepslibrary.data.dto.request.AssignPermissionRequest;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;

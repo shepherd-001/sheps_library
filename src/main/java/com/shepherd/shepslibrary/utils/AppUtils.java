@@ -28,11 +28,11 @@ public final class AppUtils {
                 Sort.by(resolvedSortDirection(paginationRequest.getDirection()), sortBy));
     }
 
-    public static int resolvedPageNumber(int pageNumber){
-        return Math.max(pageNumber -1, 0);
+    public static int resolvedPageNumber(int pageNumber) {
+        return Math.max(pageNumber - 1, 0);
     }
 
-    public static int resolvedPageSize(int pageSize){
+    public static int resolvedPageSize(int pageSize) {
         return (pageSize > 0)
                 ? Math.min(pageSize, MAX_PAGE_SIZE)
                 : DEFAULT_PAGE_SIZE;
@@ -48,21 +48,21 @@ public final class AppUtils {
 //                : SORT_BY_CREATED_AT;
 //    }
 
-    public static String resolvedSortBy(String sortBy, Set<String> allowedSortFields){
-        if(sortBy == null || sortBy.isBlank() || allowedSortFields == null
+    public static String resolvedSortBy(String sortBy, Set<String> allowedSortFields) {
+        if (sortBy == null || sortBy.isBlank() || allowedSortFields == null
                 || allowedSortFields.isEmpty())
             return SORT_BY_CREATED_AT;
         String trimmed = sortBy.trim();
         return allowedSortFields.stream()
                 .filter(field -> field.equalsIgnoreCase(trimmed))
                 .findFirst()
-                .orElseGet(()-> {
+                .orElseGet(() -> {
                     log.warn("==>> Invalid sortBy '{}' received. Falling back to '{}'", trimmed, SORT_BY_CREATED_AT);
                     return SORT_BY_CREATED_AT;
                 });
     }
 
-    public static Sort.Direction resolvedSortDirection(String sortDirection){
+    public static Sort.Direction resolvedSortDirection(String sortDirection) {
         return SORT_DIRECTION_ASC.equalsIgnoreCase(sortDirection)
                 ? Sort.Direction.ASC
                 : Sort.Direction.DESC;
@@ -88,6 +88,10 @@ public final class AppUtils {
 
         return isbn.toString();
     }
+
+//    public static void validateID(UUID id, String errorMessage){
+//
+//    }
 
 //    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 //

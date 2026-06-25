@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.security;
 
-import com.shepherd.shepslibrary.common.ApiResponse;
+import com.shepherd.shepslibrary.common.response.ApiResponse;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

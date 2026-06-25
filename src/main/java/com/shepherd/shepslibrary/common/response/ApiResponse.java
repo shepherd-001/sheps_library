@@ -1,4 +1,4 @@
-package com.shepherd.shepslibrary.common;
+package com.shepherd.shepslibrary.common.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +13,7 @@ import java.time.Instant;
 public class ApiResponse<T> {
     private final String message;
     private final T data;
+    private final T errors;
     private final Instant timeStamp;
     private final String path;
 
@@ -38,10 +39,10 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static <T> ApiResponse<T> error(String message, T data, HttpServletRequest request) {
+    public static <T> ApiResponse<T> error(String message, T errors, HttpServletRequest request) {
         return ApiResponse.<T>builder()
                 .message(message)
-                .data(data)
+                .errors(errors)
                 .timeStamp(Instant.now())
                 .path(request.getRequestURI())
                 .build();
@@ -55,9 +56,9 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static <T> ApiResponse<T> error(T data, HttpServletRequest request) {
+    public static <T> ApiResponse<T> error(T errors, HttpServletRequest request) {
         return ApiResponse.<T>builder()
-                .data(data)
+                .errors(errors)
                 .timeStamp(Instant.now())
                 .path(request.getRequestURI())
                 .build();

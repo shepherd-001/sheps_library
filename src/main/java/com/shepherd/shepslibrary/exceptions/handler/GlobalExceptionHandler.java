@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.exceptions.handler;
 
-import com.shepherd.shepslibrary.common.ApiResponse;
+import com.shepherd.shepslibrary.common.response.ApiResponse;
 import com.shepherd.shepslibrary.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -29,7 +29,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleException(Exception ex, HttpServletRequest request){
-        log.error("==>> Uncaught exception: {}", ex.getMessage());
+//        log.error("==>> Uncaught exception: {}", ex.getMessage());
+        log.error("==>> Uncaught exception", ex);
         String message = "An unexpected error occurred. Please try again later.";
         return ResponseEntity.internalServerError().body(ApiResponse.error(message, request));
     }

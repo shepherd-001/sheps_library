@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.common.ApiResponse;
+import com.shepherd.shepslibrary.common.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
@@ -41,11 +41,10 @@ public class AuthController {
                 .success("Authentication successful", authService.login(loginRequest)));
     }
 
-
     @GetMapping("/user-detail")
     public ResponseEntity<ApiResponse<?>> getUserDetails(@AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
         return ResponseEntity.ok(ApiResponse
-                .success(authService.getAuthenticatedUser(authenticatedUser)));
+                .success("User details retrieved successfully", authService.getAuthenticatedUser(authenticatedUser)));
     }
 
     @PutMapping("/change-password")

@@ -13,7 +13,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, String
     Page<Reservation> findAllByUserId(String userId, Pageable pageable);
     @Query("""
            select reservation from Reservation reservation
-           where reservation.book.isAvailable = true
+           where reservation.book.available = true
            """)
     Page<Reservation> findAllAvailableReservations(Pageable pageable);
     boolean existsByUserIdAndBookId(String userId, String bookId);
