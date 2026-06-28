@@ -21,6 +21,6 @@ public class LibrarianController {
     @PostMapping("/create-password")
     public ResponseEntity<ApiResponse<?>> createPassword(@Valid @RequestBody CreatePasswordRequest createPasswordRequest){
         return ResponseEntity.ok(ApiResponse
-                .success("Librarian password created successfully", librarianService.createPassword(createPasswordRequest)));
+                .of("Librarian password created successfully", librarianService.createPassword(createPasswordRequest)));
     }
 }

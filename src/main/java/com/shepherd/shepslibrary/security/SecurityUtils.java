@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.security;
 
-import com.shepherd.shepslibrary.exceptions.UnauthorizedException;
+import com.shepherd.shepslibrary.common.exceptions.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 

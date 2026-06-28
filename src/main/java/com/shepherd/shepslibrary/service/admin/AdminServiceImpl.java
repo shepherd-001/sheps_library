@@ -1,5 +1,9 @@
 package com.shepherd.shepslibrary.service.admin;
 
+import com.shepherd.shepslibrary.common.exceptions.AlreadyExistsException;
+import com.shepherd.shepslibrary.common.exceptions.ResourceNotFoundException;
+import com.shepherd.shepslibrary.common.exceptions.ShepsLibraryException;
+import com.shepherd.shepslibrary.common.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.data.dto.request.AddRoleRequest;
 import com.shepherd.shepslibrary.data.dto.request.AssignPermissionRequest;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
@@ -9,10 +13,6 @@ import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.model.UserRole;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
-import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
-import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
-import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
-import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.token.TokenService;

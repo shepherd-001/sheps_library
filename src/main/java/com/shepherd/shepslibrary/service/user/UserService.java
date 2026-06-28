@@ -2,7 +2,7 @@ package com.shepherd.shepslibrary.service.user;
 
 import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
-import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
+import com.shepherd.shepslibrary.common.request.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.response.RegisterUserResponse;
 import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 //import com.shepherd.shepslibrary.data.model.Role;

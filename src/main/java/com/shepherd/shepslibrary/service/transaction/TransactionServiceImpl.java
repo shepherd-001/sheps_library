@@ -2,20 +2,19 @@ package com.shepherd.shepslibrary.service.transaction;
 
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
-import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
+import com.shepherd.shepslibrary.common.request.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.response.TransactionResponse;
 import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.model.Transaction;
 import com.shepherd.shepslibrary.data.model.TransactionType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.TransactionRepository;
-import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
-import com.shepherd.shepslibrary.exceptions.TransactionException;
+import com.shepherd.shepslibrary.common.exceptions.ShepsLibraryException;
+import com.shepherd.shepslibrary.common.exceptions.TransactionException;
 import com.shepherd.shepslibrary.mapper.TransactionMapper;
 import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.book.BookService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
-import com.shepherd.shepslibrary.utils.AppUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +28,11 @@ import java.time.ZoneId;
 import java.util.Set;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.MAX_BORROW_MONTHS;
-import static com.shepherd.shepslibrary.utils.AppUtils.createPageRequest;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TransactionServiceImpl implements TransactionService{
+public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final BookService bookService;
     private final MailNotificationService mailNotificationService;
@@ -62,8 +60,8 @@ public class TransactionServiceImpl implements TransactionService{
         return transactionMapper.mapToResponse(savedTransaction);
     }
 
-    private void checkIfBookIsAvailable(Book book){
-        if(!book.isAvailable())
+    private void checkIfBookIsAvailable(Book book) {
+        if (!book.isAvailable())
             throw new TransactionException("Book is not available");
     }
 
@@ -98,7 +96,7 @@ public class TransactionServiceImpl implements TransactionService{
 
     private Transaction getTransactionById(String transactionId) {
         return transactionRepository.findById(transactionId).orElseThrow(
-                ()-> new ShepsLibraryException("Transaction with the provided ID not found"));
+                () -> new ShepsLibraryException("Transaction with the provided ID not found"));
     }
 
     @Override
@@ -106,26 +104,10 @@ public class TransactionServiceImpl implements TransactionService{
             key = "#paginationRequest.toCacheKey('user:'+userId)",
             unless = "#result == null || #result.content.isEmpty()")
     public PaginationResponse<TransactionResponse> getAllTransactionByUserId(String userId, PaginationRequest paginationRequest) {
-        Pageable pageable = AppUtils.createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
+        Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Page<Transaction> transactions = transactionRepository.findAllByUserId(userId, pageable);
         log.info("Fetched all transactions by user id");
-        return mapToTransactionPaginatedResponse(transactions);
-    }
-
-    private PaginationResponse<TransactionResponse> mapToTransactionPaginatedResponse(Page<Transaction> transactions){
-        return PaginationResponse.<TransactionResponse>builder()
-                .content(transactions.stream()
-                        .map(transactionMapper::mapToResponse)
-                        .toList())
-                .page(transactions.getNumber() + 1)
-                .size(transactions.getSize())
-                .numberOfElements(transactions.getNumberOfElements())
-                .totalElements(transactions.getTotalElements())
-                .totalPages(transactions.getTotalPages())
-                .hasNext(transactions.hasNext())
-                .hasPrevious(transactions.hasPrevious())
-                .last(transactions.isLast())
-                .build();
+        return PaginationResponse.map(transactions, transactionMapper::mapToResponse);
     }
 
     @Override
@@ -135,10 +117,10 @@ public class TransactionServiceImpl implements TransactionService{
             unless = "#result == null || #result.content.isEmpty()"
     )
     public PaginationResponse<TransactionResponse> getAllTransactions(PaginationRequest paginationRequest) {
-        Pageable pageable = createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
+        Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Page<Transaction> transactions = transactionRepository.findAll(pageable);
         log.info("==>> Fetched all transactions");
-        return mapToTransactionPaginatedResponse(transactions);
+        return PaginationResponse.map(transactions, transactionMapper::mapToResponse);
     }
 
 //    @Override

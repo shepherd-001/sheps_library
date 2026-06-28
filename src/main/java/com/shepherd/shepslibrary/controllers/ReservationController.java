@@ -23,14 +23,14 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<?>> reserveBook(@PathVariable String bookId,
                                                       @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse
-                .success("Book reserved successfully", reservationService.reserveBook(bookId, authenticatedUser)));
+                .of("Book reserved successfully", reservationService.reserveBook(bookId, authenticatedUser)));
     }
     @GetMapping("/{id}")
 //    @PreAuthorize("hasRole('MEMBER')")
     @PreAuthorize("hasAnyAuthority('member.read', 'librarian.read', 'admin.read')")
     public ResponseEntity<ApiResponse<?>> getReservationById(@PathVariable String id){
         return ResponseEntity.ok(ApiResponse
-                .success(reservationService.getReservationById(id)));
+                .of(reservationService.getReservationById(id)));
     }
 
     @GetMapping("/all/{userId}")
@@ -41,9 +41,9 @@ public class ReservationController {
                                                                      @RequestParam(required = false, defaultValue = "10") int size,
                                                                      @RequestParam(required = false) String sort,
                                                                      @RequestParam(required = false) String direction){
-        PaginationRequest paginationRequest = new PaginationRequest(page, size, sort, direction);
+        PaginationRequest paginationRequest = PaginationRequest.of(page, size, sort, direction);
         return ResponseEntity.ok(ApiResponse
-                .success(reservationService.getAllReservationByUserId(userId, paginationRequest)));
+                .of(reservationService.getAllReservationByUserId(userId, paginationRequest)));
     }
 
     @GetMapping("/all")
@@ -51,7 +51,7 @@ public class ReservationController {
     @PreAuthorize("hasAnyAuthority('librarian.read', 'admin.read')")
     public ResponseEntity<ApiResponse<?>> getAllReservations(@RequestBody PaginationRequest request){
         return ResponseEntity.ok(ApiResponse
-                .success(reservationService.getAllReservations(request)));
+                .of(reservationService.getAllReservations(request)));
     }
 
     @DeleteMapping("/{reservationId}")
@@ -60,7 +60,7 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<?>> deleteReservation(@PathVariable String reservationId,
                                                             @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
         return ResponseEntity.ok(ApiResponse
-                .success(reservationService.deleteReservation(reservationId, authenticatedUser)));
+                .of(reservationService.deleteReservation(reservationId, authenticatedUser)));
     }
 
     @DeleteMapping("/all/{userId}")

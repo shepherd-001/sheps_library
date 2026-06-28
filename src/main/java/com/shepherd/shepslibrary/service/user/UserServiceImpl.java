@@ -2,19 +2,18 @@ package com.shepherd.shepslibrary.service.user;
 
 import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
-import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
+import com.shepherd.shepslibrary.common.request.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.response.RegisterUserResponse;
 import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.model.UserRole;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
-import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
+import com.shepherd.shepslibrary.common.exceptions.AlreadyExistsException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
 import com.shepherd.shepslibrary.service.userRoleAndPermission.role.RoleService;
-import com.shepherd.shepslibrary.utils.AppUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import static com.shepherd.shepslibrary.utils.RoleUtils.MEMBER;
@@ -38,7 +35,7 @@ public class UserServiceImpl implements UserService {
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
     private final MailNotificationService mailNotificationService;
-//    private final EmailValidationService emailValidationService;
+    //    private final EmailValidationService emailValidationService;
 //    private final PasswordValidationService passwordValidationService;
     private final UserMapper userMapper;
     private final RoleService roleService;
@@ -62,7 +59,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateRegisterRequest(RegisterUserRequest registerUserRequest) {
-        if(userRepository.existsByEmailIgnoreCase(registerUserRequest.email().trim()))
+        if (userRepository.existsByEmailIgnoreCase(registerUserRequest.email().trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
 //        emailValidationService.checkAndValidateEmail(registerUserRequest.getEmail());
 //        passwordValidationService.validatePasswordNotBreached(registerUserRequest.getPassword());
@@ -81,26 +78,9 @@ public class UserServiceImpl implements UserService {
     )
     public PaginationResponse<UserResponse> getAllUsersByRole(String role, PaginationRequest paginationRequest) {
         log.info("==>> Fetching all users by role {}", role);
-        Pageable pageable = AppUtils.createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
+        Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Page<User> users = userRepository.findAllByRoleName(role, pageable);
-        return mapToPaginatedUserResponse(users);
-    }
-
-    private PaginationResponse<UserResponse> mapToPaginatedUserResponse(Page<User> users) {
-        List<UserResponse> content = users.isEmpty() ? Collections.emptyList() :
-                users.stream().map(userMapper::mapToUserResponse).toList();
-
-        return PaginationResponse.<UserResponse>builder()
-                .content(content)
-                .page(users.getNumber() + 1)
-                .size(users.getSize())
-                .numberOfElements(users.getNumberOfElements())
-                .totalElements(users.getTotalElements())
-                .totalPages(users.getTotalPages())
-                .hasNext(users.hasNext())
-                .hasPrevious(users.hasPrevious())
-                .last(users.isLast())
-                .build();
+        return PaginationResponse.map(users, userMapper::mapToUserResponse);
     }
 
     @Override
@@ -111,8 +91,8 @@ public class UserServiceImpl implements UserService {
     )
     public PaginationResponse<UserResponse> getAllUsersByStatus(boolean status, PaginationRequest paginationRequest) {
         log.info("==>> Fetching all users by status {}", status);
-        Pageable pageable = AppUtils.createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
+        Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Page<User> users = userRepository.findAllByEnabled(status, pageable);
-        return mapToPaginatedUserResponse(users);
+        return PaginationResponse.map(users, userMapper::mapToUserResponse);
     }
 }

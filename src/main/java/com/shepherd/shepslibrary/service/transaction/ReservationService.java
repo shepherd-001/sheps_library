@@ -1,7 +1,7 @@
 package com.shepherd.shepslibrary.service.transaction;
 
 import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
-import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
+import com.shepherd.shepslibrary.common.request.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.response.ReservationResponse;
 import com.shepherd.shepslibrary.security.AuthenticatedUser;
 

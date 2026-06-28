@@ -29,7 +29,7 @@ public class AdminController {
     @PreAuthorize("hasAuthority('admin.create')")
     public ResponseEntity<ApiResponse<?>> inviteLibrarian(@Valid @RequestBody InviteLibrarianRequest inviteLibrarianRequest){
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse
-                .success("Librarian invited successfully", adminService.inviteLibrarian(inviteLibrarianRequest)));
+                .of("Librarian invited successfully", adminService.inviteLibrarian(inviteLibrarianRequest)));
     }
 
     @PostMapping("/resend-librarian-invite")
@@ -39,7 +39,7 @@ public class AdminController {
                                                       @NotBlank(message = ValidationMessage.BLANK_EMAIL)
                                                       @Pattern(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
                                                       String inviteeEmail){
-        return ResponseEntity.ok(ApiResponse.success(adminService.resendInvite(inviteeEmail)));
+        return ResponseEntity.ok(ApiResponse.of(adminService.resendInvite(inviteeEmail)));
     }
 
     @PostMapping("/add-role")
@@ -47,7 +47,7 @@ public class AdminController {
     @PreAuthorize("hasAuthority('admin.create')")
     public ResponseEntity<ApiResponse<?>> addRole(@Valid @RequestBody AddRoleRequest addRoleRequest){
         return ResponseEntity.ok(ApiResponse
-                .success(adminService.addRole(addRoleRequest)));
+                .of(adminService.addRole(addRoleRequest)));
     }
 
     @PutMapping("/assign-permission-to-role")
@@ -55,7 +55,7 @@ public class AdminController {
     @PreAuthorize("hasAuthority('admin.update')")
     public ResponseEntity<ApiResponse<?>> assignPermissionsToRole(@Valid @RequestBody AssignPermissionRequest assignPermissionRequest){
         return ResponseEntity.ok(ApiResponse
-                .success(adminService.assignPermissionsToRole(assignPermissionRequest)));
+                .of(adminService.assignPermissionsToRole(assignPermissionRequest)));
     }
 
     @DeleteMapping("/delete-role")
@@ -63,6 +63,6 @@ public class AdminController {
     @PreAuthorize("hasAuthority('admin.create')")
     public ResponseEntity<ApiResponse<?>> deleteRole(@RequestParam String roleName){
         return ResponseEntity.ok(ApiResponse
-                .success(adminService.deleteRole(roleName)));
+                .of(adminService.deleteRole(roleName)));
     }
 }

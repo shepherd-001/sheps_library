@@ -20,7 +20,7 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<?>> signup(@Valid @RequestBody RegisterUserRequest registerRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse
-                .success("User registered successfully", userService.registerUser(registerRequest)));
+                .of("User registered successfully", userService.registerUser(registerRequest)));
     }
 
     @GetMapping("/all/role")
@@ -31,9 +31,9 @@ public class UserController {
                                                              @RequestParam(required = false, defaultValue = "10") int size,
                                                              @RequestParam(required = false) String sort,
                                                              @RequestParam(required = false) String direction){
-        PaginationRequest paginationRequest = new PaginationRequest(page, size, sort, direction);
+        PaginationRequest paginationRequest = PaginationRequest.of(page, size, sort, direction);
         return ResponseEntity.ok(ApiResponse
-                .success(userService.getAllUsersByRole(role, paginationRequest)));
+                .of(userService.getAllUsersByRole(role, paginationRequest)));
     }
 
     @GetMapping("/all/status")
@@ -44,8 +44,8 @@ public class UserController {
                                                               @RequestParam(required = false, defaultValue = "10") int size,
                                                               @RequestParam(required = false) String sort,
                                                               @RequestParam(required = false) String direction){
-        PaginationRequest paginationRequest = new PaginationRequest(page, size, sort, direction);
+        PaginationRequest paginationRequest = PaginationRequest.of(page, size, sort, direction);
         return ResponseEntity.ok(ApiResponse
-                .success(userService.getAllUsersByStatus(status, paginationRequest)));
+                .of(userService.getAllUsersByStatus(status, paginationRequest)));
     }
 }

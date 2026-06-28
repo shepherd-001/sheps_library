@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.service.notification;
 
-import com.shepherd.shepslibrary.exceptions.MailSenderException;
+import com.shepherd.shepslibrary.common.exceptions.MailSenderException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;

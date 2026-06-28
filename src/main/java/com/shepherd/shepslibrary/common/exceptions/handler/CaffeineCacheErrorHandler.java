@@ -1,4 +1,4 @@
-package com.shepherd.shepslibrary.exceptions.handler;
+package com.shepherd.shepslibrary.common.exceptions.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;

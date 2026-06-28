@@ -2,8 +2,8 @@ package com.shepherd.shepslibrary.service.userRoleAndPermission.permission;
 
 import com.shepherd.shepslibrary.data.model.Permission;
 import com.shepherd.shepslibrary.data.repository.PermissionRepository;
-import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
-import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
+import com.shepherd.shepslibrary.common.exceptions.AlreadyExistsException;
+import com.shepherd.shepslibrary.common.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;

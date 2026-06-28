@@ -6,12 +6,12 @@ import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
 import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
 import com.shepherd.shepslibrary.data.dto.response.AddBookResponse;
 import com.shepherd.shepslibrary.data.dto.response.BookResponse;
-import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
+import com.shepherd.shepslibrary.common.request.PaginationResponse;
 import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.repository.BookRepository;
-import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
-import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
-import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
+import com.shepherd.shepslibrary.common.exceptions.AlreadyExistsException;
+import com.shepherd.shepslibrary.common.exceptions.ResourceNotFoundException;
+import com.shepherd.shepslibrary.common.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.mapper.BookMapper;
 import com.shepherd.shepslibrary.specification.BookSpecification;
 import com.shepherd.shepslibrary.utils.AppUtils;
@@ -27,11 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
-
-import static com.shepherd.shepslibrary.utils.AppUtils.createPageRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -80,7 +76,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public Book fetchBookById(String bookId) {
         return bookRepository.findById(bookId).orElseThrow
-                (()-> new ResourceNotFoundException("Book with the provided ID not found"));
+                (() -> new ResourceNotFoundException("Book with the provided ID not found"));
     }
 
     @Override
@@ -89,7 +85,7 @@ public class BookServiceImpl implements BookService {
         log.info("==>> Fetching book by isbn");
         return bookRepository.findByIsbn(isbn)
                 .map(bookMapper::mapToBookResponse)
-                .orElseThrow(()-> new ResourceNotFoundException("Book with the provided ISBN not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Book with the provided ISBN not found"));
     }
 
     @Override
@@ -110,26 +106,10 @@ public class BookServiceImpl implements BookService {
             unless = "#result == null || #result.content.isEmpty() ||  #paginationRequest.page > 5"
     )
     public PaginationResponse<BookResponse> getAllBooks(PaginationRequest paginationRequest) {
-        Pageable pageable = createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
+        Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Page<Book> books = bookRepository.findAll(pageable);
         log.info("==>> All books fetched");
-        return mapToPaginatedBookResponse(books);
-    }
-
-    private PaginationResponse<BookResponse> mapToPaginatedBookResponse(Page<Book> books) {
-        List<BookResponse> content = books.isEmpty() ? Collections.emptyList() :
-                books.stream().map(bookMapper::mapToBookResponse).toList();
-        return PaginationResponse.<BookResponse>builder()
-                .content(content)
-                .page(books.getNumber() + 1)
-                .size(books.getSize())
-                .numberOfElements(books.getNumberOfElements())
-                .totalElements(books.getTotalElements())
-                .totalPages(books.getTotalPages())
-                .hasNext(books.hasNext())
-                .hasPrevious(books.hasPrevious())
-                .last(books.isLast())
-                .build();
+        return PaginationResponse.map(books, bookMapper::mapToBookResponse);
     }
 
     @Override
@@ -138,9 +118,9 @@ public class BookServiceImpl implements BookService {
                     "':author:'+#filterBookRequest.author+':genre:'+#filterBookRequest.genre)",
             unless = "#result == null || #result.content.isEmpty() || #paginationRequest.page > 5")
     public PaginationResponse<BookResponse> filterBook(FilterBookRequest filterBookRequest, PaginationRequest paginationRequest) {
-        Pageable pageable = createPageRequest(paginationRequest, ALLOWED_SORT_FIELDS);
+        Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Specification<Book> bookSpecification = Specification.where(
-                BookSpecification.hasTitle(filterBookRequest.title()))
+                        BookSpecification.hasTitle(filterBookRequest.title()))
                 .and(BookSpecification.hasAuthor(filterBookRequest.title()))
                 .and(BookSpecification.hasGenre(filterBookRequest.genre()));
         Page<Book> books = bookRepository.findAll(bookSpecification, pageable);
@@ -148,7 +128,7 @@ public class BookServiceImpl implements BookService {
                 filterBookRequest.title(),
                 filterBookRequest.author(),
                 filterBookRequest.genre());
-        return mapToPaginatedBookResponse(books);
+        return PaginationResponse.map(books, bookMapper::mapToBookResponse);
     }
 
     @Override
@@ -156,7 +136,7 @@ public class BookServiceImpl implements BookService {
     @CacheEvict(value = "bookCache", key = "#bookId")
     public void deleteBook(String bookId) {
         int deleted = bookRepository.deleteByIdReturningCount(bookId);
-        if(deleted == 0)
+        if (deleted == 0)
             log.warn("==>> Attempted to delete a non-existing book");
         else log.info("==>> Book deleted successfully");
     }

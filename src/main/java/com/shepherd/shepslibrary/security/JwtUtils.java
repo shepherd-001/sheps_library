@@ -2,7 +2,7 @@ package com.shepherd.shepslibrary.security;
 
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.TokenRepository;
-import com.shepherd.shepslibrary.exceptions.InvalidJwtException;
+import com.shepherd.shepslibrary.common.exceptions.InvalidJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;

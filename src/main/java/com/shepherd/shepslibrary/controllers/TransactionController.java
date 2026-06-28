@@ -26,7 +26,7 @@ public class TransactionController {
     public ResponseEntity<ApiResponse<?>> borrowBook(@Valid @RequestBody BorrowBookRequest borrowBookRequest,
                                                      @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
         return ResponseEntity.ok(ApiResponse
-                .success(transactionService.borrowBook(borrowBookRequest, authenticatedUser)));
+                .of(transactionService.borrowBook(borrowBookRequest, authenticatedUser)));
     }
 
     @PutMapping("/return-book")
@@ -35,7 +35,7 @@ public class TransactionController {
     public ResponseEntity<ApiResponse<?>> returnBook(@RequestParam @NotBlank(message = ValidationMessage.NULL_TRANSACTION_ID)
                                                          String transactionId){
         return ResponseEntity.ok(ApiResponse
-                .success(transactionService.returnBook(transactionId)));
+                .of(transactionService.returnBook(transactionId)));
     }
 
     @GetMapping("/all/{userId}")
@@ -45,9 +45,9 @@ public class TransactionController {
                                                                      @RequestParam(required = false, defaultValue = "10") int size,
                                                                      @RequestParam(required = false) String sort,
                                                                      @RequestParam(required = false) String direction){
-        PaginationRequest paginationRequest = new PaginationRequest(page, size, sort, direction);
+        PaginationRequest paginationRequest = PaginationRequest.of(page, size, sort, direction);
         return ResponseEntity.ok(ApiResponse
-                .success(transactionService.getAllTransactionByUserId(userId, paginationRequest)));
+                .of(transactionService.getAllTransactionByUserId(userId, paginationRequest)));
     }
 
     @GetMapping("/all")
@@ -55,6 +55,6 @@ public class TransactionController {
     @PreAuthorize("hasAnyAuthority('librarian.read', 'admin.read')")
     public ResponseEntity<ApiResponse<?>> getAllTransactions(@RequestBody PaginationRequest paginationRequest){
         return ResponseEntity.ok(ApiResponse
-                .success(transactionService.getAllTransactions(paginationRequest)));
+                .of(transactionService.getAllTransactions(paginationRequest)));
     }
 }
