@@ -1,8 +1,8 @@
 package com.shepherd.shepslibrary.service.transaction;
 
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
-import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
-import com.shepherd.shepslibrary.common.request.PaginationResponse;
+import com.shepherd.shepslibrary.common.request.PaginationRequest;
+import com.shepherd.shepslibrary.common.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.response.TransactionResponse;
 import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.model.Transaction;

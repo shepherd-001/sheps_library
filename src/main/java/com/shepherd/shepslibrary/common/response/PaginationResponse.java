@@ -1,4 +1,4 @@
-package com.shepherd.shepslibrary.common.request;
+package com.shepherd.shepslibrary.common.response;
 
 import org.springframework.data.domain.Page;
 

@@ -3,7 +3,7 @@ package com.shepherd.shepslibrary.controllers;
 import com.shepherd.shepslibrary.common.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.FilterBookRequest;
-import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
+import com.shepherd.shepslibrary.common.request.PaginationRequest;
 import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
 import com.shepherd.shepslibrary.service.book.BookService;
 import com.shepherd.shepslibrary.utils.RegexPattern;

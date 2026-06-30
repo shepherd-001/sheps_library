@@ -1,4 +1,4 @@
-package com.shepherd.shepslibrary.data.dto.request;
+package com.shepherd.shepslibrary.common.request;
 
 
 import lombok.extern.slf4j.Slf4j;

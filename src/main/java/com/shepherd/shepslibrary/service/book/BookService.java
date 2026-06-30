@@ -2,11 +2,11 @@ package com.shepherd.shepslibrary.service.book;
 
 import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.FilterBookRequest;
-import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
+import com.shepherd.shepslibrary.common.request.PaginationRequest;
 import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
 import com.shepherd.shepslibrary.data.dto.response.AddBookResponse;
 import com.shepherd.shepslibrary.data.dto.response.BookResponse;
-import com.shepherd.shepslibrary.common.request.PaginationResponse;
+import com.shepherd.shepslibrary.common.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.model.Book;
 
 public interface BookService {

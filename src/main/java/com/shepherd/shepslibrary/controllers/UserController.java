@@ -1,7 +1,7 @@
 package com.shepherd.shepslibrary.controllers;
 
 import com.shepherd.shepslibrary.common.response.ApiResponse;
-import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
+import com.shepherd.shepslibrary.common.request.PaginationRequest;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.service.user.UserService;
 import jakarta.validation.Valid;

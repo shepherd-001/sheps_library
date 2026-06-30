@@ -4,6 +4,7 @@ import com.shepherd.shepslibrary.data.model.Gender;
 import com.shepherd.shepslibrary.utils.RegexPattern;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import com.shepherd.shepslibrary.utils.validator.EnumValid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -20,7 +21,7 @@ public record RegisterUserRequest(
         String lastName,
 
         @NotBlank(message = ValidationMessage.BLANK_EMAIL)
-        @Pattern(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
+        @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
         String email,
 
         @NotBlank(message = ValidationMessage.BLANK_PASSWORD)

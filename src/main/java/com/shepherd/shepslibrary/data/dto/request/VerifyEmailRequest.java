@@ -4,7 +4,7 @@ import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.constraints.NotBlank;
 
 public record VerifyEmailRequest(
-//    @Pattern(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
+//    @Email(regexp = RegexPattern.EMAIL, message = ValidationMessage.INVALID_EMAIL)
 //    @NotBlank(message = ValidationMessage.BLANK_EMAIL)
 //    String email,
 

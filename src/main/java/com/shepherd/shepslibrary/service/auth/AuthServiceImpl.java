@@ -1,5 +1,6 @@
 package com.shepherd.shepslibrary.service.auth;
 
+import com.shepherd.shepslibrary.common.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
@@ -11,7 +12,6 @@ import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
-import com.shepherd.shepslibrary.common.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
 import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
@@ -31,9 +31,9 @@ import static com.shepherd.shepslibrary.utils.ErrorMessage.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthServiceImpl implements AuthService{
+public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
-//    private final PasswordValidationService passwordValidationService;
+    //    private final PasswordValidationService passwordValidationService;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
@@ -47,9 +47,9 @@ public class AuthServiceImpl implements AuthService{
         ShepsToken shepsToken = tokenService.validateToken(request.token(), TokenType.EMAIL_CONFIRMATION);
         User user = shepsToken.getUser();
 
-        if(user.isEmailVerified())
+        if (user.isEmailVerified())
             throw new UserAlreadyEnabledException("User is already verified");
-        if(user.isEnabled())
+        if (user.isEnabled())
             throw new UserAlreadyEnabledException("User is already enabled");
 
         user.setEnabled(true);
@@ -81,7 +81,7 @@ public class AuthServiceImpl implements AuthService{
         User user = authenticatedUser.getUser();
         validatePasswordChange(user.getPassword(), changePasswordRequest);
         user.setPassword(passwordEncoder.encode(changePasswordRequest.newPassword()));
-        user.setTokenVersion(user.getTokenVersion() +1); // this invalidates all existing tokens
+        user.setTokenVersion(user.getTokenVersion() + 1); // invalidates all existing tokens
         userRepository.save(user);
         log.info("==>> Password changed successfully");
         return tokenService.generateJwtTokens(user);
@@ -89,7 +89,7 @@ public class AuthServiceImpl implements AuthService{
 //
 
     private void validatePasswordChange(String currentEncodedPassword, ChangePasswordRequest request) {
-        if (!passwordEncoder.matches(request.newPassword(), currentEncodedPassword))
+        if (!passwordEncoder.matches(request.currentPassword(), currentEncodedPassword))
             throw new BadCredentialsException(INVALID_CURRENT_PASSWORD);
 
         if (request.currentPassword().equals(request.newPassword()))
