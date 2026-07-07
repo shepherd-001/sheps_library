@@ -1,20 +1,19 @@
 package com.shepherd.shepslibrary.service.transaction;
 
-import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
+import com.shepherd.shepslibrary.common.exceptions.ShepsLibraryException;
+import com.shepherd.shepslibrary.common.exceptions.TransactionException;
 import com.shepherd.shepslibrary.common.request.PaginationRequest;
 import com.shepherd.shepslibrary.common.response.PaginationResponse;
+import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
 import com.shepherd.shepslibrary.data.dto.response.TransactionResponse;
 import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.model.Transaction;
 import com.shepherd.shepslibrary.data.model.TransactionType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.TransactionRepository;
-import com.shepherd.shepslibrary.common.exceptions.ShepsLibraryException;
-import com.shepherd.shepslibrary.common.exceptions.TransactionException;
 import com.shepherd.shepslibrary.mapper.TransactionMapper;
 import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.book.BookService;
-import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Set;
+import java.util.UUID;
 
 import static com.shepherd.shepslibrary.utils.AppUtils.MAX_BORROW_MONTHS;
 
@@ -35,9 +35,10 @@ import static com.shepherd.shepslibrary.utils.AppUtils.MAX_BORROW_MONTHS;
 public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final BookService bookService;
-    private final MailNotificationService mailNotificationService;
+//    private final MailNotificationService mailNotificationService;
     private final TransactionMapper transactionMapper;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "borrowDateTime", "returnDateTime");
+    private static final String TRANSACTION_CACHE = "transactionCache";
 
     @Override
     @Transactional
@@ -81,7 +82,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionResponse returnBook(String transactionId) {
+    public TransactionResponse returnBook(UUID transactionId) {
         Transaction transaction = getTransactionById(transactionId);
         Book book = transaction.getBook();
         book.setAvailable(true);
@@ -94,16 +95,16 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionMapper.mapToResponse(savedTransaction);
     }
 
-    private Transaction getTransactionById(String transactionId) {
+    private Transaction getTransactionById(UUID transactionId) {
         return transactionRepository.findById(transactionId).orElseThrow(
                 () -> new ShepsLibraryException("Transaction with the provided ID not found"));
     }
 
     @Override
-    @Cacheable(value = "transactionCache",
+    @Cacheable(value = TRANSACTION_CACHE,
             key = "#paginationRequest.toCacheKey('user:'+userId)",
-            unless = "#result == null || #result.content.isEmpty()")
-    public PaginationResponse<TransactionResponse> getAllTransactionByUserId(String userId, PaginationRequest paginationRequest) {
+            unless = "#result == null || #result.items.isEmpty()")
+    public PaginationResponse<TransactionResponse> getAllTransactionByUserId(UUID userId, PaginationRequest paginationRequest) {
         Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Page<Transaction> transactions = transactionRepository.findAllByUserId(userId, pageable);
         log.info("Fetched all transactions by user id");
@@ -112,9 +113,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Cacheable(
-            value = "transactionCache",
+            value = TRANSACTION_CACHE,
             key = "#paginationRequest.toCacheKey('transactions')",
-            unless = "#result == null || #result.content.isEmpty()"
+            unless = "#result == null || #result.items.isEmpty()"
     )
     public PaginationResponse<TransactionResponse> getAllTransactions(PaginationRequest paginationRequest) {
         Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);

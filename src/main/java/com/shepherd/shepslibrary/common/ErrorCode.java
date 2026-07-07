@@ -2,6 +2,8 @@ package com.shepherd.shepslibrary.common;
 
 public enum ErrorCode {
     VALIDATION_ERROR,
+    INVALID_PARAMETER,
+    MISSING_PATH_VARIABLE,
     RESOURCE_NOT_FOUND,
     RESOURCE_ALREADY_EXISTS,
     BUSINESS_RULE_VIOLATION,

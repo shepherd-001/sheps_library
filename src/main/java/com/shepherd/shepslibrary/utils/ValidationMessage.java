@@ -7,7 +7,7 @@ public final class ValidationMessage {
     public static final String BLANK_PASSWORD = "Password is required";
     public static final String BLANK_TOKEN = "Token is required";
     public static final String BLANK_GENDER = "Gender is required";
-//Username may only contain alphanumeric characters or single hyphens, and cannot begin or end with a hyphen.
+
     public static final String INVALID_FIRST_NAME = "First name can only contain letters, a single apostrophe, or hyphen, and cannot start or end with apostrophes or hyphens";
     public static final String INVALID_LAST_NAME = "Last name can only contain letters, a single apostrophe, or hyphen, and cannot start or end with apostrophes or hyphens";
 //    public static final String INVALID_FIRST_NAME = "Invalid first name";
@@ -30,6 +30,11 @@ public final class ValidationMessage {
     public static final String INVALID_AUTHOR = "The author's name is invalid. Names can only contain letters, spaces, apostrophes, or hyphens";
     public static final String INVALID_GENRE = "The genre is invalid. Genres can only contain letters, spaces, or hyphens";
     public static final String INVALID_ISBN = "Book ISBN must be exactly 13 digits in length";
+
+
+    public static final String TITLE_TOO_LONG = "Book title is too long";
+    public static final String AUTHOR_NAME_TOO_LONG = "Author name is too long";
+    public static final String GENRE_TOO_LONG = "Genre is too long";
 
 
     public static final String BLANK_BOOK_ID = "Book id is required";

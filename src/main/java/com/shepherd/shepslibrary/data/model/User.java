@@ -4,6 +4,8 @@ import com.shepherd.shepslibrary.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,6 +18,10 @@ import lombok.*;
         @Index(name = "idx_tokenVersion", columnList = "tokenVersion")
 })
 public class User extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
     private String firstName;
     private String lastName;
     @Column(unique = true)
@@ -31,5 +37,5 @@ public class User extends BaseEntity {
     private boolean enabled;
     private boolean emailVerified;
 
-    private int tokenVersion = 0; // key for revoking user tokens
+    private int tokenVersion = 0;
 }

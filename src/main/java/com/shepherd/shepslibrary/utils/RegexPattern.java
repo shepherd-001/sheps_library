@@ -11,9 +11,13 @@ public final class RegexPattern {
 //    public static final String PERSON_NAME = "^\\s*[A-Za-z]+(?:[-'][A-Za-z]+)?\\s*$";
 
 
-    public static final String BOOK_TITLE = "^\\s*[a-zA-Z0-9](?:[a-zA-Z0-9\\s.,'!?()-]{0,98}[a-zA-Z0-9])?\\s*$";
-    public static final String BOOK_AUTHOR = "^\\s*[a-zA-Z](?:[a-zA-Z' -]{0,73}[a-zA-Z])?\\s*$";
-    public static final String BOOK_GENRE = "^\\s*[a-zA-Z]+(?:[ -][a-zA-Z]+){0,19}\\s*$";
+//    public static final String BOOK_TITLE = "^\\s*[a-zA-Z0-9](?:[a-zA-Z0-9\\s.,'!?()-]{0,98}[a-zA-Z0-9])?\\s*$";
+//    public static final String BOOK_AUTHOR = "^\\s*[a-zA-Z](?:[a-zA-Z' -]{0,73}[a-zA-Z])?\\s*$";
+//    public static final String BOOK_GENRE = "^\\s*[a-zA-Z]+(?:[ -][a-zA-Z]+){0,19}\\s*$";
+
+    public static final String BOOK_TITLE = "^(?!.*\\p{Cntrl}).+$";
+    public static final String BOOK_AUTHOR = "^[\\p{L}.'\\- ]+$";
+    public static final String BOOK_GENRE = "^[\\p{L}'\\- ]+$";
     public static final String ISBN = "^\\d{13}$";
 
 

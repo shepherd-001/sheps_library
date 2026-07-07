@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @AllArgsConstructor
@@ -16,6 +17,10 @@ import java.time.Instant;
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
 public class Transaction extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

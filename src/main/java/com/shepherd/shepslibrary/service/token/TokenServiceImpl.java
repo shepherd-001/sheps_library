@@ -1,11 +1,11 @@
 package com.shepherd.shepslibrary.service.token;
 
+import com.shepherd.shepslibrary.common.exceptions.ShepsTokenException;
 import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.TokenRepository;
-import com.shepherd.shepslibrary.common.exceptions.ShepsTokenException;
 import com.shepherd.shepslibrary.security.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.time.temporal.ChronoUnit;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TokenServiceImpl implements TokenService{
+public class TokenServiceImpl implements TokenService {
     private final TokenRepository tokenRepository;
     private final JwtUtils jwtUtils;
     @Value("${jwt_access_expiration}")
@@ -36,8 +36,8 @@ public class TokenServiceImpl implements TokenService{
     private static final long DEFAULT_EXPIRATION_TIME = 1800L;
 
 
-    private long getExpirationTime(TokenType tokenType){
-        return switch (tokenType){
+    private long getExpirationTime(TokenType tokenType) {
+        return switch (tokenType) {
             case RESET_PASSWORD -> resetPasswordExpiration;
             case EMAIL_CONFIRMATION -> emailConfirmationExpiration;
             case LIBRARIAN_INVITATION -> librarianInviteExpiration;
@@ -59,7 +59,7 @@ public class TokenServiceImpl implements TokenService{
                 .expirationTime(Instant.now().plusSeconds(expirationTimeInSeconds))
                 .build();
 
-         revokeAllUserTokens(user.getId(), tokenType);
+        revokeAllUserTokens(user.getEmail(), tokenType);
         tokenRepository.save(shepsToken);
         log.info("==>> Created a new {} token for user {}", tokenType, user.getEmail());
         return token;
@@ -85,7 +85,7 @@ public class TokenServiceImpl implements TokenService{
 
     @Override
     public ShepsToken validateToken(String token, TokenType tokenType) {
-        if (!jwtUtils.isValidToken(token)){
+        if (!jwtUtils.isValidToken(token)) {
             log.error("==>> Not a valid JWT token.");
             throw new ShepsTokenException("Token is invalid");
         }
@@ -101,8 +101,8 @@ public class TokenServiceImpl implements TokenService{
     }
 
     private void validateTokenExpiration(ShepsToken shepsToken) {
-        if(shepsToken.getExpirationTime() != null &&
-                shepsToken.getExpirationTime().isBefore(Instant.now())){
+        if (shepsToken.getExpirationTime() != null &&
+                shepsToken.getExpirationTime().isBefore(Instant.now())) {
             throw new ShepsTokenException("Token is expired");
         }
     }
@@ -122,8 +122,8 @@ public class TokenServiceImpl implements TokenService{
 
 
     @Override
-    public void revokeAllUserTokens(String userId, TokenType tokenType) {
-        int revoked = tokenRepository.revokeAllTokensForUser(userId, tokenType);
+    public void revokeAllUserTokens(String userEmail, TokenType tokenType) {
+        int revoked = tokenRepository.revokeAllTokensForUser(userEmail, tokenType);
         log.info("==>> Revoked {} tokens", revoked);
     }
 

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Builder
@@ -18,6 +19,10 @@ import java.time.Instant;
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
 public class ShepsToken extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
     @Column(unique = true, length = 500)
     private String token;
     @Column(length = 500)

@@ -6,12 +6,12 @@ import java.time.Instant;
 
 public record TransactionResponse(
         String id,
-        TransactionType type,
+        TransactionType transactionType,
         String firstName,
         String lastName,
         String title,
         String author,
         String genre,
-        Instant borrowedDateTime,
+        Instant borrowDateTime,
         Instant returnDateTime
 ) {}

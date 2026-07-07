@@ -17,6 +17,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -100,14 +101,24 @@ public class GlobalExceptionHandler {
                 .getFieldErrors()
                 .forEach(error ->
                         errors.put(error.getField(), error.getDefaultMessage()));
-
         return ResponseEntity.badRequest().body(ErrorResponse.validationError(errors, request.getRequestURI()));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponse> handleEnumConversionError(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
-        String message = "Invalid value for parameter '%s': %s".formatted(ex.getName(), ex.getValue());
-        return ResponseEntity.badRequest().body(ErrorResponse.of(message, ErrorCode.SHEP_LIBRARY_ERROR, request.getRequestURI()));
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        String parameterName = ex.getParameter().getParameterName();
+    String message = String.format("Invalid value '%s' for parameter '%s'. Expected a valid %s format.",
+                                   ex.getValue(),
+                                   parameterName,
+                                   ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown");
+        return ResponseEntity.badRequest().body(ErrorResponse.of(message, ErrorCode.INVALID_PARAMETER, request.getRequestURI()));
+    }
+
+    @ExceptionHandler(MissingPathVariableException.class)
+    public ResponseEntity<ErrorResponse> handleMissingPathVariable(MissingPathVariableException ex, HttpServletRequest request) {
+        String parameterName = ex.getParameter().getParameterName();
+        String message = String.format("Parameter '%s' is required", parameterName);
+        return ResponseEntity.badRequest().body(ErrorResponse.of(message, ErrorCode.MISSING_PATH_VARIABLE, request.getRequestURI()));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

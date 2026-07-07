@@ -10,8 +10,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface TokenRepository extends JpaRepository<ShepsToken, String> {
+public interface TokenRepository extends JpaRepository<ShepsToken, UUID> {
     @Query("select t from ShepsToken t where t.token = :token or t.refreshToken = :token and t.tokenType = :tokenType")
     Optional<ShepsToken> findByTokenAndTokenType(String token, @Param("tokenType")TokenType tokenType);
 

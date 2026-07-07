@@ -1,7 +1,7 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.common.response.ApiResponse;
 import com.shepherd.shepslibrary.common.request.PaginationRequest;
+import com.shepherd.shepslibrary.common.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.service.user.UserService;
 import jakarta.validation.Valid;
@@ -24,7 +24,6 @@ public class UserController {
     }
 
     @GetMapping("/all/role")
-//    @PreAuthorize("hasRole('ADMIN')")
     @PreAuthorize("hasAuthority('admin.read')")
     public ResponseEntity<ApiResponse<?>> getAllUsersByRole(@RequestParam String role,
                                                              @RequestParam(required = false, defaultValue = "1") int page,
@@ -37,7 +36,6 @@ public class UserController {
     }
 
     @GetMapping("/all/status")
-//    @PreAuthorize("hasRole('ADMIN')")
     @PreAuthorize("hasAuthority('admin.read')")
     public ResponseEntity<ApiResponse<?>> getAllUsersByStatus(@RequestParam boolean status,
                                                               @RequestParam(required = false, defaultValue = "1") int page,

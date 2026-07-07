@@ -1,5 +1,8 @@
 package com.shepherd.shepslibrary.service.transaction;
 
+import com.shepherd.shepslibrary.common.exceptions.ReservationException;
+import com.shepherd.shepslibrary.common.exceptions.ResourceNotFoundException;
+import com.shepherd.shepslibrary.common.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.common.request.PaginationRequest;
 import com.shepherd.shepslibrary.common.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.response.ReservationResponse;
@@ -7,9 +10,6 @@ import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.model.Reservation;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.ReservationRepository;
-import com.shepherd.shepslibrary.common.exceptions.ReservationException;
-import com.shepherd.shepslibrary.common.exceptions.ResourceNotFoundException;
-import com.shepherd.shepslibrary.common.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.mapper.ReservationMapper;
 import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.book.BookService;
@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Set;
+import java.util.UUID;
 
 import static com.shepherd.shepslibrary.utils.ErrorMessage.RESERVATION_NOT_FOUND;
 
@@ -38,9 +39,10 @@ public class ReservationServiceImpl implements ReservationService {
     private final MailNotificationService mailNotificationService;
     private final ReservationMapper reservationMapper;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "reservationDateTime");
+    private static final String RESERVATION_CACHE = "reservationCache";
 
     @Override
-    public ReservationResponse reserveBook(String bookId, AuthenticatedUser authenticatedUser) {
+    public ReservationResponse reserveBook(UUID bookId, AuthenticatedUser authenticatedUser) {
         User user = authenticatedUser.getUser();
         Book book = bookService.fetchBookById(bookId);
 
@@ -66,8 +68,8 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    @Cacheable(value = "reservationCache", key = "#reservationId")
-    public ReservationResponse getReservationById(String reservationId) {
+    @Cacheable(value = RESERVATION_CACHE, key = "#reservationId")
+    public ReservationResponse getReservationById(UUID reservationId) {
         log.info("::::: Fetching reservation by id :::::");
         return reservationRepository.findById(reservationId)
                 .map(reservationMapper::mapToReservationResponse)
@@ -77,8 +79,8 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Cacheable(value = "reservationCache",
             key = "#paginationRequest.toCacheKey('user:'+userId)",
-            unless = "#result == null || #result.content.isEmpty()")
-    public PaginationResponse<ReservationResponse> getAllReservationByUserId(String userId, PaginationRequest paginationRequest) {
+            unless = "#result == null || #result.items.isEmpty()")
+    public PaginationResponse<ReservationResponse> getAllReservationByUserId(UUID userId, PaginationRequest paginationRequest) {
         Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Page<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageable);
         log.info("==>> Fetched all user reservations");
@@ -87,9 +89,9 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     @Cacheable(
-            value = "reservationCache",
+            value =RESERVATION_CACHE,
             key = "#paginationRequest.toCacheKey('allReservations')",
-            unless = "#result == null || #result.content.isEmpty()"
+            unless = "#result == null || #result.items.isEmpty()"
     )
     public PaginationResponse<ReservationResponse> getAllReservations(PaginationRequest paginationRequest) {
         Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
@@ -100,8 +102,8 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "reservationCache", key = "#reservationId")
-    public String deleteReservation(String reservationId, AuthenticatedUser authenticatedUser) {
+    @CacheEvict(value = RESERVATION_CACHE, key = "#reservationId")
+    public String deleteReservation(UUID reservationId, AuthenticatedUser authenticatedUser) {
         User user = authenticatedUser.getUser();
         int deletedCount = reservationRepository.deleteByReservationIdAndUserId(reservationId, user.getId());
         if (deletedCount > 0) {
@@ -113,8 +115,8 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "reservationCache", key = "'user:' + #userId")
-    public void deleteAllReservation(String userId) {
+    @CacheEvict(value = RESERVATION_CACHE, key = "'user:' + #userId")
+    public void deleteAllReservation(UUID userId) {
         int deleted = reservationRepository.deleteAllByUserIdReturningCount(userId);
         if (deleted == 0)
             log.warn("==>> Attempted to delete a non-existing reservation");

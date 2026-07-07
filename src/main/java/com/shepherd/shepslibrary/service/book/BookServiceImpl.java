@@ -1,17 +1,17 @@
 package com.shepherd.shepslibrary.service.book;
 
-import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
-import com.shepherd.shepslibrary.data.dto.request.FilterBookRequest;
-import com.shepherd.shepslibrary.common.request.PaginationRequest;
-import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
-import com.shepherd.shepslibrary.data.dto.response.AddBookResponse;
-import com.shepherd.shepslibrary.data.dto.response.BookResponse;
-import com.shepherd.shepslibrary.common.response.PaginationResponse;
-import com.shepherd.shepslibrary.data.model.Book;
-import com.shepherd.shepslibrary.data.repository.BookRepository;
 import com.shepherd.shepslibrary.common.exceptions.AlreadyExistsException;
 import com.shepherd.shepslibrary.common.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.common.exceptions.ShepsLibraryException;
+import com.shepherd.shepslibrary.common.request.PaginationRequest;
+import com.shepherd.shepslibrary.common.response.PaginationResponse;
+import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
+import com.shepherd.shepslibrary.data.dto.request.FilterBookRequest;
+import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
+import com.shepherd.shepslibrary.data.dto.response.AddBookResponse;
+import com.shepherd.shepslibrary.data.dto.response.BookResponse;
+import com.shepherd.shepslibrary.data.model.Book;
+import com.shepherd.shepslibrary.data.repository.BookRepository;
 import com.shepherd.shepslibrary.mapper.BookMapper;
 import com.shepherd.shepslibrary.specification.BookSpecification;
 import com.shepherd.shepslibrary.utils.AppUtils;
@@ -28,6 +28,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +37,7 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "title", "author", "genre");
+    private static final String BOOK_CACHE = "bookCache";
 
     @Override
     public AddBookResponse addBook(AddBookRequest request) {
@@ -66,21 +68,21 @@ public class BookServiceImpl implements BookService {
 
 
     @Override
-    @Cacheable(value = "bookCache", key = "#bookId", unless = "#result == null")
-    public BookResponse getBookById(String bookId) {
+    @Cacheable(value = BOOK_CACHE, key = "#bookId", unless = "#result == null")
+    public BookResponse getBookById(UUID bookId) {
         Book book = fetchBookById(bookId);
         log.info("==>> Fetched book by id");
         return bookMapper.mapToBookResponse(book);
     }
 
     @Override
-    public Book fetchBookById(String bookId) {
+    public Book fetchBookById(UUID bookId) {
         return bookRepository.findById(bookId).orElseThrow
                 (() -> new ResourceNotFoundException("Book with the provided ID not found"));
     }
 
     @Override
-    @Cacheable(value = "bookCache", key = "#isbn", unless = "#result == null")
+    @Cacheable(value = BOOK_CACHE, key = "#isbn", unless = "#result == null")
     public BookResponse getBookByIsbn(String isbn) {
         log.info("==>> Fetching book by isbn");
         return bookRepository.findByIsbn(isbn)
@@ -90,8 +92,8 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    @CachePut(value = "bookCache", key = "#bookId")
-    public BookResponse updateBook(UpdateBookRequest updateBookRequest, String bookId) {
+    @CachePut(value = BOOK_CACHE, key = "#bookId")
+    public BookResponse updateBook(UpdateBookRequest updateBookRequest, UUID bookId) {
         Book book = fetchBookById(bookId);
         bookMapper.updateBookFromRequest(updateBookRequest, book);
         Book savedBook = bookRepository.save(book);
@@ -101,9 +103,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Cacheable(
-            value = "bookCache",
+            value = BOOK_CACHE,
             key = "#paginationRequest.toCacheKey('books')",
-            unless = "#result == null || #result.content.isEmpty() ||  #paginationRequest.page > 5"
+            unless = "#result == null || #result.items.isEmpty() ||  #paginationRequest.page > 5"
     )
     public PaginationResponse<BookResponse> getAllBooks(PaginationRequest paginationRequest) {
         Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
@@ -113,10 +115,10 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    @Cacheable(value = "bookCache",
+    @Cacheable(value = BOOK_CACHE,
             key = "#paginationRequest.toCacheKey('filter:title:'+#filterBookRequest.title+" +
                     "':author:'+#filterBookRequest.author+':genre:'+#filterBookRequest.genre)",
-            unless = "#result == null || #result.content.isEmpty() || #paginationRequest.page > 5")
+            unless = "#result == null || #result.items.isEmpty() || #paginationRequest.page > 5")
     public PaginationResponse<BookResponse> filterBook(FilterBookRequest filterBookRequest, PaginationRequest paginationRequest) {
         Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Specification<Book> bookSpecification = Specification.where(
@@ -133,8 +135,8 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "bookCache", key = "#bookId")
-    public void deleteBook(String bookId) {
+    @CacheEvict(value = BOOK_CACHE, key = "#bookId")
+    public void deleteBook(UUID bookId) {
         int deleted = bookRepository.deleteByIdReturningCount(bookId);
         if (deleted == 0)
             log.warn("==>> Attempted to delete a non-existing book");

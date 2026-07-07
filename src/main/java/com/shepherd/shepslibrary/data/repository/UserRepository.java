@@ -8,8 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByEmailIgnoreCase(String email);
     boolean existsByRoleName(String roleName);
 
@@ -18,6 +19,18 @@ public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findByEmailIgnoreCaseWithRole(@Param("email") String email);
 
     Optional<User> findByEmailIgnoreCase(String email);
-    Page<User> findAllByRoleName(String roleName, Pageable pageable);
-    Page<User> findAllByEnabled(boolean enabled, Pageable pageable);
+
+    @Query("""
+    select u from User u
+    where u.role.name = :roleName
+    and u.role.name != :excludedRoleName
+    """)
+    Page<User> findAllByRoleName(String roleName, String excludedRoleName, Pageable pageable);
+
+    @Query("""
+    select u from User u
+    where u.enabled = :enabled
+    and u.role.name != :excludedRoleName
+    """)
+    Page<User> findAllByEnabled(boolean enabled, String excludedRoleName, Pageable pageable);
 }

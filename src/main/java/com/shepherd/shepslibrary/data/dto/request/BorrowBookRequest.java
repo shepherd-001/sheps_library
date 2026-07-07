@@ -1,8 +1,10 @@
 package com.shepherd.shepslibrary.data.dto.request;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public record BorrowBookRequest(
-    String bookId,
-    Instant returnDateTime
-){}
+        UUID bookId,
+        Instant returnDateTime
+) {
+}

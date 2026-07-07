@@ -1,8 +1,8 @@
 package com.shepherd.shepslibrary.security;
 
+import com.shepherd.shepslibrary.common.exceptions.InvalidJwtException;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.repository.TokenRepository;
-import com.shepherd.shepslibrary.common.exceptions.InvalidJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

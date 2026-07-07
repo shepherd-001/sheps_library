@@ -1,11 +1,10 @@
 package com.shepherd.shepslibrary.data.model;
 
 import com.shepherd.shepslibrary.common.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.UUID;
 
 @Entity
 @AllArgsConstructor
@@ -20,6 +19,10 @@ import lombok.*;
         @Index(name = "idx_genre", columnList = "genre")
 })
 public class Book extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
     @Column(unique = true)
     private String title;
     private String author;

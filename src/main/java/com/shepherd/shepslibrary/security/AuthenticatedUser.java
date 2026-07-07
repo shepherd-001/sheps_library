@@ -1,8 +1,8 @@
 package com.shepherd.shepslibrary.security;
 
+import com.shepherd.shepslibrary.common.exceptions.UserNotVerifiedException;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.model.UserRole;
-import com.shepherd.shepslibrary.common.exceptions.UserNotVerifiedException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
