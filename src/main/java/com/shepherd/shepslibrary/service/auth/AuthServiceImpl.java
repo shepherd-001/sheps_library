@@ -1,20 +1,20 @@
 package com.shepherd.shepslibrary.service.auth;
 
+import com.shepherd.shepslibrary.common.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.data.dto.request.ChangePasswordRequest;
 import com.shepherd.shepslibrary.data.dto.request.LoginRequest;
 import com.shepherd.shepslibrary.data.dto.request.ResetPasswordRequest;
+import com.shepherd.shepslibrary.data.dto.request.VerifyEmailRequest;
 import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
-import com.shepherd.shepslibrary.data.dto.response.EmailConfirmationResponse;
+import com.shepherd.shepslibrary.data.dto.response.EmailVerificationResponse;
+import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
-import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
-import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
-import com.shepherd.shepslibrary.exceptions.UserNotVerifiedException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
+import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
-import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,15 +26,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import static com.shepherd.shepslibrary.utils.AppUtils.getCurrentUser;
 import static com.shepherd.shepslibrary.utils.ErrorMessage.*;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthServiceImpl implements AuthService{
+public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
-    private final PasswordValidationService passwordValidationService;
+    //    private final PasswordValidationService passwordValidationService;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
@@ -44,72 +43,67 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     @Transactional
-    public EmailConfirmationResponse verifyEmail(String token, String email) {
-        ShepsToken shepsToken = tokenService.validateToken(token, TokenType.EMAIL_CONFIRMATION, email);
+    public EmailVerificationResponse verifyEmail(VerifyEmailRequest request) {
+        ShepsToken shepsToken = tokenService.validateToken(request.token(), TokenType.EMAIL_CONFIRMATION);
         User user = shepsToken.getUser();
 
-        if(user.isEnabled())
+        if (user.isEmailVerified())
             throw new UserAlreadyEnabledException("User is already verified");
+        if (user.isEnabled())
+            throw new UserAlreadyEnabledException("User is already enabled");
 
         user.setEnabled(true);
+        user.setEmailVerified(true);
         userRepository.save(user);
         tokenService.deleteToken(shepsToken);
 
-        return userMapper.mapToEmailConfirmationResponse(user, tokenService.generateJwtTokens(user));
+        return userMapper.mapToEmailVerificationResponse(user, tokenService.generateJwtTokens(user));
     }
 
     @Override
-    @Transactional
-    public AuthResponse login(LoginRequest loginRequest){
-        Authentication authentication = authenticateUser(loginRequest);
-        User user = getUserByEmail(authentication.getName());
-
-        if(!user.isEnabled())
-            throw new UserNotVerifiedException(VERIFY_EMAIL_ADDRESS);
-
-        tokenService.deleteAllTokenByUserAndType(user.getEmail(), TokenType.JWT);
+    public AuthResponse login(LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
+        AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
+        User user = authenticatedUser.getUser();
+        log.info("User {} authenticated successfully", user.getEmail());
         return tokenService.generateJwtTokens(user);
     }
 
-    private Authentication authenticateUser(LoginRequest loginRequest) {
-        return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginRequest.getEmail().trim(), loginRequest.getPassword()));
-    }
-
-    private User getUserByEmail(String userEmail) {
-        return userRepository.findByEmailEqualsIgnoreCase(userEmail)
-                .orElseThrow(()-> new ResourceNotFoundException(USER_WITH_EMAIL_NOT_FOUND));
+    @Override
+    public UserResponse getAuthenticatedUser(AuthenticatedUser authenticatedUser) {
+        return userMapper.mapToUserResponse(authenticatedUser.getUser());
     }
 
     @Override
     @Transactional
-    public AuthResponse changePassword(ChangePasswordRequest changePasswordRequest) {
-        log.info("Change password request initiated for user");
-        User user = getCurrentUser();
+    public AuthResponse changePassword(ChangePasswordRequest changePasswordRequest, AuthenticatedUser authenticatedUser) {
+        User user = authenticatedUser.getUser();
         validatePasswordChange(user.getPassword(), changePasswordRequest);
-
-        user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.newPassword()));
+        user.setTokenVersion(user.getTokenVersion() + 1); // invalidates all existing tokens
         userRepository.save(user);
-        tokenService.deleteAllTokenByUserAndType(user.getEmail(), TokenType.JWT);
+        log.info("==>> Password changed successfully");
         return tokenService.generateJwtTokens(user);
     }
+//
 
     private void validatePasswordChange(String currentEncodedPassword, ChangePasswordRequest request) {
-        if (!passwordEncoder.matches(request.getCurrentPassword(), currentEncodedPassword))
+        if (!passwordEncoder.matches(request.currentPassword(), currentEncodedPassword))
             throw new BadCredentialsException(INVALID_CURRENT_PASSWORD);
 
-        if (request.getCurrentPassword().equals(request.getNewPassword()))
+        if (request.currentPassword().equals(request.newPassword()))
             throw new BadCredentialsException(SAME_OLD_AND_NEW_PASSWORD);
 
-        if (!request.getNewPassword().equals(request.getConfirmPassword()))
+        if (!request.newPassword().equals(request.confirmPassword()))
             throw new BadCredentialsException(MISMATCH_PASSWORD);
 
-        passwordValidationService.validatePasswordNotBreached(request.getNewPassword());
+//        passwordValidationService.validatePasswordNotBreached(request.getNewPassword());
     }
 
     @Override
     public String requestPasswordReset(String email) {
-        userRepository.findByEmailEqualsIgnoreCase(email.trim())
+        userRepository.findByEmailIgnoreCase(email.trim())
                 .filter(User::isEnabled)
                 .ifPresent(this::sendPasswordResetToken);
         return "If the email exists, a reset password link has been sent to your email address";
@@ -118,20 +112,21 @@ public class AuthServiceImpl implements AuthService{
     private void sendPasswordResetToken(User user) {
         String token = tokenService.generateToken(user, TokenType.RESET_PASSWORD);
         notificationService.sendResetPasswordMail(user, token);
-        log.info("Password reset token sent to: {}", user.getEmail());
+        log.info("==>> Password reset email sent to: {}", user.getEmail());
     }
 
     @Override
     @Transactional
     public AuthResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
-        log.info("::::: Initiating password reset :::::");
-        ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.getToken(),
-                TokenType.RESET_PASSWORD, resetPasswordRequest.getEmail());
-        tokenService.deleteToken(shepsToken);
-        passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
+        ShepsToken shepsToken = tokenService.validateToken(resetPasswordRequest.token(),
+                TokenType.RESET_PASSWORD);
+//        passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
         User user = shepsToken.getUser();
-        user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
+        user.setPassword(passwordEncoder.encode(resetPasswordRequest.newPassword()));
+        tokenService.deleteToken(shepsToken);
+        user.setTokenVersion(user.getTokenVersion() + 1);
         userRepository.save(user);
+        log.info("==>> Password reset successful for user {}", user.getEmail());
         return tokenService.generateJwtTokens(user);
     }
 }

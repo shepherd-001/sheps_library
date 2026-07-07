@@ -1,18 +1,13 @@
 package com.shepherd.shepslibrary.data.dto.response;
 
 import com.shepherd.shepslibrary.data.model.Gender;
-import lombok.Builder;
-import lombok.Getter;
 
-
-@Builder
-@Getter
-public class UserResponse {
-    private String firstName;
-    private String lastName;
-    private String email;
-    private Gender gender;
-    private String role;
-    private boolean isEnabled;
-    private boolean isRevoked;
-}
+public record UserResponse(
+    String firstName,
+    String lastName,
+    String email,
+    Gender gender,
+    String role,
+    boolean enabled,
+    boolean emailVerified
+){}

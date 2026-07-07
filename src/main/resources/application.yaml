@@ -5,11 +5,15 @@ logging:
   level:
     org.springframework.web: INFO
 
+springdoc:
+  api-docs:
+    enabled: ${ENABLE_SPRING_DOC}
+  swagger-ui:
+    enabled: ${ENABLE_SWAGGER_UI}
+
 spring:
   application:
     name: ShepsLibrary
-  profiles:
-    active: ${ACTIVE_PROFILE:local}
 
   datasource:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?createDatabaseIfNotExist=true
@@ -46,17 +50,19 @@ spring:
             enable: true
             required: true
           from: ${MAIL_FROM_EMAIL}
-          connectiontimeout: 10000
-          timeout: 10000
-          writetimeout: 10000
-  web:
-    resources:
-      add-mappings: false
+          connectiontimeout: 20000
+          timeout: 20000
+          writetimeout: 20000
+#  web:
+#    resources:
+#      add-mappings: false
 #        debug: true
+
 executor:
-  corePoolSize: ${CORE_POOL_SIZE}
-  maxPoolSize: ${MAX_POOL_SIZE}
-  keepAliveTime: ${KEEP_ALIVE_TIME}
+  mail:
+    corePoolSize: ${CORE_POOL_SIZE}
+    maxPoolSize: ${MAX_POOL_SIZE}
+    queueCapacity: ${QUEUE_CAPACITY}
 
 cache:
   expiry: ${CACHE_EXPIRY}
@@ -66,9 +72,11 @@ admin_email: ${ADMIN_EMAIL}
 admin_password: ${ADMIN_PASSWORD}
 
 
-client_url: ${CLIENT_URL:http://localhost:3000}
+client_url: ${CLIENT_URL}
 mail_from_email: ${MAIL_FROM_EMAIL}
 mail_from_name: ${MAIL_FROM_NAME}
+
+brevo_api_key: ${MAILERSEND_API_KEY}
 
 zero_bounce_api_key: ${ZEROBOUNCE_API_KEY}
 zero_bounce_url: ${ZEROBOUNCE_URL}
@@ -88,3 +96,37 @@ app:
       - ADMIN
       - LIBRARIAN
       - MEMBER
+  security:
+    allowed-origins:
+      - http://localhost:3000
+      - https://shep-blog.app
+
+#audit:
+#  enabled: true
+#  excluded-paths:
+#    - "/actuator/"
+#    - "/health"
+#    - "/swagger"
+#    - "/static/"
+#    - "/css/"
+#  max-body-bytes: 4096
+#  max-response-bytes: 1024
+#  capture-body-for-methods:
+#    - POST
+#    - PUT
+#    - PATCH
+#
+#  queue-capacity: 10000
+#  batch-size: 200
+#  flush-interval-ms: 2000
+#  drop-on-full: false
+#  retention-days: 90
+#  consumer-threads: 1
+#  db-retry-backoff: 2s
+#  enqueue-offer-timeout-ms: 200
+#  enable-persistent-fallback: true
+#  fallback-directory: audit-fallback
+#  max-write-retries: 5
+#  consumer-retry-initial-backoff: 1s
+#  consumer-retry-max-backoff: 30s
+#  enable-metrics: true

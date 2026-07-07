@@ -8,46 +8,46 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import io.swagger.v3.oas.annotations.servers.Server;
 
 @OpenAPIDefinition(
         info = @Info(
-                contact = @Contact(
-                        name = "David Oso",
-                        email = "osodavid001@gmail.com",
-                        url = "https://some-url.com"
-                ),
-                description = "OpenApi documentation for Sheps Library",
-                title = "OpenApi Specification - Sheps Library",
+                title = "Sheps Library API",
                 version = "1.0",
+                description = "REST API documentation for Sheps Library system",
+                contact = @Contact(
+                        name = "Sheps Engineering Team",
+                        email = "engineering@shepslibrary.com",
+                        url = "https://shepslibrary.com"
+                ),
                 license = @License(
-                        name = "License name",
-                        url = "https://some-url.com"
-                ),
-                termsOfService = "Terms of service"
+                        name = "Apache 2.0",
+                        url = "https://www.apache.org/licenses/LICENSE-2.0"
+                )
         ),
-        servers = {
-                @Server(
-                        description = "Local environment",
-                        url = "http://localhost:9092"
-                ),
-                @Server(
-                        description = "Development environment",
-                        url = "https://shepslibrary-production.up.railway.app"
-                )
-        },
+//        servers = {
+//                @Server(
+//                        description = "Local",
+//                        url = "http://localhost:9092"
+//                ),
+//                @Server(
+//                        description = "Development",
+//                        url = "https://dev.shepslibrary.com"
+//                ),
+//                @Server(
+//                        description = "Production",
+//                        url = "https://api.shepslibrary.com"
+//                )
+//        },
         security = {
-                @SecurityRequirement(
-                        name = "bearerAuth"
-                )
+                @SecurityRequirement(name = "bearerAuth")
         }
 )
 @SecurityScheme(
         name = "bearerAuth",
-        description = "JWT auth description",
+        description = "JWT authentication using Bearer token",
         scheme = "bearer",
-        type = SecuritySchemeType.HTTP,
         bearerFormat = "JWT",
+        type = SecuritySchemeType.HTTP,
         in = SecuritySchemeIn.HEADER
 )
 public class OpenApiConfig {

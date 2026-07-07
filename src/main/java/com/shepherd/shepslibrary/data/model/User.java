@@ -1,8 +1,10 @@
 package com.shepherd.shepslibrary.data.model;
 
-import com.shepherd.shepslibrary.data.common.BaseEntity;
+import com.shepherd.shepslibrary.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.UUID;
 
 @Entity
 @AllArgsConstructor
@@ -12,9 +14,14 @@ import lombok.*;
 @Setter
 @Table(indexes = {
         @Index(name = "idx_email", columnList = "email"),
-        @Index(name = "idx_createdAt", columnList = "createdAt")
+        @Index(name = "idx_createdAt", columnList = "createdAt"),
+        @Index(name = "idx_tokenVersion", columnList = "tokenVersion")
 })
 public class User extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
     private String firstName;
     private String lastName;
     @Column(unique = true)
@@ -22,15 +29,13 @@ public class User extends BaseEntity {
     private String password;
     @Enumerated(EnumType.STRING)
     private Gender gender;
-//    @Enumerated(EnumType.STRING)
-//    private Role role;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", nullable = false)
     private UserRole role;
 
-    @Column(name = "enabled")
-    private boolean isEnabled;
-    @Column(name = "revoked")
-    private boolean isRevoked;
+    private boolean enabled;
+    private boolean emailVerified;
+
+    private int tokenVersion = 0;
 }

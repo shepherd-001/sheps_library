@@ -1,31 +1,28 @@
 package com.shepherd.shepslibrary.jackson;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.shepherd.shepslibrary.context.RequestTimezoneContext;
-import org.springframework.stereotype.Component;
+import com.shepherd.shepslibrary.context.RequestTimezoneHolder;
+import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-import java.io.IOException;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-@Component
-public class InstantToUserZoneSerializer extends JsonSerializer<Instant> {
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-    private final RequestTimezoneContext requestTimezoneContext;
 
-    public InstantToUserZoneSerializer(RequestTimezoneContext requestTimezoneContext) {
-        this.requestTimezoneContext = requestTimezoneContext;
-    }
+@Slf4j
+public class InstantToUserZoneSerializer extends ValueSerializer<Instant> {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     @Override
-    public void serialize(Instant value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        if(value == null){
-            jsonGenerator.writeNull();
+    public void serialize(Instant value, JsonGenerator gen, SerializationContext ctxt) {
+        if (value == null) {
+            gen.writeNull();
             return;
         }
-        String out = value.atZone(requestTimezoneContext.getZoneId()).format(FORMATTER);
-        jsonGenerator.writeString(out);
+
+        ZonedDateTime zoned = value.atZone(RequestTimezoneHolder.current());
+        gen.writeString(FORMATTER.format(zoned));
     }
 }

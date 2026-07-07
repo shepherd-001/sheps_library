@@ -1,22 +1,20 @@
 package com.shepherd.shepslibrary.service.user;
 
+import com.shepherd.shepslibrary.common.exceptions.AlreadyExistsException;
+import com.shepherd.shepslibrary.common.request.PaginationRequest;
+import com.shepherd.shepslibrary.common.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
-import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.response.RegisterUserResponse;
 import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.model.UserRole;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
-import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
-import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
-import com.shepherd.shepslibrary.service.emailValidator.EmailValidationService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
-import com.shepherd.shepslibrary.service.passwordServie.PasswordValidationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
-import com.shepherd.shepslibrary.service.userRole.RoleService;
-import com.shepherd.shepslibrary.utils.AppUtils;
+import com.shepherd.shepslibrary.service.userRoleAndPermission.role.RoleService;
+import com.shepherd.shepslibrary.utils.RoleUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,10 +24,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
-import static com.shepherd.shepslibrary.utils.AppUtils.*;
 import static com.shepherd.shepslibrary.utils.RoleUtils.MEMBER;
 
 @Service
@@ -40,31 +36,32 @@ public class UserServiceImpl implements UserService {
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
     private final MailNotificationService mailNotificationService;
-    private final EmailValidationService emailValidationService;
-    private final PasswordValidationService passwordValidationService;
+    //    private final EmailValidationService emailValidationService;
+//    private final PasswordValidationService passwordValidationService;
     private final UserMapper userMapper;
     private final RoleService roleService;
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "firstName", "lastName", "email");
+    private static final String USER_CACHE = "userCache";
 
     @Override
     @Transactional
     public RegisterUserResponse registerUser(RegisterUserRequest registerUserRequest) {
-        log.info("=>> Registering user: {}", registerUserRequest.toString());
         validateRegisterRequest(registerUserRequest);
 
         UserRole role = roleService.getRole(MEMBER);
 
-        User newUser = userMapper.mapToUser(registerUserRequest, passwordEncoder);
-        newUser.setRole(role);
+        User user = userMapper.mapToUser(registerUserRequest);
+        user.setPassword(passwordEncoder.encode(registerUserRequest.password()));
+        user.setRole(role);
 
-        newUser = userRepository.save(newUser);
-        sendEmailConfirmation(newUser);
+        user = userRepository.save(user);
+        sendEmailConfirmation(user);
 
-        log.info("::::: User with the first name {} registered successfully :::::", newUser.getFirstName());
-        return userMapper.mapToRegisterResponse(newUser);
+        return userMapper.mapToRegisterResponse(user);
     }
 
     private void validateRegisterRequest(RegisterUserRequest registerUserRequest) {
-        if(userRepository.existsByEmailEqualsIgnoreCase(registerUserRequest.getEmail().trim()))
+        if (userRepository.existsByEmailIgnoreCase(registerUserRequest.email().trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
 //        emailValidationService.checkAndValidateEmail(registerUserRequest.getEmail());
 //        passwordValidationService.validatePasswordNotBreached(registerUserRequest.getPassword());
@@ -76,42 +73,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "userCache", key = "#userId")
-    public UserResponse getUserById(String userId) {
-        log.info("::::: Fetching a user by id :::::");
-        return userRepository.findById(userId)
-                .map(userMapper::mapToUserResponse)
-                .orElseThrow(()-> new ResourceNotFoundException("User with the provided Id not found"));
+    @Cacheable(
+            value = USER_CACHE,
+            key = "#paginationRequest.toCacheKey('role:'+#role)",
+            unless = "#result == null || #result.items.isEmpty()"
+    )
+    public PaginationResponse<UserResponse> getAllUsersByRole(String role, PaginationRequest paginationRequest) {
+        log.info("==>> Fetching all users by role {}", role);
+        Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
+        Page<User> users = userRepository.findAllByRoleName(role, RoleUtils.ADMIN, pageable);
+        return PaginationResponse.map(users, userMapper::mapToUserResponse);
     }
 
     @Override
-    @Cacheable(value = "userCache", key = "'role:' + #role + ':page:' + #pageNumber")
-    public PaginationResponse<UserResponse> getAllUsersByRole(String role, int pageNumber) {
-        log.info("::::: Fetching all users by role {} :::::", role);
-        Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
-        Page<User> users = userRepository.findAllByRoleName(role, pageable);
-        return mapToPaginatedUserResponse(users);
-    }
-
-    private PaginationResponse<UserResponse> mapToPaginatedUserResponse(Page<User> users) {
-        List<UserResponse> content = users.isEmpty() ? Collections.emptyList() :
-                users.stream().map(userMapper::mapToUserResponse).toList();
-
-        return PaginationResponse.<UserResponse>builder()
-                .content(content)
-                .numberOfElements(users.getNumberOfElements())
-                .totalPages(users.getTotalPages())
-                .totalElements(users.getTotalElements())
-                .isLast(users.isLast())
-                .build();
-    }
-
-    @Override
-    @Cacheable(value = "userCache", key = "'status:' + #status + ':page:' + #pageNumber")
-    public PaginationResponse<UserResponse> getAllUsersByStatus(boolean status, int pageNumber) {
-        log.info("::::: Fetching all users by status {} :::::", status);
-        Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
-        Page<User> users = userRepository.findAllByIsEnabled(status, pageable);
-        return mapToPaginatedUserResponse(users);
+    @Cacheable(
+            value = USER_CACHE,
+            key = "#paginationRequest.toCacheKey('status:'+#status)",
+            unless = "#result == null || #result.items.isEmpty()"
+    )
+    public PaginationResponse<UserResponse> getAllUsersByStatus(boolean status, PaginationRequest paginationRequest) {
+        log.info("==>> Fetching all users by status {}", status);
+        Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
+        Page<User> users = userRepository.findAllByEnabled(status, RoleUtils.ADMIN, pageable);
+        return PaginationResponse.map(users, userMapper::mapToUserResponse);
     }
 }

@@ -1,7 +1,8 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.response.ApiResponse;
+import com.shepherd.shepslibrary.common.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.AddRoleRequest;
+import com.shepherd.shepslibrary.data.dto.request.AssignPermissionRequest;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
 import com.shepherd.shepslibrary.service.admin.AdminService;
 import com.shepherd.shepslibrary.utils.RegexPattern;
@@ -24,32 +25,44 @@ public class AdminController {
     private final AdminService adminService;
 
     @PostMapping("/invite-librarian")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<?>> inviteLibrarian(@Valid @RequestBody InviteLibrarianRequest inviteLibrarianRequest){
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('admin.create')")
+    public ResponseEntity<ApiResponse<?>> inviteLibrarian(@Valid @RequestBody InviteLibrarianRequest inviteLibrarianRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse
-                .buildResponse("Librarian invited successfully", adminService.inviteLibrarian(inviteLibrarianRequest)));
+                .of("Librarian invited successfully", adminService.inviteLibrarian(inviteLibrarianRequest)));
     }
 
     @PostMapping("/resend-librarian-invite")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('admin.create')")
     public ResponseEntity<ApiResponse<?>> resendLibrarianInvitation(@RequestParam
-                                                      @NotBlank(message = ValidationMessage.BLANK_EMAIL)
-                                                      @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
-                                                      String inviteeEmail){
-        return ResponseEntity.ok(ApiResponse.buildResponse(adminService.resendInvite(inviteeEmail)));
+                                                                    @NotBlank(message = ValidationMessage.BLANK_EMAIL)
+                                                                    @Email(message = ValidationMessage.INVALID_EMAIL, regexp = RegexPattern.EMAIL)
+                                                                    String inviteeEmail) {
+        return ResponseEntity.ok(ApiResponse.of(adminService.resendInvite(inviteeEmail)));
     }
 
     @PostMapping("/add-role")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<?>> addRole(@Valid @RequestBody AddRoleRequest addRoleRequest){
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('admin.create')")
+    public ResponseEntity<ApiResponse<?>> addRole(@Valid @RequestBody AddRoleRequest addRoleRequest) {
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(adminService.addRole(addRoleRequest)));
+                .of(adminService.addRole(addRoleRequest)));
+    }
+
+    @PutMapping("/assign-permission-to-role")
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('admin.update')")
+    public ResponseEntity<ApiResponse<?>> assignPermissionsToRole(@Valid @RequestBody AssignPermissionRequest assignPermissionRequest) {
+        return ResponseEntity.ok(ApiResponse
+                .of(adminService.assignPermissionsToRole(assignPermissionRequest)));
     }
 
     @DeleteMapping("/delete-role")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<?>> deleteRole(@RequestParam String roleName){
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('admin.create')")
+    public ResponseEntity<ApiResponse<?>> deleteRole(@RequestParam String roleName) {
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(adminService.deleteRole(roleName)));
+                .of(adminService.deleteRole(roleName)));
     }
 }

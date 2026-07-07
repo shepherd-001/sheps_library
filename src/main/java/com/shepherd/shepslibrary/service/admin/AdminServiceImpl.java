@@ -1,6 +1,11 @@
 package com.shepherd.shepslibrary.service.admin;
 
+import com.shepherd.shepslibrary.common.exceptions.AlreadyExistsException;
+import com.shepherd.shepslibrary.common.exceptions.ResourceNotFoundException;
+import com.shepherd.shepslibrary.common.exceptions.ShepsLibraryException;
+import com.shepherd.shepslibrary.common.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.data.dto.request.AddRoleRequest;
+import com.shepherd.shepslibrary.data.dto.request.AssignPermissionRequest;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
 import com.shepherd.shepslibrary.data.dto.response.InviteLibrarianResponse;
 import com.shepherd.shepslibrary.data.model.Gender;
@@ -8,15 +13,10 @@ import com.shepherd.shepslibrary.data.model.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.model.UserRole;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
-import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
-import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
-import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
-import com.shepherd.shepslibrary.exceptions.UserAlreadyEnabledException;
 import com.shepherd.shepslibrary.mapper.UserMapper;
-import com.shepherd.shepslibrary.service.emailValidator.EmailValidationService;
 import com.shepherd.shepslibrary.service.notification.MailNotificationService;
 import com.shepherd.shepslibrary.service.token.TokenService;
-import com.shepherd.shepslibrary.service.userRole.RoleService;
+import com.shepherd.shepslibrary.service.userRoleAndPermission.role.RoleService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ public class AdminServiceImpl implements AdminService {
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final MailNotificationService mailNotificationService;
-    private final EmailValidationService emailValidationService;
+//    private final EmailValidationService emailValidationService;
     private final UserMapper userMapper;
     private final RoleService roleService;
 
@@ -52,25 +52,31 @@ public class AdminServiceImpl implements AdminService {
             return;
         }
         UserRole role = roleService.getRole(ADMIN);
-        User admin = User.builder()
-                .firstName("Admin")
+        User user = User.builder()
+                .firstName("ShepLibrary")
                 .lastName("Admin")
                 .gender(Gender.MALE)
                 .email(adminEmail.toLowerCase())
                 .password(passwordEncoder.encode(adminPassword))
                 .role(role)
-                .isEnabled(true)
-                .isRevoked(false)
+                .enabled(false)
+                .emailVerified(false)
                 .build();
 
-        userRepository.save(admin);
-        log.info("Admin created successfully");
+        userRepository.save(user);
+        sendAdminInvite(user);
+        log.info("==>> Admin invite sent successfully");
+    }
+
+    private void sendAdminInvite(User user) {
+        mailNotificationService.sendSuperAdminInvite(user,
+                tokenService.generateToken(user, TokenType.EMAIL_CONFIRMATION));
     }
 
     @Override
     @Transactional
     public InviteLibrarianResponse inviteLibrarian(InviteLibrarianRequest request) {
-        if(userRepository.existsByEmailEqualsIgnoreCase(request.getEmail().trim()))
+        if(userRepository.existsByEmailIgnoreCase(request.email().trim()))
             throw new AlreadyExistsException("User with the provided email already exists");
 //        emailValidationService.checkAndValidateEmail(request.getEmail());
 
@@ -87,14 +93,13 @@ public class AdminServiceImpl implements AdminService {
     private void sendLibrarianInvite(User user) {
         String token = tokenService.generateToken(user, TokenType.LIBRARIAN_INVITATION);
         mailNotificationService.sendLibrarianInvitation(user, token);
-        log.info("Librarian invited successfully to {}", user.getEmail());
+        log.info("==>> Invited librarian {} successfully", user.getEmail());
     }
 
     @Override
-    @Transactional
     public String resendInvite(String inviteeEmail) {
-        log.info("Initiating resend invitation for email: {}", inviteeEmail);
-        return userRepository.findByEmailEqualsIgnoreCase(inviteeEmail.trim())
+        log.info("==>> Initiating resend invitation for email: {}", inviteeEmail);
+        return userRepository.findByEmailIgnoreCase(inviteeEmail.trim())
                 .map(this::handleResendInvite)
                 .orElseThrow(
                         ()-> new ResourceNotFoundException("User not found. Invitation not resent"));
@@ -102,7 +107,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public String addRole(AddRoleRequest request) {
-        roleService.addRole(request.getName(), request.getDescription());
+        roleService.addRole(request.name());
         return "Role added successfully";
     }
 
@@ -112,13 +117,18 @@ public class AdminServiceImpl implements AdminService {
         return "Role deleted successfully";
     }
 
+    @Override
+    public UserRole assignPermissionsToRole(AssignPermissionRequest request) {
+        return roleService.assignPermissionsToRole(request.roleName(), request.permissionNames());
+    }
+
     private String handleResendInvite(User user) {
         if(user.isEnabled()){
             log.error("User with email {} is already enabled", user.getEmail());
             throw new UserAlreadyEnabledException("User is already verified. Resend invitation not applicable");
         }
         if(!LIBRARIAN.equals(user.getRole().getName())){
-            log.warn("User does not have the role LIBRARIAN");
+            log.warn("User does not have the role {}", LIBRARIAN);
             throw new ShepsLibraryException("User is not a librarian. Resend invitation not applicable");
         }
 

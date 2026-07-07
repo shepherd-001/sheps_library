@@ -1,19 +1,19 @@
 package com.shepherd.shepslibrary.service.transaction;
 
+import com.shepherd.shepslibrary.common.exceptions.ShepsLibraryException;
+import com.shepherd.shepslibrary.common.exceptions.TransactionException;
+import com.shepherd.shepslibrary.common.request.PaginationRequest;
+import com.shepherd.shepslibrary.common.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
-import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
-import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.response.TransactionResponse;
 import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.model.Transaction;
 import com.shepherd.shepslibrary.data.model.TransactionType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.TransactionRepository;
-import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
-import com.shepherd.shepslibrary.exceptions.TransactionException;
+import com.shepherd.shepslibrary.mapper.TransactionMapper;
+import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.book.BookService;
-import com.shepherd.shepslibrary.service.notification.MailNotificationService;
-import com.shepherd.shepslibrary.utils.AppUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,26 +24,29 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Set;
+import java.util.UUID;
 
-import static com.shepherd.shepslibrary.utils.AppUtils.*;
+import static com.shepherd.shepslibrary.utils.AppUtils.MAX_BORROW_MONTHS;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TransactionServiceImpl implements TransactionService{
+public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final BookService bookService;
-    private final MailNotificationService mailNotificationService;
+//    private final MailNotificationService mailNotificationService;
+    private final TransactionMapper transactionMapper;
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "borrowDateTime", "returnDateTime");
+    private static final String TRANSACTION_CACHE = "transactionCache";
 
     @Override
     @Transactional
-    public TransactionResponse borrowBook(BorrowBookRequest request) {
-        log.info("::::: Initiating borrow book request :::::");
-        User user = AppUtils.getCurrentUser();
-        checkIfUserIsRevoked(user);
-        Book book = bookService.fetchBookById(request.getBookId());
+    public TransactionResponse borrowBook(BorrowBookRequest request, AuthenticatedUser authenticatedUser) {
+        User user = authenticatedUser.getUser();
+        Book book = bookService.fetchBookById(request.bookId());
         checkIfBookIsAvailable(book);
-        validateReturnDateTime(request.getReturnDateTime());
+        validateReturnDateTime(request.returnDateTime());
         book.setAvailable(false);
         Book savedBook = bookService.saveBook(book);
 
@@ -52,20 +55,14 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.setUser(user);
         transaction.setBook(savedBook);
         transaction.setBorrowDateTime(Instant.now());
-        transaction.setReturnDateTime(request.getReturnDateTime());
+        transaction.setReturnDateTime(request.returnDateTime());
         Transaction savedTransaction = transactionRepository.save(transaction);
-        log.info("::::: Book borrowed successfully :::::");
-        return mapToTransactionResponse(savedTransaction);
+        log.info("==>> Book borrowed successfully");
+        return transactionMapper.mapToResponse(savedTransaction);
     }
 
-    private void checkIfUserIsRevoked(User user){
-        if(user.isRevoked())
-            throw new ShepsLibraryException("Your access to perform this action has been revoked. " +
-                    "Please settle your overdue payment or contact our support team for assistance");
-    }
-
-    private void checkIfBookIsAvailable(Book book){
-        if(!book.isAvailable())
+    private void checkIfBookIsAvailable(Book book) {
+        if (!book.isAvailable())
             throw new TransactionException("Book is not available");
     }
 
@@ -84,23 +81,8 @@ public class TransactionServiceImpl implements TransactionService{
         }
     }
 
-    private TransactionResponse mapToTransactionResponse(Transaction transaction){
-        return TransactionResponse.builder()
-                .transactionId(transaction.getId())
-                .transactionType(transaction.getTransactionType())
-                .firstName(transaction.getUser().getFirstName())
-                .lastName(transaction.getUser().getLastName())
-                .title(transaction.getBook().getTitle())
-                .author(transaction.getBook().getAuthor())
-                .genre(transaction.getBook().getGenre())
-                .borrowedDateTime(transaction.getBorrowDateTime())
-                .returnDateTime(transaction.getReturnDateTime())
-                .build();
-    }
-
     @Override
-    public TransactionResponse returnBook(String transactionId) {
-        log.info("::::: Initiating return book :::::");
+    public TransactionResponse returnBook(UUID transactionId) {
         Transaction transaction = getTransactionById(transactionId);
         Book book = transaction.getBook();
         book.setAvailable(true);
@@ -109,47 +91,37 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.setTransactionType(TransactionType.RETURN_BOOK);
         transaction.setReturnDateTime(Instant.now());
         Transaction savedTransaction = transactionRepository.save(transaction);
-        return mapToTransactionResponse(savedTransaction);
+        log.info("Book returned successfully");
+        return transactionMapper.mapToResponse(savedTransaction);
     }
 
-    private Transaction getTransactionById(String transactionId) {
+    private Transaction getTransactionById(UUID transactionId) {
         return transactionRepository.findById(transactionId).orElseThrow(
-                ()-> new ShepsLibraryException("Transaction with the provided ID not found"));
+                () -> new ShepsLibraryException("Transaction with the provided ID not found"));
     }
 
     @Override
-    @Cacheable(value = "transactionCache", key = "'user:' + #userId + ':page:' + #pageNumber")
-    public PaginationResponse<TransactionResponse> getAllTransactionByUserId(String userId, int pageNumber) {
-        log.info("::::: Fetching all transactions by user id :::::");
-        Pageable pageable = AppUtils.createPageRequest(pageNumber, DEFAULT_PAGE_SIZE, SORT_BY_CREATED_AT, SORT_DIRECTION_ASC);
+    @Cacheable(value = TRANSACTION_CACHE,
+            key = "#paginationRequest.toCacheKey('user:'+#userId)",
+            unless = "#result == null || #result.items.isEmpty()")
+    public PaginationResponse<TransactionResponse> getAllTransactionByUserId(UUID userId, PaginationRequest paginationRequest) {
+        Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Page<Transaction> transactions = transactionRepository.findAllByUserId(userId, pageable);
-        return getTransactionPaginatedResponse(transactions);
-    }
-
-    private PaginationResponse<TransactionResponse> getTransactionPaginatedResponse(Page<Transaction> transactions){
-        return PaginationResponse.<TransactionResponse>builder()
-                .content(transactions.stream()
-                        .map(this::mapToTransactionResponse)
-                        .toList())
-                .numberOfElements(transactions.getNumberOfElements())
-                .totalPages(transactions.getTotalPages())
-                .totalElements(transactions.getTotalElements())
-                .isLast(transactions.isLast())
-                .build();
+        log.info("Fetched all transactions by user id");
+        return PaginationResponse.map(transactions, transactionMapper::mapToResponse);
     }
 
     @Override
     @Cacheable(
-            value = "transactionCache",
+            value = TRANSACTION_CACHE,
             key = "#paginationRequest.toCacheKey('transactions')",
-            unless = "#result == null || #result.content.isEmpty()"
+            unless = "#result == null || #result.items.isEmpty()"
     )
     public PaginationResponse<TransactionResponse> getAllTransactions(PaginationRequest paginationRequest) {
-        log.info("::::: Fetching all transactions :::::");
-        Pageable pageable = createPageRequest(paginationRequest.getPageNumber(), paginationRequest.getPageSize(),
-                paginationRequest.getSortBy(), paginationRequest.getSortDirection());
+        Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Page<Transaction> transactions = transactionRepository.findAll(pageable);
-        return getTransactionPaginatedResponse(transactions);
+        log.info("==>> Fetched all transactions");
+        return PaginationResponse.map(transactions, transactionMapper::mapToResponse);
     }
 
 //    @Override

@@ -1,27 +1,27 @@
 package com.shepherd.shepslibrary.config;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.shepherd.shepslibrary.jackson.InstantDeserializerWithTimezone;
 import com.shepherd.shepslibrary.jackson.InstantToUserZoneSerializer;
-import com.shepherd.shepslibrary.jackson.LocalDateTimeToInstantDeserializer;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import tools.jackson.databind.module.SimpleModule;
 
 import java.time.Instant;
 
+
 @Configuration
+@Slf4j
 public class JacksonConfig {
     @Bean
-    public Jackson2ObjectMapperBuilder jacksonBuilder(
-            InstantToUserZoneSerializer serializer,
-            LocalDateTimeToInstantDeserializer deserializer
-    ) {
-        SimpleModule module = new SimpleModule()
-                .addSerializer(Instant.class, serializer)
-                .addDeserializer(Instant.class, deserializer);
+    public JsonMapperBuilderCustomizer timezoneCustomizer() {
+        return builder -> {
+            SimpleModule module = new SimpleModule("timezone-module");
+            module.addSerializer(Instant.class, new InstantToUserZoneSerializer());
+            module.addDeserializer(Instant.class, new InstantDeserializerWithTimezone());
 
-        return new Jackson2ObjectMapperBuilder()
-                .modules(new JavaTimeModule(), module);
+             builder.addModule(module);
+        };
     }
 }

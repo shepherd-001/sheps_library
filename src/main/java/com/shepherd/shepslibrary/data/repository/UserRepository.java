@@ -8,16 +8,29 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public interface UserRepository extends JpaRepository<User, String> {
-    boolean existsByEmailEqualsIgnoreCase(String email);
+public interface UserRepository extends JpaRepository<User, UUID> {
+    boolean existsByEmailIgnoreCase(String email);
     boolean existsByRoleName(String roleName);
 
     // this is to fetch the user role eagerly only during authentication
     @Query("SELECT u FROM User u JOIN FETCH u.role WHERE u.email = :email")
-    Optional<User> findByEmailEqualsIgnoreCaseWithRole(@Param("email") String email);
+    Optional<User> findByEmailIgnoreCaseWithRole(@Param("email") String email);
 
-    Optional<User> findByEmailEqualsIgnoreCase(String email);
-    Page<User> findAllByRoleName(String roleName, Pageable pageable);
-    Page<User> findAllByIsEnabled(boolean enabled, Pageable pageable);
+    Optional<User> findByEmailIgnoreCase(String email);
+
+    @Query("""
+    select u from User u
+    where u.role.name = :roleName
+    and u.role.name != :excludedRoleName
+    """)
+    Page<User> findAllByRoleName(String roleName, String excludedRoleName, Pageable pageable);
+
+    @Query("""
+    select u from User u
+    where u.enabled = :enabled
+    and u.role.name != :excludedRoleName
+    """)
+    Page<User> findAllByEnabled(boolean enabled, String excludedRoleName, Pageable pageable);
 }

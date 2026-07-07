@@ -1,17 +1,17 @@
 package com.shepherd.shepslibrary.service.book;
 
+import com.shepherd.shepslibrary.common.exceptions.AlreadyExistsException;
+import com.shepherd.shepslibrary.common.exceptions.ResourceNotFoundException;
+import com.shepherd.shepslibrary.common.exceptions.ShepsLibraryException;
+import com.shepherd.shepslibrary.common.request.PaginationRequest;
+import com.shepherd.shepslibrary.common.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.request.AddBookRequest;
 import com.shepherd.shepslibrary.data.dto.request.FilterBookRequest;
-import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
 import com.shepherd.shepslibrary.data.dto.request.UpdateBookRequest;
 import com.shepherd.shepslibrary.data.dto.response.AddBookResponse;
 import com.shepherd.shepslibrary.data.dto.response.BookResponse;
-import com.shepherd.shepslibrary.data.dto.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.repository.BookRepository;
-import com.shepherd.shepslibrary.exceptions.AlreadyExistsException;
-import com.shepherd.shepslibrary.exceptions.ResourceNotFoundException;
-import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.mapper.BookMapper;
 import com.shepherd.shepslibrary.specification.BookSpecification;
 import com.shepherd.shepslibrary.utils.AppUtils;
@@ -27,10 +27,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-
-import static com.shepherd.shepslibrary.utils.AppUtils.createPageRequest;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -38,17 +36,19 @@ import static com.shepherd.shepslibrary.utils.AppUtils.createPageRequest;
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "title", "author", "genre");
+    private static final String BOOK_CACHE = "bookCache";
 
     @Override
     public AddBookResponse addBook(AddBookRequest request) {
-        if (bookRepository.existsByTitle(request.getTitle().trim())) {
-            throw new AlreadyExistsException("Book with title '%s' already exists".formatted(request.getTitle()));
+        if (bookRepository.existsByTitle(request.title().trim())) {
+            throw new AlreadyExistsException("Book with title '%s' already exists".formatted(request.title()));
         }
 
         Book book = bookMapper.mapToBook(request);
+        book.setAvailable(true);
         Book savedBook = saveBookWithUniqueIsbn(book);
-        log.info("::::: Book added with title='{}' :::::", savedBook.getTitle());
-
+        log.info("==>> Book with title='{}' added successfully", savedBook.getTitle());
         return bookMapper.mapToAddBookResponse(savedBook);
     }
 
@@ -59,7 +59,7 @@ public class BookServiceImpl implements BookService {
             try {
                 return bookRepository.save(book);
             } catch (DataIntegrityViolationException ex) {
-                log.warn("ISBN conflict on attempt {} with isbn='{}'. Retrying... Root cause: {}",
+                log.warn("==>> ISBN conflict on attempt {} with isbn='{}'. Retrying... Root cause: {}",
                         attempt, book.getIsbn(), ex.getMostSpecificCause().getMessage());
             }
         }
@@ -68,89 +68,79 @@ public class BookServiceImpl implements BookService {
 
 
     @Override
-    @Cacheable(value = "bookCache", key = "#bookId", unless = "#result == null")
-    public BookResponse getBookById(String bookId) {
-        log.info("::::: Fetching book by id :::::");
+    @Cacheable(value = BOOK_CACHE, key = "#bookId", unless = "#result == null")
+    public BookResponse getBookById(UUID bookId) {
         Book book = fetchBookById(bookId);
+        log.info("==>> Fetched book by id");
         return bookMapper.mapToBookResponse(book);
     }
 
     @Override
-    public Book fetchBookById(String bookId) {
+    public Book fetchBookById(UUID bookId) {
         return bookRepository.findById(bookId).orElseThrow
-                (()-> new ResourceNotFoundException("Book with the provided ID not found"));
+                (() -> new ResourceNotFoundException("Book with the provided ID not found"));
     }
 
     @Override
-    @Cacheable(value = "bookCache", key = "#isbn", unless = "#result == null")
+    @Cacheable(value = BOOK_CACHE, key = "#isbn", unless = "#result == null")
     public BookResponse getBookByIsbn(String isbn) {
-        log.info("::::: Fetching book by isbn :::::");
+        log.info("==>> Fetching book by isbn");
         return bookRepository.findByIsbn(isbn)
                 .map(bookMapper::mapToBookResponse)
-                .orElseThrow(()-> new ResourceNotFoundException("Book with the provided ISBN not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Book with the provided ISBN not found"));
     }
 
     @Override
     @Transactional
-    @CachePut(value = "bookCache", key = "#bookId")
-    public BookResponse updateBook(UpdateBookRequest updateBookRequest, String bookId) {
+    @CachePut(value = BOOK_CACHE, key = "#bookId")
+    public BookResponse updateBook(UpdateBookRequest updateBookRequest, UUID bookId) {
         Book book = fetchBookById(bookId);
         bookMapper.updateBookFromRequest(updateBookRequest, book);
         Book savedBook = bookRepository.save(book);
-        log.info("::::: Updated book with title '{}' :::::", book.getTitle());
+        log.info("==>> Updated book with title '{}'", book.getTitle());
         return bookMapper.mapToBookResponse(savedBook);
     }
 
     @Override
     @Cacheable(
-            value = "bookCache",
+            value = BOOK_CACHE,
             key = "#paginationRequest.toCacheKey('books')",
-            unless = "#result == null || #result.content.isEmpty()"
+            unless = "#result == null || #result.items.isEmpty() ||  #paginationRequest.page > 5"
     )
     public PaginationResponse<BookResponse> getAllBooks(PaginationRequest paginationRequest) {
-        log.info("::::: Fetching all books :::::");
-        Pageable pageable = createPageRequest(paginationRequest.getPageNumber(), paginationRequest.getPageSize(),
-                paginationRequest.getSortBy(), paginationRequest.getSortDirection());
+        Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Page<Book> books = bookRepository.findAll(pageable);
-        return mapToPaginatedBookResponse(books);
-    }
-
-    private PaginationResponse<BookResponse> mapToPaginatedBookResponse(Page<Book> books) {
-        List<BookResponse> content = books.isEmpty() ? Collections.emptyList() :
-                books.stream().map(bookMapper::mapToBookResponse).toList();
-        return PaginationResponse.<BookResponse>builder()
-                .content(content)
-                .numberOfElements(books.getNumberOfElements())
-                .totalPages(books.getTotalPages())
-                .totalElements(books.getTotalElements())
-                .isLast(books.isLast())
-                .build();
+        log.info("==>> All books fetched");
+        return PaginationResponse.map(books, bookMapper::mapToBookResponse);
     }
 
     @Override
-    @Cacheable(value = "bookCache", key = "#request.toCacheKey()",
-            unless = "#result == null || #result.content.isEmpty()")
-    public PaginationResponse<BookResponse> filterBook(FilterBookRequest request) {
-        log.info(":::::  Filtering book :::::");
-        Pageable pageable = createPageRequest(request.getPageNumber(), request.getPageSize(),
-                request.getSortBy(), request.getSortDirection());
+    @Cacheable(value = BOOK_CACHE,
+            key = "#paginationRequest.toCacheKey('filter:title:'+#filterBookRequest.title+" +
+                    "':author:'+#filterBookRequest.author+':genre:'+#filterBookRequest.genre)",
+            unless = "#result == null || #result.items.isEmpty() || #paginationRequest.page > 5")
+    public PaginationResponse<BookResponse> filterBook(FilterBookRequest filterBookRequest, PaginationRequest paginationRequest) {
+        Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
         Specification<Book> bookSpecification = Specification.where(
-                BookSpecification.hasTitle(request.getTitle()))
-                .and(BookSpecification.hasAuthor(request.getAuthor()))
-                .and(BookSpecification.hasGenre(request.getGenre()));
+                        BookSpecification.hasTitle(filterBookRequest.title()))
+                .and(BookSpecification.hasAuthor(filterBookRequest.title()))
+                .and(BookSpecification.hasGenre(filterBookRequest.genre()));
         Page<Book> books = bookRepository.findAll(bookSpecification, pageable);
-        return mapToPaginatedBookResponse(books);
+        log.info("Books filtered successfully with title={}, author={}, genre={}",
+                filterBookRequest.title(),
+                filterBookRequest.author(),
+                filterBookRequest.genre());
+        return PaginationResponse.map(books, bookMapper::mapToBookResponse);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "bookCache", key = "#bookId")
-    public String deleteBook(String bookId) {
-        if(!bookRepository.existsById(bookId))
-            throw new ResourceNotFoundException("Book with the provided ID not found");
-        bookRepository.deleteById(bookId);
-        log.info("::::: Deleted a book by id :::::");
-        return "Book deleted successfully";
+    @CacheEvict(value = BOOK_CACHE, key = "#bookId")
+    public void deleteBook(UUID bookId) {
+        int deleted = bookRepository.deleteByIdReturningCount(bookId);
+        if (deleted == 0)
+            log.warn("==>> Attempted to delete a non-existing book");
+        else log.info("==>> Book deleted successfully");
     }
 
     @Override

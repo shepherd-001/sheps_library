@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.service.notification;
 
-import com.shepherd.shepslibrary.exceptions.MailSenderException;
+import com.shepherd.shepslibrary.common.exceptions.MailSenderException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -9,10 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+
 
 @Service
 @RequiredArgsConstructor
@@ -26,11 +26,8 @@ public class MailSenderServiceImpl implements MailSenderService {
 
 
     @Override
-    @Async
     public void sendEmail(String to, String subject, String htmlContent) {
         try {
-            log.info("::::: Initiating send email notification to {} :::::", to);
-
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 
@@ -40,11 +37,10 @@ public class MailSenderServiceImpl implements MailSenderService {
             helper.setText(htmlContent, true);
             mailSender.send(mimeMessage);
 
-            log.info("::::: Email notification sent to {} :::::", to);
-        } catch (MessagingException | UnsupportedEncodingException ex) {
-            log.error("::::: Unable to send email to '{}'.  Error: '{}' :::::", to, ex.getMessage());
-            throw new MailSenderException(ex.getMessage());
+            log.info("==>> Email notification sent to {}", to);
+        } catch (UnsupportedEncodingException | MessagingException ex) {
+            log.error("==>> Unable to send email to '{}'.  Error: '{}'", to, ex.getMessage());
+            throw new MailSenderException("Unable to send mail");
         }
     }
 }
-

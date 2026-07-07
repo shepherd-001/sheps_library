@@ -1,56 +1,19 @@
 package com.shepherd.shepslibrary.utils;
 
-import com.shepherd.shepslibrary.data.model.User;
-import com.shepherd.shepslibrary.exceptions.ShepsLibraryException;
-import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.SecureRandom;
-import java.time.Instant;
 
 @Slf4j
 public final class AppUtils {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     public static final int DEFAULT_PAGE_SIZE = 10;
-    public static final String SORT_BY_CREATED_AT = "createdAt";
-    public static final String SORT_DIRECTION_ASC = "ASC";
+    public static final int MAX_PAGE_SIZE = 100;
+    public static final String DEFAULT_SORT_FIELD = "createdAt";
+    public static final Sort.Direction DEFAULT_SORT_DIRECTION = Sort.Direction.DESC;
     public static final int MAX_ISBN_ATTEMPTS = 5;
     public static final int MAX_BORROW_MONTHS = 2;
-
-
-    public static User getCurrentUser() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !(authentication.getPrincipal() instanceof AuthenticatedUser)) {
-                throw new ShepsLibraryException("No authenticated user found");
-            }
-            return ((AuthenticatedUser) authentication.getPrincipal()).getUser();
-        } catch (Exception e) {
-            log.error("Error fetching authenticated user: {}", e.getMessage());
-            throw new ShepsLibraryException("Failed to fetch authenticated user");
-        }
-    }
-
-    public static Pageable createPageRequest(int pageNumber, Integer pageSize, String sortBy, String sortDirection) {
-        final int MAX_PAGE_SIZE = 100;
-        pageNumber = Math.max(pageNumber - 1, 0);
-        int resolvedPageSize = (pageSize != null && pageSize > 0)
-                ? Math.min(pageSize, MAX_PAGE_SIZE)
-                : DEFAULT_PAGE_SIZE;
-
-        String resolvedSortBy = (sortBy != null && !sortBy.isBlank()) ? sortBy : SORT_BY_CREATED_AT;
-        Sort.Direction resolvedDirection = SORT_DIRECTION_ASC.equalsIgnoreCase(sortDirection) ? Sort.Direction.ASC : Sort.Direction.DESC;
-        return PageRequest.of(pageNumber, resolvedPageSize, Sort.by(resolvedDirection, resolvedSortBy));
-    }
-
-    public static String customAuthResponse(String message, Instant timestamp, boolean isSuccessful){
-        return String.format("{\"message\": \"%s\", \"timestamp\": \"%s\", \"isSuccessful\": \"%b\"}", message, timestamp, isSuccessful);
-    }
 
     public static String generateISBN() {
         StringBuilder isbn = new StringBuilder(13);

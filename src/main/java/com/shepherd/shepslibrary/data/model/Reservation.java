@@ -1,11 +1,12 @@
 package com.shepherd.shepslibrary.data.model;
 
 
-import com.shepherd.shepslibrary.data.common.BaseEntity;
+import com.shepherd.shepslibrary.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @AllArgsConstructor
@@ -17,6 +18,10 @@ import java.time.Instant;
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
 public class Reservation extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
     @OneToOne
     private Book book;
     @ManyToOne

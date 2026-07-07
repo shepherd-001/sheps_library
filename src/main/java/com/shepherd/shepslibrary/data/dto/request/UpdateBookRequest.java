@@ -4,25 +4,24 @@ import com.shepherd.shepslibrary.utils.RegexPattern;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.Size;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-public class UpdateBookRequest {
-    @NotBlank(message = ValidationMessage.BLANK_TITLE)
-    @Pattern(regexp = RegexPattern.BOOK_TITLE, message = ValidationMessage.INVALID_TITLE)
-    private String title;
+import static com.shepherd.shepslibrary.utils.ValidationMessage.*;
 
-    @NotBlank(message = ValidationMessage.BLANK_AUTHOR)
-    @Pattern(regexp = RegexPattern.BOOK_AUTHOR, message = ValidationMessage.INVALID_AUTHOR)
-    private String author;
 
-    @NotBlank(message = ValidationMessage.BLANK_GENRE)
-    @Pattern(regexp = RegexPattern.BOOK_GENRE, message = ValidationMessage.INVALID_GENRE)
-    private String genre;
-}
+public record UpdateBookRequest(
+        @NotBlank(message = ValidationMessage.BLANK_TITLE)
+        @Pattern(regexp = RegexPattern.BOOK_TITLE, message = ValidationMessage.INVALID_TITLE)
+        @Size(max = 100, message = TITLE_TOO_LONG)
+        String title,
+
+        @NotBlank(message = ValidationMessage.BLANK_AUTHOR)
+        @Pattern(regexp = RegexPattern.BOOK_AUTHOR, message = ValidationMessage.INVALID_AUTHOR)
+        @Size(max = 100, message = AUTHOR_NAME_TOO_LONG)
+        String author,
+
+        @NotBlank(message = ValidationMessage.BLANK_GENRE)
+        @Pattern(regexp = RegexPattern.BOOK_GENRE, message = ValidationMessage.INVALID_GENRE)
+        @Size(max = 20, message = GENRE_TOO_LONG)
+        String genre
+) {}

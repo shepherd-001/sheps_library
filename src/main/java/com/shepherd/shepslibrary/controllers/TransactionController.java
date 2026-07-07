@@ -1,16 +1,18 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.response.ApiResponse;
+import com.shepherd.shepslibrary.common.request.PaginationRequest;
+import com.shepherd.shepslibrary.common.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
-import com.shepherd.shepslibrary.data.dto.request.PaginationRequest;
+import com.shepherd.shepslibrary.security.AuthenticatedUser;
 import com.shepherd.shepslibrary.service.transaction.TransactionService;
-import com.shepherd.shepslibrary.utils.ValidationMessage;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,32 +20,53 @@ import org.springframework.web.bind.annotation.*;
 public class TransactionController {
     private final TransactionService transactionService;
 
-    @PreAuthorize("hasRole('MEMBER')")
     @PostMapping("/borrow-book")
-    public ResponseEntity<ApiResponse<?>> borrowBook(@Valid @RequestBody BorrowBookRequest borrowBookRequest){
-        return ResponseEntity.ok(ApiResponse
-                .buildResponse(transactionService.borrowBook(borrowBookRequest)));
+    @PreAuthorize("hasAuthority('member.create')")
+    public ResponseEntity<ApiResponse<?>> borrowBook(@Valid @RequestBody BorrowBookRequest borrowBookRequest,
+                                                     @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+        return ResponseEntity.ok(ApiResponse.of("Book borrowed successfully",
+                transactionService.borrowBook(borrowBookRequest, authenticatedUser)));
     }
 
-    @PreAuthorize("hasRole('MEMBER')")
     @PutMapping("/return-book")
-    public ResponseEntity<ApiResponse<?>> returnBook(@RequestParam @NotBlank(message = ValidationMessage.NULL_TRANSACTION_ID)
-                                                         String transactionId){
+    @PreAuthorize("hasAuthority('member.update')")
+    public ResponseEntity<ApiResponse<?>> returnBook(@RequestParam UUID transactionId) {
+        return ResponseEntity.ok(ApiResponse.of("Book returned successfully",
+                transactionService.returnBook(transactionId)));
+    }
+
+    @GetMapping("/my")
+    @PreAuthorize("hasAnyAuthority('member.read')")
+    public ResponseEntity<ApiResponse<?>> getMyTransactions(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+                                                             @RequestParam(required = false, defaultValue = "1") int page,
+                                                             @RequestParam(required = false, defaultValue = "10") int size,
+                                                             @RequestParam(required = false) String sort,
+                                                             @RequestParam(required = false) String direction) {
+        PaginationRequest paginationRequest = PaginationRequest.of(page, size, sort, direction);
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(transactionService.returnBook(transactionId)));
+                .of(transactionService.getAllTransactionByUserId(authenticatedUser.getUser().getId(), paginationRequest)));
     }
 
     @GetMapping("/all/{userId}")
-    public ResponseEntity<ApiResponse<?>> getAllTransactions(@PathVariable @NotBlank(message = ValidationMessage.NULL_USER_ID)
-                                                                 String userId, int pageNumber){
+    @PreAuthorize("hasAnyAuthority('librarian.read', 'admin.read')")
+    public ResponseEntity<ApiResponse<?>> getAllTransactions(@PathVariable UUID userId,
+                                                             @RequestParam(required = false, defaultValue = "1") int page,
+                                                             @RequestParam(required = false, defaultValue = "10") int size,
+                                                             @RequestParam(required = false) String sort,
+                                                             @RequestParam(required = false) String direction) {
+        PaginationRequest paginationRequest = PaginationRequest.of(page, size, sort, direction);
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(transactionService.getAllTransactionByUserId(userId, pageNumber)));
+                .of(transactionService.getAllTransactionByUserId(userId, paginationRequest)));
     }
 
     @GetMapping("/all")
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public ResponseEntity<ApiResponse<?>> getAllTransactions(@RequestBody PaginationRequest paginationRequest){
+    @PreAuthorize("hasAnyAuthority('librarian.read', 'admin.read')")
+    public ResponseEntity<ApiResponse<?>> getAllTransactions(@RequestParam(required = false, defaultValue = "1") int page,
+                                                             @RequestParam(required = false, defaultValue = "10") int size,
+                                                             @RequestParam(required = false) String sort,
+                                                             @RequestParam(required = false) String direction) {
+        PaginationRequest paginationRequest = PaginationRequest.of(page, size, sort, direction);
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(transactionService.getAllTransactions(paginationRequest)));
+                .of(transactionService.getAllTransactions(paginationRequest)));
     }
 }

@@ -1,6 +1,7 @@
 package com.shepherd.shepslibrary.controllers;
 
-import com.shepherd.shepslibrary.controllers.response.ApiResponse;
+import com.shepherd.shepslibrary.common.request.PaginationRequest;
+import com.shepherd.shepslibrary.common.response.ApiResponse;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.service.user.UserService;
 import jakarta.validation.Valid;
@@ -19,25 +20,30 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<?>> signup(@Valid @RequestBody RegisterUserRequest registerRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse
-                .buildResponse("User registered successfully", userService.registerUser(registerRequest)));
-    }
-    @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<?>> getUserById(@PathVariable String userId) {
-        return ResponseEntity.ok(ApiResponse
-                .buildResponse(userService.getUserById(userId)));
+                .of("User registered successfully", userService.registerUser(registerRequest)));
     }
 
     @GetMapping("/all/role")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<?>> getAllUsersByRole(@RequestParam String role, int pageNumber) {
+    @PreAuthorize("hasAuthority('admin.read')")
+    public ResponseEntity<ApiResponse<?>> getAllUsersByRole(@RequestParam String role,
+                                                             @RequestParam(required = false, defaultValue = "1") int page,
+                                                             @RequestParam(required = false, defaultValue = "10") int size,
+                                                             @RequestParam(required = false) String sort,
+                                                             @RequestParam(required = false) String direction){
+        PaginationRequest paginationRequest = PaginationRequest.of(page, size, sort, direction);
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(userService.getAllUsersByRole(role, pageNumber)));
+                .of(userService.getAllUsersByRole(role, paginationRequest)));
     }
 
     @GetMapping("/all/status")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<?>> getAllUsersByStatus(@RequestParam boolean status, int pageNumber) {
+    @PreAuthorize("hasAuthority('admin.read')")
+    public ResponseEntity<ApiResponse<?>> getAllUsersByStatus(@RequestParam boolean status,
+                                                              @RequestParam(required = false, defaultValue = "1") int page,
+                                                              @RequestParam(required = false, defaultValue = "10") int size,
+                                                              @RequestParam(required = false) String sort,
+                                                              @RequestParam(required = false) String direction){
+        PaginationRequest paginationRequest = PaginationRequest.of(page, size, sort, direction);
         return ResponseEntity.ok(ApiResponse
-                .buildResponse(userService.getAllUsersByStatus(status, pageNumber)));
+                .of(userService.getAllUsersByStatus(status, paginationRequest)));
     }
 }

@@ -29,7 +29,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
     private static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
 
-    private final JwtService jwtService;
+    private final JwtUtils jwtUtils;
     private final UserDetailsService userDetailsService;
     private final TokenRepository tokenRepository;
 
@@ -48,32 +48,31 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
         String userEmail;
         try{
-            userEmail = jwtService.extractUsername(jwtToken);
+            userEmail = jwtUtils.extractUsername(jwtToken);
             if(!StringUtils.hasText(userEmail)){
-                log.warn("Token validation failed: no subject found");
+                log.warn("==>> Token validation failed: no subject found");
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            if(!isTokenValid(jwtToken) || !jwtService.isValidToken(jwtToken, userEmail)){
-                log.warn("JWT token is invalid, revoked, or expired for user: {}", userEmail);
+            if(!isTokenValid(jwtToken) || !jwtUtils.isValidToken(jwtToken, userEmail)){
+                log.warn("==>> JWT token is invalid, revoked, or expired for user: {}", userEmail);
                 filterChain.doFilter(request, response);
                 return;
             }
-
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
             if(!isUserAccountValid(userDetails)){
-                log.warn("Account invalid for user: {}", userEmail);
+                log.warn("==>> Account invalid for user: {}", userEmail);
                 filterChain.doFilter(request, response);
                 return;
             }
 
             setSecurityContext(request, userDetails);
-            log.info("User authenticated: {}", userEmail);
+            log.info("==>> User authenticated: {}", userEmail);
 
         }catch (Exception ex){
-            log.error("Authorization error: {}", ex.getMessage());
+            log.error("==>> Authorization error: {}", ex.getMessage());
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, String.format("Unauthorized: %s", ex.getMessage()));
             return;
         }

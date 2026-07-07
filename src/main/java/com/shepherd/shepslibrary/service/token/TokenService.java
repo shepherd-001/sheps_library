@@ -9,7 +9,7 @@ import com.shepherd.shepslibrary.data.model.User;
 public interface TokenService {
     String generateToken(User user, TokenType tokenType);
     AuthResponse generateJwtTokens(User user);
-    ShepsToken validateToken(String token, TokenType tokenType, String expectedEmail);
+    ShepsToken validateToken(String token, TokenType tokenType);
     void deleteToken(ShepsToken shepsToken);
-    void deleteAllTokenByUserAndType(String userEmail, TokenType tokenType);
+    void revokeAllUserTokens(String userEmail, TokenType tokenType);
 }

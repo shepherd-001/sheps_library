@@ -2,19 +2,37 @@ package com.shepherd.shepslibrary.data.repository;
 
 import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.TokenType;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface TokenRepository extends JpaRepository<ShepsToken, String> {
-//    @Query("""
-//           select t from ShepsToken t
-//           where t.user.email = :email and t.token = :token
-//           and t.tokenType = :tokenType\s
-//          \s""")
-//    ShepsToken findByUserAndTokenAndTokenType(@Param("email") String email,
-//         @Param("token") String token, @Param("tokenType") TokenType tokenType);
-    Optional<ShepsToken> findByTokenAndTokenType(String token, TokenType tokenType);
-//    List<ShepsToken> findAllByUserIdAndTokenType(String userId, TokenType tokenType);
-    void deleteAllByUserEmailAndTokenType(String email, TokenType tokenType);
+public interface TokenRepository extends JpaRepository<ShepsToken, UUID> {
+    @Query("select t from ShepsToken t where t.token = :token or t.refreshToken = :token and t.tokenType = :tokenType")
+    Optional<ShepsToken> findByTokenAndTokenType(String token, @Param("tokenType")TokenType tokenType);
+
+    Optional<ShepsToken> findShepsTokenByTokenAndTokenType(String token, TokenType tokenType);
+
+    @Modifying
+    @Transactional
+    @Query("update ShepsToken t set t.isRevoked = true, t.isExpired = true where t.token = :token and t.tokenType = :tokenType")
+    int revokeToken(@Param("token") String token, @Param("tokenType") TokenType tokenType);
+
+    @Modifying
+    @Transactional
+    @Query("update ShepsToken t set t.isRevoked = true, t.isExpired = true where t.user.email = :email and t.tokenType = :tokenType")
+    int revokeAllTokensForUser(@Param("email") String email, @Param("tokenType") TokenType tokenType);
+
+    @Modifying
+    @Transactional
+    @Query("delete from ShepsToken t where (t.isRevoked = true or t.isExpired = true) and t.createdAt < :cutoff")
+    int deleteAllRevokedOrExpiredTokensOlderThan(@Param("cutoff") Instant cutoff);
+
+    @Query("select u.tokenVersion from User u where u.email = :email")
+    Integer findTokenVersionByEmail(String email);
 }
