@@ -102,7 +102,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Cacheable(value = TRANSACTION_CACHE,
-            key = "#paginationRequest.toCacheKey('user:'+userId)",
+            key = "#paginationRequest.toCacheKey('user:'+#userId)",
             unless = "#result == null || #result.items.isEmpty()")
     public PaginationResponse<TransactionResponse> getAllTransactionByUserId(UUID userId, PaginationRequest paginationRequest) {
         Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);

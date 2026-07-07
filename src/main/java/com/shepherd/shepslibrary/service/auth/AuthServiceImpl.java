@@ -122,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
                 TokenType.RESET_PASSWORD);
 //        passwordValidationService.validatePasswordNotBreached(resetPasswordRequest.getNewPassword());
         User user = shepsToken.getUser();
-        user.setPassword(passwordEncoder.encode(resetPasswordRequest.token()));
+        user.setPassword(passwordEncoder.encode(resetPasswordRequest.newPassword()));
         tokenService.deleteToken(shepsToken);
         user.setTokenVersion(user.getTokenVersion() + 1);
         userRepository.save(user);

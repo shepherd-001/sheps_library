@@ -77,8 +77,8 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    @Cacheable(value = "reservationCache",
-            key = "#paginationRequest.toCacheKey('user:'+userId)",
+    @Cacheable(value = RESERVATION_CACHE,
+            key = "#paginationRequest.toCacheKey('user:'+#userId)",
             unless = "#result == null || #result.items.isEmpty()")
     public PaginationResponse<ReservationResponse> getAllReservationByUserId(UUID userId, PaginationRequest paginationRequest) {
         Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
