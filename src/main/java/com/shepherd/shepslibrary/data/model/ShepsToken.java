@@ -2,6 +2,7 @@ package com.shepherd.shepslibrary.data.model;
 
 
 import com.shepherd.shepslibrary.common.BaseEntity;
+import com.shepherd.shepslibrary.data.model.enums.TokenType;
 import jakarta.persistence.*;
 import lombok.*;
 

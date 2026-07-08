@@ -9,7 +9,7 @@ import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
 import com.shepherd.shepslibrary.data.dto.response.EmailVerificationResponse;
 import com.shepherd.shepslibrary.data.dto.response.UserResponse;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
-import com.shepherd.shepslibrary.data.model.TokenType;
+import com.shepherd.shepslibrary.data.model.enums.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.UserRepository;
 import com.shepherd.shepslibrary.mapper.UserMapper;

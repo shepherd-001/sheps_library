@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.data.dto.response;
 
-import com.shepherd.shepslibrary.data.model.Gender;
+import com.shepherd.shepslibrary.data.model.enums.Gender;
 
 public record UserResponse(
     String firstName,

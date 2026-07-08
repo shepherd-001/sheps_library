@@ -1,6 +1,7 @@
 package com.shepherd.shepslibrary.data.model;
 
 import com.shepherd.shepslibrary.common.BaseEntity;
+import com.shepherd.shepslibrary.data.model.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 

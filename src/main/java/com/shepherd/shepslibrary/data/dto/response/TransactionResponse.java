@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.data.dto.response;
 
-import com.shepherd.shepslibrary.data.model.TransactionType;
+import com.shepherd.shepslibrary.data.model.enums.TransactionType;
 
 import java.time.Instant;
 

@@ -1,7 +1,7 @@
 package com.shepherd.shepslibrary.data.repository;
 
 import com.shepherd.shepslibrary.data.model.ShepsToken;
-import com.shepherd.shepslibrary.data.model.TokenType;
+import com.shepherd.shepslibrary.data.model.enums.TokenType;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

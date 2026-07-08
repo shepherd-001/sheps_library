@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.data.dto.request;
 
-import com.shepherd.shepslibrary.data.model.Gender;
+import com.shepherd.shepslibrary.data.model.enums.Gender;
 import com.shepherd.shepslibrary.utils.RegexPattern;
 import com.shepherd.shepslibrary.utils.ValidationMessage;
 import com.shepherd.shepslibrary.utils.validator.EnumValid;

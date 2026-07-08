@@ -25,9 +25,9 @@ public class Book extends BaseEntity {
     private UUID id;
     @Column(unique = true)
     private String title;
-    private String author;
-    private String genre;
     @Column(unique = true)
     private String isbn;
+    private String author;
+    private String genre;
     private boolean available;
 }

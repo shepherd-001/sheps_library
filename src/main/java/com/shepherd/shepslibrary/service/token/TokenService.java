@@ -3,7 +3,7 @@ package com.shepherd.shepslibrary.service.token;
 
 import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
-import com.shepherd.shepslibrary.data.model.TokenType;
+import com.shepherd.shepslibrary.data.model.enums.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 
 public interface TokenService {

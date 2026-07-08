@@ -1,6 +1,6 @@
 package com.shepherd.shepslibrary.security;
 
-import com.shepherd.shepslibrary.data.model.TokenType;
+import com.shepherd.shepslibrary.data.model.enums.TokenType;
 import com.shepherd.shepslibrary.data.repository.TokenRepository;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;

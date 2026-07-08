@@ -8,7 +8,7 @@ import com.shepherd.shepslibrary.data.dto.request.BorrowBookRequest;
 import com.shepherd.shepslibrary.data.dto.response.TransactionResponse;
 import com.shepherd.shepslibrary.data.model.Book;
 import com.shepherd.shepslibrary.data.model.Transaction;
-import com.shepherd.shepslibrary.data.model.TransactionType;
+import com.shepherd.shepslibrary.data.model.enums.TransactionType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.TransactionRepository;
 import com.shepherd.shepslibrary.mapper.TransactionMapper;

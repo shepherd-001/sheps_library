@@ -6,7 +6,7 @@ import com.shepherd.shepslibrary.common.response.PaginationResponse;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.data.dto.response.RegisterUserResponse;
 import com.shepherd.shepslibrary.data.dto.response.UserResponse;
-import com.shepherd.shepslibrary.data.model.TokenType;
+import com.shepherd.shepslibrary.data.model.enums.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.model.UserRole;
 import com.shepherd.shepslibrary.data.repository.UserRepository;

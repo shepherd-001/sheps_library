@@ -3,7 +3,7 @@ package com.shepherd.shepslibrary.mapper;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
 import com.shepherd.shepslibrary.data.dto.request.RegisterUserRequest;
 import com.shepherd.shepslibrary.data.dto.response.*;
-import com.shepherd.shepslibrary.data.model.Gender;
+import com.shepherd.shepslibrary.data.model.enums.Gender;
 import com.shepherd.shepslibrary.data.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -3,7 +3,7 @@ package com.shepherd.shepslibrary.service.token;
 import com.shepherd.shepslibrary.common.exceptions.ShepsTokenException;
 import com.shepherd.shepslibrary.data.dto.response.AuthResponse;
 import com.shepherd.shepslibrary.data.model.ShepsToken;
-import com.shepherd.shepslibrary.data.model.TokenType;
+import com.shepherd.shepslibrary.data.model.enums.TokenType;
 import com.shepherd.shepslibrary.data.model.User;
 import com.shepherd.shepslibrary.data.repository.TokenRepository;
 import com.shepherd.shepslibrary.security.JwtUtils;

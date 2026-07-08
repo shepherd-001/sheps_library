@@ -1,7 +1,7 @@
 package com.shepherd.shepslibrary.security;
 
 import com.shepherd.shepslibrary.common.exceptions.InvalidJwtException;
-import com.shepherd.shepslibrary.data.model.TokenType;
+import com.shepherd.shepslibrary.data.model.enums.TokenType;
 import com.shepherd.shepslibrary.data.repository.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
