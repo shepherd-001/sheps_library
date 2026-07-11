@@ -1,54 +1,68 @@
 package com.shepherd.shepslibrary.security.securityConfig;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.info.Contact;
-import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.info.License;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@OpenAPIDefinition(
-        info = @Info(
-                title = "Sheps Library API",
-                version = "1.0",
-                description = "REST API documentation for Sheps Library system",
-                contact = @Contact(
-                        name = "Sheps Engineering Team",
-                        email = "engineering@shepslibrary.com",
-                        url = "https://shepslibrary.com"
-                ),
-                license = @License(
-                        name = "Apache 2.0",
-                        url = "https://www.apache.org/licenses/LICENSE-2.0"
-                )
-        ),
-//        servers = {
-//                @Server(
-//                        description = "Local",
-//                        url = "http://localhost:9092"
-//                ),
-//                @Server(
-//                        description = "Development",
-//                        url = "https://dev.shepslibrary.com"
-//                ),
-//                @Server(
-//                        description = "Production",
-//                        url = "https://api.shepslibrary.com"
-//                )
-//        },
-        security = {
-                @SecurityRequirement(name = "bearerAuth")
-        }
-)
-@SecurityScheme(
-        name = "bearerAuth",
-        description = "JWT authentication using Bearer token",
-        scheme = "bearer",
-        bearerFormat = "JWT",
-        type = SecuritySchemeType.HTTP,
-        in = SecuritySchemeIn.HEADER
-)
+import java.util.List;
+
+
+@Configuration
+@RequiredArgsConstructor
 public class OpenApiConfig {
+    private static final String SECURITY_SCHEME_NAME = "bearerAuth";
+    private static final String SECURITY_SCHEME_TYPE = "bearer";
+    private static final String SECURITY_SCHEME_BEARER_FORMAT = "JWT";
+
+    private final OpenApiProperties properties;
+
+    @Bean
+    public OpenAPI openAPI() {
+        return new OpenAPI()
+                .info(buildInfo())
+                .servers(buildServers())
+                .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME))
+                .components(buildComponents());
+    }
+
+    private Info buildInfo() {
+        return new Info()
+                .title(properties.title())
+                .version(properties.version())
+                .description(properties.description())
+                .contact(new Contact()
+                        .name(properties.contactName())
+                        .email(properties.contactEmail())
+                        .url(properties.contactUrl()))
+                .license(new License()
+                        .name(properties.licenseName())
+                        .url(properties.licenseUrl()));
+    }
+
+    private List<Server> buildServers() {
+        return properties.servers().stream()
+                .map(definition -> new Server()
+                        .url(definition.url())
+                        .description(definition.description()))
+                .toList();
+    }
+
+    private Components buildComponents() {
+        return new Components()
+                .addSecuritySchemes(
+                        SECURITY_SCHEME_NAME,
+                        new SecurityScheme()
+                                .name(SECURITY_SCHEME_NAME)
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme(SECURITY_SCHEME_TYPE)
+                                .bearerFormat(SECURITY_SCHEME_BEARER_FORMAT));
+    }
 }

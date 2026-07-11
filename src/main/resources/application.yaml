@@ -97,9 +97,17 @@ app:
       - LIBRARIAN
       - MEMBER
   security:
-    allowed-origins:
-      - http://localhost:3000
-      - https://shep-blog.app
+    allowed-origins: []
+  openapi:
+    title: Shep Blog API
+    version: 1.0.0
+    description: REST API documentation for Shep Blog system
+    contact-name: Sheps Engineering Team
+    contact-email: engineering@shepblog.com
+    contact-url: https://shepblog.com
+    license-name: Apache 2.0
+    license-url: https://www.apache.org/licenses/LICENSE-2.0
+
 
 #audit:
 #  enabled: true

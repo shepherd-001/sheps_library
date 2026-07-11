@@ -31,8 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
-
-application-local.yaml
-application-test.yaml
-application-dev.yaml
+#
+#application-local.yaml
+#application-test.yaml
+#application-dev.yaml
+application-*.yaml
 .gitignore

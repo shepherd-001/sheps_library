@@ -3,9 +3,10 @@ package com.shepherd.shepslibrary.utils;
 public final class RegexPattern {
     public static final String EMAIL = "^(?=.{1,254}$)[A-Za-z0-9_+&*-]+(?:\\.[A-Za-z0-9_+&*-]+)*@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,9}$";
     public static final String PASSWORD = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,20}$";
-//    public static final String PERSON_NAME = "^[A-Za-z]+(?:['- ][A-Za-z]+)*$";
     public static final String PERSON_NAME = "^[A-Za-z]+(?:[\\-' ][A-Za-z]+)*$";
     public static final String ROLE = "^[a-zA-Z0-9]+$";
+
+//    public static final String PERSON_NAME = "^[A-Za-z]+(?:['- ][A-Za-z]+)*$";
     //    public static final String EMAIL = "^\\s*(?=.{1,254}$)(?!.*\\.\\.)(?!.*@.*@)(?!.*[_%+\\-]{2,})([a-zA-Z0-9](?:[a-zA-Z0-9._%+\\-]*[a-zA-Z0-9])?)@([a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)\\.([a-zA-Z]{2,24})\\s*$";
 //    public static final String PASSWORD = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*().?]).{8,20}$";
 //    public static final String PERSON_NAME = "^\\s*[A-Za-z]+(?:[-'][A-Za-z]+)?\\s*$";
