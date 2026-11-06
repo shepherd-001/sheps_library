@@ -35,6 +35,7 @@ public class AuthenticatedUser implements UserDetails {
 
         if(role.getPermissions() != null) {
             role.getPermissions().stream()
+                    .filter(permission -> com.shepherd.shepslibrary.service.userRoleAndPermission.permission.PermissionCatalog.codes().contains(permission.getName()))
                     .map(permission -> new SimpleGrantedAuthority(permission.getName()))
                     .forEach(authorities::add);
         }

@@ -12,10 +12,11 @@ import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByEmailIgnoreCase(String email);
+    boolean existsByRoleId(Long roleId);
     boolean existsByRoleName(String roleName);
 
     // this is to fetch the user role eagerly only during authentication
-    @Query("SELECT u FROM User u JOIN FETCH u.role WHERE u.email = :email")
+    @Query("SELECT u FROM User u JOIN FETCH u.role r LEFT JOIN FETCH r.permissions WHERE lower(u.email) = lower(:email)")
     Optional<User> findByEmailIgnoreCaseWithRole(@Param("email") String email);
 
     Optional<User> findByEmailIgnoreCase(String email);

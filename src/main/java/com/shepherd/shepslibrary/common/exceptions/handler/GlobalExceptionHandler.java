@@ -29,10 +29,27 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(org.springframework.dao.PessimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleLockConflict(Exception ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.of(
+                "This resource is being updated. Please retry.", ErrorCode.BUSINESS_RULE_VIOLATION, request.getRequestURI()));
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataConflict(Exception ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.of(
+                "The operation conflicts with existing data.", ErrorCode.BUSINESS_RULE_VIOLATION, request.getRequestURI()));
+    }
+
+    @ExceptionHandler(org.springframework.dao.OptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleVersionConflict(Exception ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.of(
+                "Role changed; reload it before retrying.", ErrorCode.BUSINESS_RULE_VIOLATION, request.getRequestURI()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllUncaught(Exception ex, HttpServletRequest request) {
-        log.error("==>> Uncaught exception: {}", ex.getMessage());
-//        log.error("==>> Uncaught exception", ex);
+        log.error("Uncaught request exception", ex);
         String message = "An unexpected error occurred. Please try again later.";
         return ResponseEntity.internalServerError().body(ErrorResponse.internalServerError(message, request.getRequestURI()));
     }
@@ -76,7 +93,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(AuthorizationDeniedException ex, HttpServletRequest request) {
         log.error("Authorization denied exception: {}", ex.getMessage());
         String message = "You are not authorized to access this resource";
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorResponse.unauthorized(message, request.getRequestURI()));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.forbidden(message, request.getRequestURI()));
     }
 
     @ExceptionHandler({

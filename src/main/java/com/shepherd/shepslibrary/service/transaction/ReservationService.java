@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface ReservationService {
     ReservationResponse reserveBook(UUID bookId, AuthenticatedUser authenticatedUser);
-    ReservationResponse getReservationById(UUID reservationId);
+    ReservationResponse getReservationById(UUID reservationId, AuthenticatedUser authenticatedUser);
     PaginationResponse<ReservationResponse> getAllReservationByUserId(UUID userId, PaginationRequest paginationRequest);
     PaginationResponse<ReservationResponse> getAllReservations(PaginationRequest paginationRequest);
     String deleteReservation(UUID reservationId, AuthenticatedUser authenticatedUser);

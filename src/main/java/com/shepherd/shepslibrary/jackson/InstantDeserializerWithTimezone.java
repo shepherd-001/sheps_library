@@ -19,8 +19,7 @@ public class InstantDeserializerWithTimezone extends ValueDeserializer<Instant> 
             OffsetDateTime odt = OffsetDateTime.parse(text);
             return odt.toInstant();
         } catch (Exception e) {
-            log.warn("Failed to parse datetime '{}'", text, e);
-            return null; // or throw JsonMappingException
+            throw new IllegalArgumentException("Datetime must be ISO-8601 with a UTC offset", e);
         }
     }
 }

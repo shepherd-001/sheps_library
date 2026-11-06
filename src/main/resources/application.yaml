@@ -1,5 +1,6 @@
 server:
-  port: ${PORT}
+  port: ${PORT:8080}
+  shutdown: graceful
 
 logging:
   level:
@@ -7,16 +8,16 @@ logging:
 
 springdoc:
   api-docs:
-    enabled: ${ENABLE_SPRING_DOC}
+    enabled: ${ENABLE_SPRING_DOC:false}
   swagger-ui:
-    enabled: ${ENABLE_SWAGGER_UI}
+    enabled: ${ENABLE_SWAGGER_UI:false}
 
 spring:
   application:
     name: ShepsLibrary
 
   datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?createDatabaseIfNotExist=true
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -28,9 +29,13 @@ spring:
       max-lifetime: ${HIKARI_MAX_LIFETIME}
       minimum-idle: ${HIKARI_MINIMUM_IDLE}
 
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
   jpa:
+    open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${DDL_AUTO:validate}
     database: mysql
     properties:
       hibernate:
@@ -64,23 +69,18 @@ executor:
     maxPoolSize: ${MAX_POOL_SIZE}
     queueCapacity: ${QUEUE_CAPACITY}
 
-cache:
-  expiry: ${CACHE_EXPIRY}
-  maximumSize: ${CACHE_MAXIMUM_SIZE}
-
-admin_email: ${ADMIN_EMAIL}
-admin_password: ${ADMIN_PASSWORD}
+admin_email: ${ADMIN_EMAIL:}
+admin_password: ${ADMIN_PASSWORD:}
 
 
 client_url: ${CLIENT_URL}
 mail_from_email: ${MAIL_FROM_EMAIL}
 mail_from_name: ${MAIL_FROM_NAME}
 
-brevo_api_key: ${MAILERSEND_API_KEY}
 
-zero_bounce_api_key: ${ZEROBOUNCE_API_KEY}
-zero_bounce_url: ${ZEROBOUNCE_URL}
-have_i_been_pawned_url: ${HAVE_I_BEEN_PAWNED_URL}
+zero_bounce_api_key: ${ZEROBOUNCE_API_KEY:}
+zero_bounce_url: ${ZEROBOUNCE_URL:}
+have_i_been_pawned_url: ${HAVE_I_BEEN_PAWNED_URL:}
 
 reset_password_expiration: ${RESET_PASSWORD_EXPIRATION}
 email_confirmation_expiration: ${EMAIL_CONFIRMATION_EXPIRATION}
@@ -92,13 +92,13 @@ jwt_refresh_expiration: ${JWT_REFRESH_EXPIRATION}
 
 app:
   seed:
-    roles:
-      - ADMIN
-      - LIBRARIAN
-      - MEMBER
+    admin-enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}
   security:
     allowed-origins: []
   openapi:
+    servers:
+      - url: /
+        description: Current server
     title: Shep Blog API
     version: 1.0.0
     description: REST API documentation for Shep Blog system

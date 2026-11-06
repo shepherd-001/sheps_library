@@ -37,16 +37,18 @@ public record PaginationRequest(
             throw new IllegalStateException("Allowed sort fields must be provided");
         }
 
+        String fallback = allowedSortFields.contains(DEFAULT_SORT_FIELD) ? DEFAULT_SORT_FIELD
+                : allowedSortFields.stream().sorted().findFirst().orElseThrow();
         if (sort == null || sort.isBlank()) {
-            return DEFAULT_SORT_FIELD;
+            return fallback;
         }
         String trimmed = sort.trim();
         return allowedSortFields.stream()
                 .filter(field -> field.equalsIgnoreCase(trimmed))
                 .findFirst()
                 .orElseGet(() -> {
-                    log.warn("==>> Invalid sort '{}' received. Falling back to '{}'", trimmed, DEFAULT_SORT_FIELD);
-                    return DEFAULT_SORT_FIELD;
+                    log.warn("==>> Invalid sort '{}' received. Falling back to '{}'", trimmed, fallback);
+                    return fallback;
                 });
     }
 

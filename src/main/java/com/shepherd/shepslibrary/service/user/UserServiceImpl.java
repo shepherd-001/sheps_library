@@ -18,7 +18,6 @@ import com.shepherd.shepslibrary.utils.RoleUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +28,7 @@ import java.util.Set;
 import static com.shepherd.shepslibrary.utils.RoleUtils.MEMBER;
 
 @Service
+@org.springframework.transaction.annotation.Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -41,7 +41,6 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final RoleService roleService;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "firstName", "lastName", "email");
-    private static final String USER_CACHE = "userCache";
 
     @Override
     @Transactional
@@ -73,11 +72,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(
-            value = USER_CACHE,
-            key = "#paginationRequest.toCacheKey('role:'+#role)",
-            unless = "#result == null || #result.items.isEmpty()"
-    )
     public PaginationResponse<UserResponse> getAllUsersByRole(String role, PaginationRequest paginationRequest) {
         log.info("==>> Fetching all users by role {}", role);
         Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);
@@ -86,11 +80,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(
-            value = USER_CACHE,
-            key = "#paginationRequest.toCacheKey('status:'+#status)",
-            unless = "#result == null || #result.items.isEmpty()"
-    )
     public PaginationResponse<UserResponse> getAllUsersByStatus(boolean status, PaginationRequest paginationRequest) {
         log.info("==>> Fetching all users by status {}", status);
         Pageable pageable = paginationRequest.toPageable(ALLOWED_SORT_FIELDS);

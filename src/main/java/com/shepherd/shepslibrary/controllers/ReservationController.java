@@ -20,7 +20,7 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping("/create/{bookId}")
-    @PreAuthorize("hasAuthority('member.create')")
+    @PreAuthorize("hasAuthority('reservation:create')")
     public ResponseEntity<ApiResponse<?>> reserveBook(@PathVariable UUID bookId,
                                                       @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse
@@ -28,14 +28,15 @@ public class ReservationController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('member.read', 'librarian.read', 'admin.read')")
-    public ResponseEntity<ApiResponse<?>> getReservationById(@PathVariable UUID id) {
+    @PreAuthorize("hasAnyAuthority('reservation:read:own', 'reservation:read:any')")
+    public ResponseEntity<ApiResponse<?>> getReservationById(@PathVariable UUID id,
+                                                               @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
         return ResponseEntity.ok(ApiResponse
-                .of(reservationService.getReservationById(id)));
+                .of(reservationService.getReservationById(id, authenticatedUser)));
     }
 
     @GetMapping("/my")
-    @PreAuthorize("hasAnyAuthority('member.read')")
+    @PreAuthorize("hasAuthority('reservation:read:own')")
     public ResponseEntity<ApiResponse<?>> getMyReservations(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
                                                             @RequestParam(required = false, defaultValue = "1") int page,
                                                             @RequestParam(required = false, defaultValue = "10") int size,
@@ -47,7 +48,7 @@ public class ReservationController {
     }
 
     @GetMapping("/all/user/{userId}")
-    @PreAuthorize("hasAnyAuthority('librarian.read', 'admin.read')")
+    @PreAuthorize("hasAuthority('reservation:read:any')")
     public ResponseEntity<ApiResponse<?>> getAllReservationsByUserId(@PathVariable UUID userId,
                                                                      @RequestParam(required = false, defaultValue = "1") int page,
                                                                      @RequestParam(required = false, defaultValue = "10") int size,
@@ -59,7 +60,7 @@ public class ReservationController {
     }
 
     @GetMapping("/all")
-    @PreAuthorize("hasAnyAuthority('librarian.read', 'admin.read')")
+    @PreAuthorize("hasAuthority('reservation:read:any')")
     public ResponseEntity<ApiResponse<?>> getAllReservations(@RequestParam(required = false, defaultValue = "1") int page,
                                                              @RequestParam(required = false, defaultValue = "10") int size,
                                                              @RequestParam(required = false) String sort,
@@ -70,7 +71,7 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{reservationId}")
-    @PreAuthorize("hasAuthority('member.read')")
+    @PreAuthorize("hasAuthority('reservation:delete:own')")
     public ResponseEntity<ApiResponse<?>> deleteReservation(@PathVariable UUID reservationId,
                                                             @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
         return ResponseEntity.ok(ApiResponse
@@ -78,7 +79,7 @@ public class ReservationController {
     }
 
     @DeleteMapping("/all")
-    @PreAuthorize("hasAuthority('member.delete')")
+    @PreAuthorize("hasAuthority('reservation:delete:own')")
     public ResponseEntity<ApiResponse<?>> deleteAllReservations(
             @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
         reservationService.deleteAllReservation(authenticatedUser.getUser().getId());

@@ -21,7 +21,7 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping("/borrow-book")
-    @PreAuthorize("hasAuthority('member.create')")
+    @PreAuthorize("hasAuthority('loan:borrow')")
     public ResponseEntity<ApiResponse<?>> borrowBook(@Valid @RequestBody BorrowBookRequest borrowBookRequest,
                                                      @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
         return ResponseEntity.ok(ApiResponse.of("Book borrowed successfully",
@@ -29,14 +29,15 @@ public class TransactionController {
     }
 
     @PutMapping("/return-book")
-    @PreAuthorize("hasAuthority('member.update')")
-    public ResponseEntity<ApiResponse<?>> returnBook(@RequestParam UUID transactionId) {
+    @PreAuthorize("hasAuthority('loan:return:own')")
+    public ResponseEntity<ApiResponse<?>> returnBook(@RequestParam UUID transactionId,
+                                                     @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
         return ResponseEntity.ok(ApiResponse.of("Book returned successfully",
-                transactionService.returnBook(transactionId)));
+                transactionService.returnBook(transactionId, authenticatedUser)));
     }
 
     @GetMapping("/my")
-    @PreAuthorize("hasAnyAuthority('member.read')")
+    @PreAuthorize("hasAuthority('loan:read:own')")
     public ResponseEntity<ApiResponse<?>> getMyTransactions(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
                                                              @RequestParam(required = false, defaultValue = "1") int page,
                                                              @RequestParam(required = false, defaultValue = "10") int size,
@@ -48,7 +49,7 @@ public class TransactionController {
     }
 
     @GetMapping("/all/{userId}")
-    @PreAuthorize("hasAnyAuthority('librarian.read', 'admin.read')")
+    @PreAuthorize("hasAuthority('loan:read:any')")
     public ResponseEntity<ApiResponse<?>> getAllTransactions(@PathVariable UUID userId,
                                                              @RequestParam(required = false, defaultValue = "1") int page,
                                                              @RequestParam(required = false, defaultValue = "10") int size,
@@ -60,7 +61,7 @@ public class TransactionController {
     }
 
     @GetMapping("/all")
-    @PreAuthorize("hasAnyAuthority('librarian.read', 'admin.read')")
+    @PreAuthorize("hasAuthority('loan:read:any')")
     public ResponseEntity<ApiResponse<?>> getAllTransactions(@RequestParam(required = false, defaultValue = "1") int page,
                                                              @RequestParam(required = false, defaultValue = "10") int size,
                                                              @RequestParam(required = false) String sort,

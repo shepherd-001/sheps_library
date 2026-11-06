@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface TransactionService {
     TransactionResponse borrowBook(BorrowBookRequest request, AuthenticatedUser authenticatedUser);
-    TransactionResponse returnBook(UUID transactionId);
+    TransactionResponse returnBook(UUID transactionId, AuthenticatedUser authenticatedUser);
     PaginationResponse<TransactionResponse> getAllTransactionByUserId(UUID userId, PaginationRequest paginationRequest);
     PaginationResponse<TransactionResponse> getAllTransactions(PaginationRequest paginationRequest);
 //    void sendBookOverdueNotifications();

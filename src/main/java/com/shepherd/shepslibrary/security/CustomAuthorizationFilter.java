@@ -69,11 +69,12 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             }
 
             setSecurityContext(request, userDetails);
-            log.info("==>> User authenticated: {}", userEmail);
+            log.debug("Request authenticated");
 
         }catch (Exception ex){
             log.error("==>> Authorization error: {}", ex.getMessage());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, String.format("Unauthorized: %s", ex.getMessage()));
+            SecurityContextHolder.clearContext();
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid authentication credentials");
             return;
         }
         filterChain.doFilter(request, response);
@@ -87,7 +88,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     }
 
     private boolean isTokenValid(String jwtToken) {
-        return tokenRepository.findByTokenAndTokenType(jwtToken, TokenType.JWT)
+        return tokenRepository.findShepsTokenByTokenAndTokenType(jwtToken, TokenType.JWT)
                 .map(token -> !token.isExpired() && !token.isRevoked())
                 .orElse(false);
     }

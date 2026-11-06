@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface PermissionRepository extends JpaRepository<Permission, Long> {
+    Set<Permission> findByNameIn(Set<String> names);
+
     Optional<Permission> findByNameEqualsIgnoreCase(String name);
     boolean existsByNameEqualsIgnoreCase(String name);
 

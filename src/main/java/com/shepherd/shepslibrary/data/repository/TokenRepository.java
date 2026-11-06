@@ -2,8 +2,10 @@ package com.shepherd.shepslibrary.data.repository;
 
 import com.shepherd.shepslibrary.data.model.ShepsToken;
 import com.shepherd.shepslibrary.data.model.enums.TokenType;
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,10 +15,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TokenRepository extends JpaRepository<ShepsToken, UUID> {
-    @Query("select t from ShepsToken t where t.token = :token or t.refreshToken = :token and t.tokenType = :tokenType")
-    Optional<ShepsToken> findByTokenAndTokenType(String token, @Param("tokenType")TokenType tokenType);
+    @Query("select t from ShepsToken t where (t.token = :token or t.refreshToken = :token) and t.tokenType = :tokenType")
+    Optional<ShepsToken> findByTokenAndTokenType(String token, @Param("tokenType") TokenType tokenType);
 
     Optional<ShepsToken> findShepsTokenByTokenAndTokenType(String token, TokenType tokenType);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select t from ShepsToken t where t.token = :token and t.tokenType = :tokenType")
+    Optional<ShepsToken> findForConsumption(@Param("token") String token, @Param("tokenType") TokenType tokenType);
 
     @Modifying
     @Transactional

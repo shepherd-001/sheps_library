@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "user_roles")
@@ -20,11 +21,16 @@ public class UserRole {
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @Version
+    @Column(nullable = false)
+    private long version;
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "role_permissions",
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
-    private Set<Permission> permissions;
+    @Builder.Default
+    private Set<Permission> permissions = new HashSet<>();
 }

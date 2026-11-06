@@ -24,7 +24,7 @@ public class UserController {
     }
 
     @GetMapping("/all/role")
-    @PreAuthorize("hasAuthority('admin.read')")
+    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<ApiResponse<?>> getAllUsersByRole(@RequestParam String role,
                                                              @RequestParam(required = false, defaultValue = "1") int page,
                                                              @RequestParam(required = false, defaultValue = "10") int size,
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @GetMapping("/all/status")
-    @PreAuthorize("hasAuthority('admin.read')")
+    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<ApiResponse<?>> getAllUsersByStatus(@RequestParam boolean status,
                                                               @RequestParam(required = false, defaultValue = "1") int page,
                                                               @RequestParam(required = false, defaultValue = "10") int size,

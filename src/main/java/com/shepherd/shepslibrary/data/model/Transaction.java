@@ -15,7 +15,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(indexes = {
-        @Index(name = "idx_createdAt", columnList = "createdAt")
+        @Index(name = "idx_transaction_created_at", columnList = "created_at")
 })
 public class Transaction extends BaseEntity {
     @Id

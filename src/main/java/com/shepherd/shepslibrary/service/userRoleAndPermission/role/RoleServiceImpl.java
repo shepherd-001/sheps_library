@@ -1,127 +1,140 @@
 package com.shepherd.shepslibrary.service.userRoleAndPermission.role;
 
-import com.shepherd.shepslibrary.common.exceptions.AlreadyExistsException;
-import com.shepherd.shepslibrary.common.exceptions.ResourceNotFoundException;
-import com.shepherd.shepslibrary.data.model.Permission;
-import com.shepherd.shepslibrary.data.model.UserRole;
-import com.shepherd.shepslibrary.data.repository.UserRoleRepository;
-import com.shepherd.shepslibrary.service.userRoleAndPermission.permission.PermissionService;
+import com.shepherd.shepslibrary.common.exceptions.*;
+import com.shepherd.shepslibrary.common.request.PaginationRequest;
+import com.shepherd.shepslibrary.common.response.PaginationResponse;
+import com.shepherd.shepslibrary.data.dto.request.*;
+import com.shepherd.shepslibrary.data.dto.response.RoleResponse;
+import com.shepherd.shepslibrary.data.model.*;
+import com.shepherd.shepslibrary.data.repository.*;
+import com.shepherd.shepslibrary.service.userRoleAndPermission.audit.*;
+import com.shepherd.shepslibrary.service.userRoleAndPermission.permission.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Set;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Validated
 @RequiredArgsConstructor
-@Slf4j
+@Transactional(readOnly = true)
 public class RoleServiceImpl implements RoleService {
-    private final UserRoleRepository userRoleRepository;
+    private final UserRoleRepository roleRepository;
+    private final UserRepository userRepository;
     private final PermissionService permissionService;
-    private final CacheManager cacheManager;
+    private final AuthorizationPolicy policy;
+    private final AuthorizationAuditRepository auditRepository;
 
     @Override
-    @Cacheable(value = "roles", key = "#name.toUpperCase()")
-    public UserRole getRole(String name){
-        log.info("==>> Loading role '{}' from DB", name);
-        return userRoleRepository.findByNameEqualsIgnoreCase(name).orElseThrow(
-                ()-> new ResourceNotFoundException("Role not found"));
+    public UserRole getRole(String name) { return find(RoleNames.normalize(name)); }
+
+    @Override
+    public RoleResponse getRoleDetails(String name) {
+        policy.require("role:read");
+        return RoleResponse.from(find(RoleNames.normalize(name)));
     }
 
     @Override
-    @CachePut(value = "roles", key = "#name.toUpperCase()")
-    public UserRole addRole(String name){
-        if(userRoleRepository.existsByNameEqualsIgnoreCase(name))
-            throw new AlreadyExistsException(String.format("Role '%s' already exists", name));
-
-        log.info("==>> Added role '{}'", name);
-        return userRoleRepository.save(UserRole.builder()
-                        .name(name.toUpperCase())
-                .build());
+    public PaginationResponse<RoleResponse> listRoles(PaginationRequest pagination) {
+        policy.require("role:read");
+        var page = roleRepository.findAll(pagination.toPageable(Set.of("id", "name")));
+        if (page.isEmpty()) return PaginationResponse.map(page, RoleResponse::from);
+        Map<Long, RoleResponse> snapshots = roleRepository.findByIdIn(page.map(UserRole::getId).getContent()).stream()
+                .collect(Collectors.toMap(UserRole::getId, RoleResponse::from));
+        return PaginationResponse.map(page, role -> snapshots.get(role.getId()));
     }
 
     @Override
-    @CacheEvict(value = "roles", key = "#name.toUpperCase()")
-    public void deleteRole(String name){
-        UserRole role = getRole(name);
-        userRoleRepository.delete(role);
-        log.info("==>> Deleted role '{}'", name);
+    @Transactional
+    public RoleResponse createRole(AddRoleRequest request) {
+        AuthorizationPolicy.Actor actor = policy.require("role:create");
+        String name = RoleNames.normalize(request.name());
+        policy.checkTarget(actor, name);
+        String reason = reason(request.reason());
+        if (roleRepository.existsByNameEqualsIgnoreCase(name)) throw new AlreadyExistsException("Role already exists");
+        UserRole role = roleRepository.saveAndFlush(UserRole.builder().name(name).build());
+        auditRepository.save(new AuthorizationAudit(actor.userId(), "ROLE_CREATED", role.getId(), name,
+                null, role.getVersion(), Set.of(), Set.of(), reason));
+        return RoleResponse.from(role);
     }
 
     @Override
-    public UserRole assignPermissionsToRole(String name, List<String> permissionNames) {
-        UserRole role = getRole(name);
-
-        Set<Permission> permissions = permissionNames.stream()
-                .map(permissionService::getPermission)
-                .collect(Collectors.toSet());
-
-        role.setPermissions(permissions);
-        UserRole updatedRole = userRoleRepository.save(role);
-        log.info("==>> Assigned {} permissions to role '{}'", permissions.size(), role.getName());
-        return updatedRole;
+    @Transactional
+    public RoleResponse replaceRolePermissions(AssignPermissionRequest request) {
+        AuthorizationPolicy.Actor actor = policy.require("role:permissions:update");
+        String name = RoleNames.normalize(request.roleName());
+        policy.checkTarget(actor, name);
+        String reason = reason(request.reason());
+        UserRole role = find(name);
+        checkVersion(role, request.expectedVersion());
+        Set<String> codes = normalizePermissions(request.permissionNames());
+        policy.checkGrant(actor, codes);
+        Set<String> before = permissionNames(role);
+        policy.checkGrant(actor, before);
+        if (before.equals(codes)) return RoleResponse.from(role);
+        Set<Permission> permissions = permissionService.resolve(codes);
+        long previousVersion = role.getVersion();
+        role.setPermissions(new HashSet<>(permissions));
+        // Flush the owning association so Hibernate checks/increments @Version before the response/audit snapshot.
+        roleRepository.flush();
+        auditRepository.save(new AuthorizationAudit(actor.userId(), "ROLE_PERMISSIONS_REPLACED", role.getId(), name,
+                previousVersion, role.getVersion(), before, codes, reason));
+        return RoleResponse.from(role);
     }
 
     @Override
-    public void updateCache(UserRole role) {
-        Cache cache = cacheManager.getCache("roles");
-        if(cache != null) {
-            cache.put(role.getName().toUpperCase(), role);
+    @Transactional
+    public void deleteRole(String rawName, Long expectedVersion, String rawReason) {
+        AuthorizationPolicy.Actor actor = policy.require("role:delete");
+        String name = RoleNames.normalize(rawName);
+        policy.checkTarget(actor, name);
+        String reason = reason(rawReason);
+        UserRole role = find(name);
+        checkVersion(role, expectedVersion);
+        if (userRepository.existsByRoleId(role.getId())) {
+            throw new AuthorizationConflictException("Reassign users before deleting this role");
         }
+        Set<String> before = permissionNames(role);
+        // Prevent delegated administrators from deleting a role above their delegation boundary.
+        policy.checkGrant(actor, before);
+        auditRepository.save(new AuthorizationAudit(actor.userId(), "ROLE_DELETED", role.getId(), name,
+                role.getVersion(), null, before, Set.of(), reason));
+        roleRepository.delete(role);
+        roleRepository.flush();
     }
 
-//    private final UserRoleRepository userRoleRepository;
-//    private final Map<String, UserRole> roleCache = new ConcurrentHashMap<>();
-//
-//
-//    @PostConstruct
-//    public synchronized void loadRoles() {
-//        roleCache.clear();
-//        userRoleRepository.findAll()
-//                .forEach(role -> roleCache.put(role.getName(), role));
-//    }
-//
-//    public synchronized void addRole(String name){
-//        if(!isValidRole(name)){
-//            throw new AlreadyExistsException(String.format("Role with name '%s' already exists", name.toUpperCase()));
-//        }
-//        userRoleRepository.save(UserRole.builder()
-//                        .name(normalizeRoleName(name))
-//                .build());
-//        loadRoles();
-//        log.info("Added new role '{}'", name);
-//    }
-//
-//    public synchronized void deleteRole(String name) {
-//        name = normalizeRoleName(name);
-//        UserRole role = roleCache.get(name);
-//        if(role == null)
-//            throw new ResourceNotFoundException("Role not found");
-//        userRoleRepository.delete(role);
-//        loadRoles();
-//        log.info("Deleted role '{}'", name);
-//    }
-//
-//    public UserRole getRole(String name){
-//        if(!isValidRole(name))
-//            throw new IllegalArgumentException("Role is invalid");
-//        return roleCache.get(normalizeRoleName(name));
-//    }
-//
-//    private boolean isValidRole(String name){
-//        return roleCache.containsKey(normalizeRoleName(name));
-//    }
-//
-//    private String normalizeRoleName(String name) {
-//        if(name.isBlank())
-//            throw new IllegalArgumentException("Role name is required");
-//        return name.trim().toUpperCase();
-//    }
+    private UserRole find(String name) {
+        return roleRepository.findByNameEqualsIgnoreCase(name)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+    }
+
+    private void checkVersion(UserRole role, Long expected) {
+        if (expected == null || expected < 0) throw new IllegalArgumentException("A non-negative expectedVersion is required");
+        if (role.getVersion() != expected) throw new AuthorizationConflictException("Role changed; reload it before retrying");
+    }
+
+    private Set<String> normalizePermissions(List<String> names) {
+        if (names == null || names.size() > 100) throw new IllegalArgumentException("Provide at most 100 permission names");
+        Set<String> normalized = new HashSet<>();
+        for (String name : names) {
+            if (name == null || name.isBlank()) throw new IllegalArgumentException("Permission names must not be blank");
+            String code = name.trim().toLowerCase(Locale.ROOT);
+            PermissionCatalog.fromCode(code);
+            if (!normalized.add(code)) throw new IllegalArgumentException("Duplicate permission: " + code);
+        }
+        return normalized;
+    }
+
+    private String reason(String reason) {
+        if (reason == null || reason.isBlank() || reason.length() > 500) {
+            throw new IllegalArgumentException("A change reason of 1-500 characters is required");
+        }
+        return reason.trim();
+    }
+
+    private Set<String> permissionNames(UserRole role) {
+        return role.getPermissions().stream().map(Permission::getName).collect(Collectors.toSet());
+    }
 }

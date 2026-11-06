@@ -15,8 +15,8 @@ import java.util.UUID;
 @Setter
 @Table(indexes = {
         @Index(name = "idx_email", columnList = "email"),
-        @Index(name = "idx_createdAt", columnList = "createdAt"),
-        @Index(name = "idx_tokenVersion", columnList = "tokenVersion")
+        @Index(name = "idx_user_created_at", columnList = "created_at"),
+        @Index(name = "idx_tokenVersion", columnList = "token_version")
 })
 public class User extends BaseEntity {
     @Id

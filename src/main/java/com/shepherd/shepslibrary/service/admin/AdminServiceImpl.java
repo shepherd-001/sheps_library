@@ -4,8 +4,6 @@ import com.shepherd.shepslibrary.common.exceptions.AlreadyExistsException;
 import com.shepherd.shepslibrary.common.exceptions.ResourceNotFoundException;
 import com.shepherd.shepslibrary.common.exceptions.ShepsLibraryException;
 import com.shepherd.shepslibrary.common.exceptions.UserAlreadyEnabledException;
-import com.shepherd.shepslibrary.data.dto.request.AddRoleRequest;
-import com.shepherd.shepslibrary.data.dto.request.AssignPermissionRequest;
 import com.shepherd.shepslibrary.data.dto.request.InviteLibrarianRequest;
 import com.shepherd.shepslibrary.data.dto.response.InviteLibrarianResponse;
 import com.shepherd.shepslibrary.data.model.enums.Gender;
@@ -33,9 +31,9 @@ import static com.shepherd.shepslibrary.utils.RoleUtils.LIBRARIAN;
 @Slf4j
 public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
-    @Value("${admin_email}")
+    @Value("${admin_email:}")
     private String adminEmail;
-    @Value("${admin_password}")
+    @Value("${admin_password:}")
     private String adminPassword;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
@@ -50,6 +48,9 @@ public class AdminServiceImpl implements AdminService {
         if(userRepository.existsByRoleName(ADMIN)){
             log.info("Admin already exists");
             return;
+        }
+        if (adminEmail.isBlank() || adminPassword.length() < 12) {
+            throw new IllegalStateException("Admin bootstrap requires an email and a password of at least 12 characters");
         }
         UserRole role = roleService.getRole(ADMIN);
         User user = User.builder()
@@ -103,23 +104,6 @@ public class AdminServiceImpl implements AdminService {
                 .map(this::handleResendInvite)
                 .orElseThrow(
                         ()-> new ResourceNotFoundException("User not found. Invitation not resent"));
-    }
-
-    @Override
-    public String addRole(AddRoleRequest request) {
-        roleService.addRole(request.name());
-        return "Role added successfully";
-    }
-
-    @Override
-    public String deleteRole(String roleName) {
-        roleService.deleteRole(roleName);
-        return "Role deleted successfully";
-    }
-
-    @Override
-    public UserRole assignPermissionsToRole(AssignPermissionRequest request) {
-        return roleService.assignPermissionsToRole(request.roleName(), request.permissionNames());
     }
 
     private String handleResendInvite(User user) {

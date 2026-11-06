@@ -17,7 +17,7 @@ import java.util.UUID;
 @Setter
 @Table(indexes = {
         @Index(name = "idx_token", columnList = "token"),
-        @Index(name = "idx_createdAt", columnList = "createdAt")
+        @Index(name = "idx_shepstoken_created_at", columnList = "created_at")
 })
 public class ShepsToken extends BaseEntity {
     @Id

@@ -28,8 +28,7 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping
-//    @PreAuthorize("hasRole('ADMIN')")
-    @PreAuthorize("hasAuthority('admin.create')")
+    @PreAuthorize("hasAuthority('book:create')")
     public ResponseEntity<ApiResponse<?>> addBook(@Valid @RequestBody AddBookRequest addBookRequest) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse
@@ -37,15 +36,14 @@ public class BookController {
     }
 
     @GetMapping("/{bookId}")
-    @PreAuthorize("hasAnyAuthority('admin.read', 'librarian.read', 'member.read')")
+    @PreAuthorize("hasAuthority('book:read')")
     public ResponseEntity<ApiResponse<?>> getBookById(@PathVariable UUID bookId) {
         return ResponseEntity.ok(ApiResponse
                 .of(bookService.getBookById(bookId)));
     }
 
     @GetMapping("/isbn/{isbn}")
-//    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    @PreAuthorize("hasAnyAuthority('admin.read', 'librarian.read')")
+    @PreAuthorize("hasAuthority('book:read')")
     public ResponseEntity<ApiResponse<?>> getBookByIsbn(@PathVariable
                                                         @Pattern(message = ValidationMessage.INVALID_ISBN, regexp = RegexPattern.ISBN)
                                                         @NotBlank(message = ValidationMessage.BLANK_ISBN)
@@ -54,8 +52,7 @@ public class BookController {
     }
 
     @PutMapping("/{bookId}")
-//    @PreAuthorize("hasRole('ADMIN')")
-    @PreAuthorize("hasAuthority('admin.update')")
+    @PreAuthorize("hasAuthority('book:update')")
     public ResponseEntity<ApiResponse<?>> updateBook(@Valid @RequestBody UpdateBookRequest updateBookRequest,
                                                      @PathVariable UUID bookId) {
         return ResponseEntity.ok(ApiResponse
@@ -63,7 +60,7 @@ public class BookController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('admin.read', 'librarian.read', 'member.read')")
+    @PreAuthorize("hasAuthority('book:read')")
     public ResponseEntity<ApiResponse<?>> getAllBooks(@RequestParam(required = false, defaultValue = "1") int page,
                                                       @RequestParam(required = false, defaultValue = "10") int size,
                                                       @RequestParam(required = false) String sort,
@@ -73,7 +70,7 @@ public class BookController {
     }
 
     @GetMapping("/filter")
-    @PreAuthorize("hasAnyAuthority('admin.read', 'librarian.read', 'member.read')")
+    @PreAuthorize("hasAuthority('book:read')")
 
     public ResponseEntity<ApiResponse<?>> filterBook(@RequestParam(required = false) String title,
                                                      @RequestParam(required = false) String author,
@@ -88,8 +85,7 @@ public class BookController {
     }
 
     @DeleteMapping("/{bookId}")
-//    @PreAuthorize("hasRole('ADMIN')")
-    @PreAuthorize("hasAuthority('admin.delete')")
+    @PreAuthorize("hasAuthority('book:delete')")
     public ResponseEntity<ApiResponse<?>> deleteBook(@PathVariable UUID bookId) {
         bookService.deleteBook(bookId);
         return ResponseEntity.noContent().build();

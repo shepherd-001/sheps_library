@@ -96,7 +96,8 @@ public class JwtUtils {
         String subject = claims.getSubject();
         Integer tokenVersion = claims.get(TOKEN_VERSION, Integer.class);
         Integer fetchedTokenVersion = tokenRepository.findTokenVersionByEmail(email);
-        return subject != null
+        return ACCESS.equals(claims.get(TOKEN_TYPE, String.class))
+                && subject != null
                 && subject.equalsIgnoreCase(email)
                 && expiration.isAfter(now)
                 && tokenVersion != null

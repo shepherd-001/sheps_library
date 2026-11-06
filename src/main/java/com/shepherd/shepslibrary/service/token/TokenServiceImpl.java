@@ -84,15 +84,19 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(propagation = org.springframework.transaction.annotation.Propagation.MANDATORY)
     public ShepsToken validateToken(String token, TokenType tokenType) {
         if (!jwtUtils.isValidToken(token)) {
             log.error("==>> Not a valid JWT token.");
             throw new ShepsTokenException("Token is invalid");
         }
 
-        ShepsToken shepsToken = tokenRepository.findShepsTokenByTokenAndTokenType(token, tokenType)
+        ShepsToken shepsToken = tokenRepository.findForConsumption(token, tokenType)
                 .orElseThrow(() -> new ShepsTokenException("Token is invalid"));
 
+        if (shepsToken.isRevoked() || shepsToken.isExpired()) {
+            throw new ShepsTokenException("Token is invalid");
+        }
         validateTokenExpiration(shepsToken);
         String expectedEmail = jwtUtils.extractUsername(token);
         validateUserEmail(shepsToken.getUser().getEmail(), expectedEmail);

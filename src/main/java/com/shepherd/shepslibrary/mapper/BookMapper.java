@@ -17,7 +17,6 @@ public interface BookMapper {
     @Mapping(target = "author", source = "author", qualifiedByName = "trim")
     @Mapping(target = "genre", source = "genre", qualifiedByName = "trim")
     @Mapping(target = "isbn", ignore = true)
-    @Mapping(target = "book.createdBy", ignore = true)
     Book mapToBook(AddBookRequest request);
 
     AddBookResponse mapToAddBookResponse(Book book);

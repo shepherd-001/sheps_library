@@ -1,16 +1,8 @@
 package com.shepherd.shepslibrary.data.dto.request;
 
-import com.shepherd.shepslibrary.utils.RegexPattern;
-import com.shepherd.shepslibrary.utils.ValidationMessage;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public record AddRoleRequest(
-    @NotBlank(message = ValidationMessage.BLANK_ROLE)
-    @Pattern(message = ValidationMessage.INVALID_ROLE, regexp = RegexPattern.ROLE)
-    @Size(max = 100, message = ValidationMessage.ROLE_NAME_TOO_LONG)
-    String name
-
-//    permissions
-){}
+        @NotBlank @Size(max = 50) @Pattern(regexp = "[a-zA-Z][a-zA-Z0-9_]{0,49}") String name,
+        @NotBlank @Size(max = 500) String reason
+) {}
